@@ -1,0 +1,160 @@
+"""USB 摄像头采集封装。"""
+
+from __future__ import annotations
+
+import contextlib
+import time
+from typing import Iterator, List, Optional, Tuple
+
+import cv2
+import numpy as np
+
+# Windows 下 MSMF 能正确上报 fps，DSHOW 上报 0，故先试 MSMF
+PREFERRED_BACKENDS = (cv2.CAP_MSMF, cv2.CAP_DSHOW, cv2.CAP_ANY)
+
+
+class UsbCamera:
+    def __init__(
+        self,
+        index: int = 0,
+        width: int = 1280,
+        height: int = 720,
+        fps: int = 30,
+        backend: Optional[int] = None,
+    ):
+        self.index = index
+        self.width = width
+        self.height = height
+        self.fps = fps
+        self.backend = backend
+        self.cap: Optional[cv2.VideoCapture] = None
+        self.actual_size: Tuple[int, int] = (0, 0)
+        self.actual_fps: float = 0.0
+
+    def open(self) -> None:
+        candidates = (self.backend,) if self.backend is not None else PREFERRED_BACKENDS
+        errors: List[str] = []
+
+        for backend in candidates:
+            cap = cv2.VideoCapture(self.index, backend)
+            if not cap.isOpened():
+                cap.release()
+                errors.append(f"backend={backend} 打开失败")
+                continue
+
+            # MJPG 压缩便于 USB 带宽下跑满帧率
+            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, float(self.width))
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, float(self.height))
+            cap.set(cv2.CAP_PROP_FPS, float(self.fps))
+
+            ok, frame = cap.read()
+            if not ok or frame is None:
+                cap.release()
+                errors.append(f"backend={backend} 读取首帧失败")
+                continue
+
+            h, w = frame.shape[:2]
+            self.cap = cap
+            self.actual_size = (w, h)
+            # 后端上报值可能不可靠（DSHOW 恒为 0），稍后用 measure_fps 校准
+            self.actual_fps = float(cap.get(cv2.CAP_PROP_FPS))
+            return
+
+        raise RuntimeError(
+            f"无法打开摄像头 index={self.index}（{'；'.join(errors) or '无可用后端'}）"
+        )
+
+    def read(self) -> Tuple[bool, Optional[np.ndarray]]:
+        if self.cap is None:
+            return False, None
+        return self.cap.read()
+
+    def release(self) -> None:
+        if self.cap is not None:
+            self.cap.release()
+            self.cap = None
+
+    def measure_fps(self, seconds: float = 2.0) -> float:
+        """实测帧率。后端上报值不可信时以实测为准。"""
+        if self.cap is None:
+            return 0.0
+        count = 0
+        start = time.perf_counter()
+        while time.perf_counter() - start < seconds:
+            ok, _ = self.read()
+            count += int(ok)
+        elapsed = time.perf_counter() - start
+        measured = count / elapsed if elapsed > 0 else 0.0
+        if measured > 1.0:
+            self.actual_fps = measured
+        return measured
+
+    def backend_name(self) -> str:
+        if self.cap is None:
+            return "unknown"
+        try:
+            return self.cap.getBackendName()
+        except Exception:
+            return "unknown"
+
+    def info(self) -> str:
+        w, h = self.actual_size
+        return f"cam#{self.index} {w}x{h} @{self.actual_fps:.1f}fps backend={self.backend_name()}"
+
+    def __enter__(self) -> "UsbCamera":
+        self.open()
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.release()
+
+
+@contextlib.contextmanager
+def quiet_opencv() -> Iterator[None]:
+    """探测不存在的设备索引时 OpenCV 会刷大量 warning，临时静音。"""
+    try:
+        previous = cv2.setLogLevel(0)  # LOG_LEVEL_SILENT
+    except Exception:
+        previous = None
+    try:
+        yield
+    finally:
+        if previous is not None:
+            cv2.setLogLevel(previous)
+
+
+def probe_cameras(max_index: int = 8) -> List[dict]:
+    """探测可用摄像头。返回的是各摄像头默认分辨率。"""
+    results: List[dict] = []
+    with quiet_opencv():
+        for index in range(max_index):
+            for backend in PREFERRED_BACKENDS:
+                cap = cv2.VideoCapture(index, backend)
+                if not cap.isOpened():
+                    cap.release()
+                    continue
+                ok, frame = cap.read()
+                if not ok or frame is None:
+                    cap.release()
+                    break
+                h, w = frame.shape[:2]
+                results.append(
+                    {
+                        "index": index,
+                        "width": w,
+                        "height": h,
+                        "fps": float(cap.get(cv2.CAP_PROP_FPS)),
+                        "backend": _backend_name(cap, backend),
+                    }
+                )
+                cap.release()
+                break
+    return results
+
+
+def _backend_name(cap: cv2.VideoCapture, backend: int) -> str:
+    try:
+        return cap.getBackendName()
+    except Exception:
+        return str(backend)
