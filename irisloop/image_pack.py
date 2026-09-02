@@ -38,10 +38,15 @@ def binarize(gray: np.ndarray, threshold: int = 127) -> np.ndarray:
 
 
 def pack(bw: np.ndarray) -> bytes:
-    """二值图 -> 38400 字节设备载荷。"""
+    """二值图 -> 38400 字节设备载荷。
+
+    设备读取 BMP 数据是自底向上行序（BMP 标准存储），因此打包前需
+    先 flipud 把图像上下翻转，使设备读出的第一行是图像最后一行。
+    已用真机 BMP (test-data/1_1.bmp) 反推验证：flipud 后解包为正向。
+    """
     if bw.shape != (HEIGHT, WIDTH):
         raise ValueError(f"期望 {HEIGHT}x{WIDTH}, 实际 {bw.shape}")
-    a = np.fliplr(bw.astype(np.uint8))
+    a = np.flipud(np.fliplr(bw.astype(np.uint8)))
     bits = a.reshape(-1).reshape(-1, 8)
     weights = (1 << np.arange(7, -1, -1)).astype(np.uint8)
     return (bits * weights).sum(axis=1).astype(np.uint8).tobytes()
@@ -53,12 +58,14 @@ def build_stream(bw: np.ndarray) -> bytes:
 
 
 def save_bmp(path: str, bw: np.ndarray) -> None:
-    """存成可在 PC 上直接查看的 BMP（自底向上行序）。"""
+    """存成可在 PC 上直接查看的 BMP（自底向上行序）。
+
+    pack() 已含 flipud（设备自底向上读取），直接 reshape 写出即是标准 BMP。
+    """
     rows = np.frombuffer(pack(bw), dtype=np.uint8).reshape(HEIGHT, ROW_BYTES)
-    body = np.flipud(rows).tobytes()  # 自顶向下 -> BMP 的自底向上
     with open(path, "wb") as f:
         f.write(BMP_HEAD)
-        f.write(body)
+        f.write(rows.tobytes())
 
 
 # ---------------- 测试图生成 ----------------

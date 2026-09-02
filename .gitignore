@@ -8,3 +8,9 @@ captures/
 
 # Office 临时锁文件
 ~$*
+
+# 协议文档（xlsx 源文件与自动导出的 md 均由内部流程管理）
+doc/
+
+# 逆向工程临时产物（Flutter 工程副本/SDK 解压/反编译工具）
+tmp/

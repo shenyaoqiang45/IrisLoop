@@ -33,13 +33,20 @@ CHAR_MAIN_DATA = "adb40004-b1c6-11ed-afa1-0242ac120004"
 # write：备用指令通道
 CHAR_MAIN_CMD2 = "adb40005-b1c6-11ed-afa1-0242ac120005"
 
-# ---------------- 次自定义服务 ----------------
+# ---------------- 次自定义服务（文件传输） ----------------
 
+# 文件传输服务 adb40006-...（通道映射以 iris-g-sdk IrisProtocolConfig.kt 为准，
+# 协议 xlsx R13/R14 的「开始/数据」描述与 UUID 尾号是反的，勿按文档顺序映射）
 SVC_SECONDARY = "adb40006-b1c6-11ed-afa1-0242ac120001"
 
-CHAR_SEC_WRITE_1 = "adb40006-b1c6-11ed-afa1-0242ac120003"  # write
-CHAR_SEC_WRITE_2 = "adb40006-b1c6-11ed-afa1-0242ac120002"  # write-without-response
-CHAR_SEC_WRITE_3 = "adb40006-b1c6-11ed-afa1-0242ac120004"  # write
+CHAR_FILE_START = "adb40006-b1c6-11ed-afa1-0242ac120003"  # write: 传输开始包
+CHAR_FILE_DATA = "adb40006-b1c6-11ed-afa1-0242ac120002"   # write_no_rsp: 数据流
+CHAR_FILE_END = "adb40006-b1c6-11ed-afa1-0242ac120004"    # write: 传输结束包
+
+# 兼容旧名（语义已纠正：1=开始 2=数据 3=结束）
+CHAR_SEC_WRITE_1 = CHAR_FILE_START
+CHAR_SEC_WRITE_2 = CHAR_FILE_DATA
+CHAR_SEC_WRITE_3 = CHAR_FILE_END
 
 # ---------------- 标准服务 ----------------
 
