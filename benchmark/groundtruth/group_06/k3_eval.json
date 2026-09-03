@@ -1,0 +1,24 @@
+{
+  "group": 6,
+  "subject": "IRIS GREEN 连接成功界面",
+  "recognizable": true,
+  "confidence": 0.95,
+  "issues": [],
+  "content_actions": [
+    "none"
+  ],
+  "summary": "投影文字与图标清晰可辨，采集伪影不影响内容识别。",
+  "_raw": "{\"group\":6,\"subject\":\"IRIS GREEN 连接成功界面\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影文字与图标清晰可辨，采集伪影不影响内容识别。\"}",
+  "_usage": {
+    "prompt_tokens": 1061,
+    "completion_tokens": 229,
+    "total_tokens": 1290,
+    "completion_tokens_details": {
+      "reasoning_tokens": 163
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_06/still_01_2.9s.jpg",
+  "ok": true,
+  "elapsed_s": 18.23
+}

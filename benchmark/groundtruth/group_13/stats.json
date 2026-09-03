@@ -1,0 +1,27 @@
+{
+  "group": 13,
+  "name": "提示词",
+  "frames": null,
+  "stills": [
+    "frame_00_0.4s.jpg",
+    "frame_01_2.8s.jpg",
+    "frame_02_5.1s.jpg",
+    "frame_03_7.5s.jpg",
+    "frame_04_9.9s.jpg",
+    "frame_05_12.3s.jpg",
+    "frame_06_14.7s.jpg",
+    "frame_07_17.0s.jpg",
+    "frame_08_19.4s.jpg",
+    "frame_09_21.8s.jpg"
+  ],
+  "video": "group13.mp4",
+  "mean": 97.91898480902776,
+  "max_mean": 98.22056966145833,
+  "bright_ratio": 0.026885850694444446,
+  "lap_var": 35.52516224735683,
+  "verdict": [
+    "偏模糊或扫描条纹主导"
+  ],
+  "dir": "benchmark/groundtruth/group_13",
+  "ok": true
+}

@@ -1,0 +1,28 @@
+{
+  "group": 10,
+  "subject": "绿色网格线（先显示 IRIS GREEN 连接成功界面，后切换为静态网格）",
+  "recognizable": true,
+  "confidence": 0.95,
+  "motion": "static",
+  "issues": [
+    "太细",
+    "伪影干扰"
+  ],
+  "content_actions": [
+    "thicken_strokes"
+  ],
+  "summary": "网格图案清晰可辨认，全程静态，仅线条偏细并伴随轻微扫描伪影，建议加粗线条。",
+  "_raw": "{\n  \"group\": 10,\n  \"subject\": \"绿色网格线（先显示 IRIS GREEN 连接成功界面，后切换为静态网格）\",\n  \"recognizable\": true,\n  \"confidence\": 0.95,\n  \"motion\": \"static\",\n  \"issues\": [\"太细\", \"伪影干扰\"],\n  \"content_actions\": [\"thicken_strokes\"],\n  \"summary\": \"网格图案清晰可辨认，全程静态，仅线条偏细并伴随轻微扫描伪影，建议加粗线条。\"\n}",
+  "_usage": {
+    "prompt_tokens": 41277,
+    "completion_tokens": 161,
+    "total_tokens": 41438,
+    "completion_tokens_details": {
+      "reasoning_tokens": 34
+    }
+  },
+  "_mode": "video",
+  "_file": "benchmark/groundtruth/group_10/group10.mp4",
+  "ok": true,
+  "elapsed_s": 90.51
+}

@@ -1,0 +1,24 @@
+{
+  "group": 15,
+  "subject": "里程完成界面，显示 0.0 km",
+  "recognizable": true,
+  "confidence": 0.95,
+  "issues": [],
+  "content_actions": [
+    "none"
+  ],
+  "summary": "投影内容清晰可辨：Completed 字样、0.0 数值与 km 单位均明确，采集伪影不影响识别。",
+  "_raw": "{\"group\":15,\"subject\":\"里程完成界面，显示 0.0 km\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容清晰可辨：Completed 字样、0.0 数值与 km 单位均明确，采集伪影不影响识别。\"}",
+  "_usage": {
+    "prompt_tokens": 1057,
+    "completion_tokens": 244,
+    "total_tokens": 1301,
+    "completion_tokens_details": {
+      "reasoning_tokens": 162
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_15/frame_01_2.8s.jpg",
+  "ok": true,
+  "elapsed_s": 19.54
+}

@@ -1,0 +1,29 @@
+{
+  "group": 20,
+  "subject": "骑山地车下坡的人，带地面阴影",
+  "recognizable": true,
+  "confidence": 0.85,
+  "issues": [
+    "太碎",
+    "伪影干扰",
+    "对比不足"
+  ],
+  "content_actions": [
+    "simplify_silhouette",
+    "drop_background"
+  ],
+  "summary": "山地车下坡主体清晰可辨，绿色扫描条纹为采集伪影，建议简化剪影去除细碎背景纹理。",
+  "_raw": "{\"group\": 20, \"subject\": \"骑山地车下坡的人，带地面阴影\", \"recognizable\": true, \"confidence\": 0.85, \"issues\": [\"太碎\", \"伪影干扰\", \"对比不足\"], \"content_actions\": [\"simplify_silhouette\", \"drop_background\"], \"summary\": \"山地车下坡主体清晰可辨，绿色扫描条纹为采集伪影，建议简化剪影去除细碎背景纹理。\"}",
+  "_usage": {
+    "prompt_tokens": 1057,
+    "completion_tokens": 131,
+    "total_tokens": 1188,
+    "completion_tokens_details": {
+      "reasoning_tokens": 21
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_20/frame_01_2.8s.jpg",
+  "ok": true,
+  "elapsed_s": 13.17
+}

@@ -1,0 +1,27 @@
+{
+  "group": 20,
+  "name": "下坡素材",
+  "frames": null,
+  "stills": [
+    "frame_00_0.4s.jpg",
+    "frame_01_2.8s.jpg",
+    "frame_02_5.1s.jpg",
+    "frame_03_7.5s.jpg",
+    "frame_04_9.9s.jpg",
+    "frame_05_12.3s.jpg",
+    "frame_06_14.7s.jpg",
+    "frame_07_17.0s.jpg",
+    "frame_08_19.4s.jpg",
+    "frame_09_21.8s.jpg"
+  ],
+  "video": "group20.mp4",
+  "mean": 101.84014431423611,
+  "max_mean": 103.26288411458333,
+  "bright_ratio": 0.076396484375,
+  "lap_var": 28.63079390306202,
+  "verdict": [
+    "偏模糊或扫描条纹主导"
+  ],
+  "dir": "benchmark/groundtruth/group_20",
+  "ok": true
+}

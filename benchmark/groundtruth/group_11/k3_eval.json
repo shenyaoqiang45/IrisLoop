@@ -1,0 +1,27 @@
+{
+  "group": 11,
+  "subject": "一条游动的鲸鱼",
+  "recognizable": true,
+  "confidence": 0.92,
+  "motion": "animated",
+  "issues": [
+    "伪影干扰"
+  ],
+  "content_actions": [
+    "none"
+  ],
+  "summary": "开头显示连接成功界面后切换为绿色鲸鱼游动动画，轮廓清晰、动作连贯，主体完全可辨认。",
+  "_raw": "{\n  \"group\": 11,\n  \"subject\": \"一条游动的鲸鱼\",\n  \"recognizable\": true,\n  \"confidence\": 0.92,\n  \"motion\": \"animated\",\n  \"issues\": [\"伪影干扰\"],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"开头显示连接成功界面后切换为绿色鲸鱼游动动画，轮廓清晰、动作连贯，主体完全可辨认。\"\n}",
+  "_usage": {
+    "prompt_tokens": 41277,
+    "completion_tokens": 119,
+    "total_tokens": 41396,
+    "completion_tokens_details": {
+      "reasoning_tokens": 15
+    }
+  },
+  "_mode": "video",
+  "_file": "benchmark/groundtruth/group_11/group11.mp4",
+  "ok": true,
+  "elapsed_s": 100.66
+}

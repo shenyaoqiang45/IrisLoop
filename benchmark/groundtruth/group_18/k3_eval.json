@@ -1,0 +1,29 @@
+{
+  "group": 18,
+  "subject": "左右对称的放射状光轮轨迹",
+  "recognizable": true,
+  "confidence": 0.72,
+  "issues": [
+    "伪影干扰",
+    "太碎",
+    "对比不足"
+  ],
+  "content_actions": [
+    "simplify_silhouette",
+    "thicken_strokes"
+  ],
+  "summary": "可辨认为对称扇形/放射状光轮轨迹，但扫描点阵与欠曝使边缘偏碎，建议简化轮廓并加粗主光带。",
+  "_raw": "{\n  \"group\": 18,\n  \"subject\": \"左右对称的放射状光轮轨迹\",\n  \"recognizable\": true,\n  \"confidence\": 0.72,\n  \"issues\": [\n    \"伪影干扰\",\n    \"太碎\",\n    \"对比不足\"\n  ],\n  \"content_actions\": [\n    \"simplify_silhouette\",\n    \"thicken_strokes\"\n  ],\n  \"summary\": \"可辨认为对称扇形/放射状光轮轨迹，但扫描点阵与欠曝使边缘偏碎，建议简化轮廓并加粗主光带。\"\n}",
+  "_usage": {
+    "prompt_tokens": 1058,
+    "completion_tokens": 295,
+    "total_tokens": 1353,
+    "completion_tokens_details": {
+      "reasoning_tokens": 154
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_18/frame_01_2.8s.jpg",
+  "ok": true,
+  "elapsed_s": 20.28
+}

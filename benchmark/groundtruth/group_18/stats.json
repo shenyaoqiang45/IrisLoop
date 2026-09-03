@@ -1,0 +1,27 @@
+{
+  "group": 18,
+  "name": "光轮轨迹",
+  "frames": null,
+  "stills": [
+    "frame_00_0.4s.jpg",
+    "frame_01_2.8s.jpg",
+    "frame_02_5.2s.jpg",
+    "frame_03_7.5s.jpg",
+    "frame_04_9.9s.jpg",
+    "frame_05_12.3s.jpg",
+    "frame_06_14.7s.jpg",
+    "frame_07_17.0s.jpg",
+    "frame_08_19.4s.jpg",
+    "frame_09_21.8s.jpg"
+  ],
+  "video": "group18.mp4",
+  "mean": 98.81933745659721,
+  "max_mean": 99.24776258680555,
+  "bright_ratio": 0.04366970486111111,
+  "lap_var": 28.892650232247945,
+  "verdict": [
+    "偏模糊或扫描条纹主导"
+  ],
+  "dir": "benchmark/groundtruth/group_18",
+  "ok": true
+}

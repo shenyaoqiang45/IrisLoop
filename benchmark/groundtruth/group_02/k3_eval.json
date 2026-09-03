@@ -1,0 +1,24 @@
+{
+  "group": 2,
+  "subject": "电池充电图标",
+  "recognizable": true,
+  "confidence": 0.98,
+  "issues": [],
+  "content_actions": [
+    "none"
+  ],
+  "summary": "绿色电池与闪电充电符号清晰可辨，电量格明确，采集伪影不影响内容识别。",
+  "_raw": "{\n  \"group\": 2,\n  \"subject\": \"电池充电图标\",\n  \"recognizable\": true,\n  \"confidence\": 0.98,\n  \"issues\": [],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"绿色电池与闪电充电符号清晰可辨，电量格明确，采集伪影不影响内容识别。\"\n}",
+  "_usage": {
+    "prompt_tokens": 1056,
+    "completion_tokens": 181,
+    "total_tokens": 1237,
+    "completion_tokens_details": {
+      "reasoning_tokens": 93
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_02/still_01_2.9s.jpg",
+  "ok": true,
+  "elapsed_s": 19.68
+}

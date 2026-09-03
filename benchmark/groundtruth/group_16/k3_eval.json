@@ -1,0 +1,27 @@
+{
+  "group": 16,
+  "subject": "侧身人物举瓶喝水",
+  "recognizable": true,
+  "confidence": 0.92,
+  "issues": [
+    "构图偏左",
+    "门缝分割画面"
+  ],
+  "content_actions": [
+    "recenter"
+  ],
+  "summary": "喝水人物主体清晰可辨认，绿色偏色和扫描纹属采集伪影，主要问题是投影位置偏左且被门缝切开。",
+  "_raw": "{\"group\":16,\"subject\":\"侧身人物举瓶喝水\",\"recognizable\":true,\"confidence\":0.92,\"issues\":[\"构图偏左\",\"门缝分割画面\"],\"content_actions\":[\"recenter\"],\"summary\":\"喝水人物主体清晰可辨认，绿色偏色和扫描纹属采集伪影，主要问题是投影位置偏左且被门缝切开。\"}",
+  "_usage": {
+    "prompt_tokens": 1057,
+    "completion_tokens": 300,
+    "total_tokens": 1357,
+    "completion_tokens_details": {
+      "reasoning_tokens": 211
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_16/frame_01_2.8s.jpg",
+  "ok": true,
+  "elapsed_s": 20.96
+}

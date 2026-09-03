@@ -1,0 +1,27 @@
+{
+  "group": 17,
+  "subject": "绿色数字“40”（速度达成40KM）",
+  "recognizable": true,
+  "confidence": 0.92,
+  "issues": [
+    "伪影干扰",
+    "太碎"
+  ],
+  "content_actions": [
+    "none"
+  ],
+  "summary": "主体数字40清晰可辨，绿色扫描碎裂和条纹属于采集伪影，不影响内容识别。",
+  "_raw": "{\"group\":17,\"subject\":\"绿色数字“40”（速度达成40KM）\",\"recognizable\":true,\"confidence\":0.92,\"issues\":[\"伪影干扰\",\"太碎\"],\"content_actions\":[\"none\"],\"summary\":\"主体数字40清晰可辨，绿色扫描碎裂和条纹属于采集伪影，不影响内容识别。\"}",
+  "_usage": {
+    "prompt_tokens": 1059,
+    "completion_tokens": 210,
+    "total_tokens": 1269,
+    "completion_tokens_details": {
+      "reasoning_tokens": 127
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_17/frame_01_2.8s.jpg",
+  "ok": true,
+  "elapsed_s": 15.93
+}

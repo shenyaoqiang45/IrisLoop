@@ -1,0 +1,28 @@
+{
+  "group": 6,
+  "name": "unknown(0x06)",
+  "play_ok": true,
+  "play_raw": "80a00106",
+  "frames": 590,
+  "stills": [
+    "still_00_0.5s.jpg",
+    "still_01_2.9s.jpg",
+    "still_02_5.2s.jpg",
+    "still_03_7.6s.jpg",
+    "still_04_9.9s.jpg",
+    "still_05_12.3s.jpg",
+    "still_06_14.7s.jpg",
+    "still_07_17.0s.jpg",
+    "still_08_19.4s.jpg",
+    "still_09_21.7s.jpg"
+  ],
+  "video": "group.mp4",
+  "mean": 97.15933507496175,
+  "max_mean": 97.77889322916667,
+  "bright_ratio": 0.028701171875,
+  "lap_var": 38.42997442850429,
+  "verdict": [
+    "偏模糊或扫描条纹主导"
+  ],
+  "dir": "benchmark/groundtruth/group_06"
+}

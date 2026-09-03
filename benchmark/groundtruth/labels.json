@@ -1,0 +1,127 @@
+{
+  "purpose": "vu_groundtruth",
+  "source": "vu_testset_20260902_175407",
+  "note": "USB camera stills of IrisGreen groups 1-20; MP4 kept local only",
+  "groups": [
+    {
+      "group": 1,
+      "name": "开机",
+      "still": "still_01_2.9s.jpg",
+      "dir": "benchmark/groundtruth/group_01"
+    },
+    {
+      "group": 2,
+      "name": "充电",
+      "still": "still_01_2.9s.jpg",
+      "dir": "benchmark/groundtruth/group_02"
+    },
+    {
+      "group": 3,
+      "name": "未连接",
+      "still": "still_01_2.9s.jpg",
+      "dir": "benchmark/groundtruth/group_03"
+    },
+    {
+      "group": 4,
+      "name": "连接成功",
+      "still": "still_01_2.9s.jpg",
+      "dir": "benchmark/groundtruth/group_04"
+    },
+    {
+      "group": 5,
+      "name": "低电量",
+      "still": "still_01_2.9s.jpg",
+      "dir": "benchmark/groundtruth/group_05"
+    },
+    {
+      "group": 6,
+      "name": "unknown(0x06)",
+      "still": "still_01_2.9s.jpg",
+      "dir": "benchmark/groundtruth/group_06"
+    },
+    {
+      "group": 7,
+      "name": "unknown(0x07)",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_07"
+    },
+    {
+      "group": 8,
+      "name": "unknown(0x08)",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_08"
+    },
+    {
+      "group": 9,
+      "name": "unknown(0x09)",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_09"
+    },
+    {
+      "group": 10,
+      "name": "网格",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_10"
+    },
+    {
+      "group": 11,
+      "name": "动画",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_11"
+    },
+    {
+      "group": 12,
+      "name": "手写",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_12"
+    },
+    {
+      "group": 13,
+      "name": "提示词",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_13"
+    },
+    {
+      "group": 14,
+      "name": "速度达成30KM",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_14"
+    },
+    {
+      "group": 15,
+      "name": "里程素材",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_15"
+    },
+    {
+      "group": 16,
+      "name": "喝水素材",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_16"
+    },
+    {
+      "group": 17,
+      "name": "速度达成40KM",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_17"
+    },
+    {
+      "group": 18,
+      "name": "光轮轨迹",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_18"
+    },
+    {
+      "group": 19,
+      "name": "爬坡素材",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_19"
+    },
+    {
+      "group": 20,
+      "name": "下坡素材",
+      "still": "frame_01_2.8s.jpg",
+      "dir": "benchmark/groundtruth/group_20"
+    }
+  ]
+}

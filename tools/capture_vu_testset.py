@@ -2,13 +2,10 @@
 
 每组用独立子进程跑 project_and_capture（规避 Windows Bleak 重连失效）。
 
-每组输出:
+工作目录（临时）:
     captures/vu_testset_<tag>/group_XX/
-        frame_*.jpg / still 同批 JPG
-        group.mp4
-        stats.json   # 由本脚本根据目录汇总
-根目录:
-    manifest.json
+固化为评测集时请移到:
+    benchmark/groundtruth/
 
 用法:
     python tools/capture_vu_testset.py

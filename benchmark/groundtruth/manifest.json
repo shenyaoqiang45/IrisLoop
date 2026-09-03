@@ -1,0 +1,595 @@
+{
+  "created": "2026-09-02T18:08:47",
+  "purpose": "video_understanding_testset",
+  "projector": "F4:12:FA:B6:B7:CA",
+  "camera": 0,
+  "exposure": -7.0,
+  "seconds_per_group": 22.0,
+  "interval_100ms": 20,
+  "groups": [
+    {
+      "group": 1,
+      "name": "开机",
+      "play_ok": true,
+      "play_raw": "80a00101",
+      "frames": 643,
+      "stills": [
+        "still_00_0.5s.jpg",
+        "still_01_2.9s.jpg",
+        "still_02_5.2s.jpg",
+        "still_03_7.6s.jpg",
+        "still_04_10.0s.jpg",
+        "still_05_12.3s.jpg",
+        "still_06_14.6s.jpg",
+        "still_07_17.0s.jpg",
+        "still_08_19.4s.jpg",
+        "still_09_21.7s.jpg"
+      ],
+      "video": "group.mp4",
+      "mean": 101.40833422433904,
+      "max_mean": 102.7839529079861,
+      "bright_ratio": 0.06940212673611111,
+      "lap_var": 23.449846418409923,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_01"
+    },
+    {
+      "group": 2,
+      "name": "充电",
+      "play_ok": true,
+      "play_raw": "80a00102",
+      "frames": 555,
+      "stills": [
+        "still_00_0.5s.jpg",
+        "still_01_2.9s.jpg",
+        "still_02_5.2s.jpg",
+        "still_03_7.6s.jpg",
+        "still_04_9.9s.jpg",
+        "still_05_12.3s.jpg",
+        "still_06_14.7s.jpg",
+        "still_07_17.0s.jpg",
+        "still_08_19.4s.jpg",
+        "still_09_21.7s.jpg"
+      ],
+      "video": "group.mp4",
+      "mean": 96.59495269683747,
+      "max_mean": 97.4786111111111,
+      "bright_ratio": 0.03579535590277778,
+      "lap_var": 17.267619625533914,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_02"
+    },
+    {
+      "group": 3,
+      "name": "未连接",
+      "play_ok": true,
+      "play_raw": "80a00103",
+      "frames": 584,
+      "stills": [
+        "still_00_0.5s.jpg",
+        "still_01_2.9s.jpg",
+        "still_02_5.2s.jpg",
+        "still_03_7.6s.jpg",
+        "still_04_9.9s.jpg",
+        "still_05_12.3s.jpg",
+        "still_06_14.7s.jpg",
+        "still_07_17.0s.jpg",
+        "still_08_19.4s.jpg",
+        "still_09_21.7s.jpg"
+      ],
+      "video": "group.mp4",
+      "mean": 95.99337391753176,
+      "max_mean": 97.69037434895833,
+      "bright_ratio": 0.024117838541666665,
+      "lap_var": 29.1853491123864,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_03"
+    },
+    {
+      "group": 4,
+      "name": "连接成功",
+      "play_ok": true,
+      "play_raw": "80a00104",
+      "frames": 542,
+      "stills": [
+        "still_00_0.5s.jpg",
+        "still_01_2.9s.jpg",
+        "still_02_5.2s.jpg",
+        "still_03_7.6s.jpg",
+        "still_04_10.0s.jpg",
+        "still_05_12.3s.jpg",
+        "still_06_14.7s.jpg",
+        "still_07_17.0s.jpg",
+        "still_08_19.4s.jpg",
+        "still_09_21.7s.jpg"
+      ],
+      "video": "group.mp4",
+      "mean": 96.93633357837484,
+      "max_mean": 97.66185438368055,
+      "bright_ratio": 0.02891818576388889,
+      "lap_var": 38.57669915886081,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_04"
+    },
+    {
+      "group": 5,
+      "name": "低电量",
+      "play_ok": true,
+      "play_raw": "80a00105",
+      "frames": 554,
+      "stills": [
+        "still_00_0.5s.jpg",
+        "still_01_2.9s.jpg",
+        "still_02_5.2s.jpg",
+        "still_03_7.6s.jpg",
+        "still_04_10.0s.jpg",
+        "still_05_12.3s.jpg",
+        "still_06_14.6s.jpg",
+        "still_07_17.0s.jpg",
+        "still_08_19.4s.jpg",
+        "still_09_21.7s.jpg"
+      ],
+      "video": "group.mp4",
+      "mean": 94.94579135838158,
+      "max_mean": 97.18835503472222,
+      "bright_ratio": 0.029895833333333333,
+      "lap_var": 9.98685459828682,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_05"
+    },
+    {
+      "group": 6,
+      "name": "unknown(0x06)",
+      "play_ok": true,
+      "play_raw": "80a00106",
+      "frames": 590,
+      "stills": [
+        "still_00_0.5s.jpg",
+        "still_01_2.9s.jpg",
+        "still_02_5.2s.jpg",
+        "still_03_7.6s.jpg",
+        "still_04_9.9s.jpg",
+        "still_05_12.3s.jpg",
+        "still_06_14.7s.jpg",
+        "still_07_17.0s.jpg",
+        "still_08_19.4s.jpg",
+        "still_09_21.7s.jpg"
+      ],
+      "video": "group.mp4",
+      "mean": 97.15933507496175,
+      "max_mean": 97.77889322916667,
+      "bright_ratio": 0.028701171875,
+      "lap_var": 38.42997442850429,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_06"
+    },
+    {
+      "group": 7,
+      "name": "unknown(0x07)",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.1s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group7.mp4",
+      "mean": 97.06798220486111,
+      "max_mean": 97.65225151909722,
+      "bright_ratio": 0.027374131944444446,
+      "lap_var": 40.578006780028986,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_07",
+      "ok": true,
+      "subprocess_rc": 1
+    },
+    {
+      "group": 8,
+      "name": "unknown(0x08)",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.6s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group8.mp4",
+      "mean": 98.42536002604166,
+      "max_mean": 98.80704210069445,
+      "bright_ratio": 0.028531901041666665,
+      "lap_var": 38.41406588429816,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_08",
+      "ok": true,
+      "subprocess_rc": 1
+    },
+    {
+      "group": 9,
+      "name": "unknown(0x09)",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.6s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group9.mp4",
+      "mean": 98.23156228298612,
+      "max_mean": 98.67727756076388,
+      "bright_ratio": 0.028436414930555556,
+      "lap_var": 38.16960566920222,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_09",
+      "ok": true,
+      "subprocess_rc": 1
+    },
+    {
+      "group": 10,
+      "name": "网格",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.6s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group10.mp4",
+      "mean": 97.33014257812499,
+      "max_mean": 98.08641276041666,
+      "bright_ratio": 0.026114366319444443,
+      "lap_var": 39.7257713107361,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_10",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 11,
+      "name": "动画",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group11.mp4",
+      "mean": 96.97675238715279,
+      "max_mean": 97.43640082465278,
+      "bright_ratio": 0.026284722222222223,
+      "lap_var": 14.021795358101054,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_11",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 12,
+      "name": "手写",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.1s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group12.mp4",
+      "mean": 95.95359223090279,
+      "max_mean": 98.10977105034722,
+      "bright_ratio": 0.027247178819444443,
+      "lap_var": 22.609489651575082,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_12",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 13,
+      "name": "提示词",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.1s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group13.mp4",
+      "mean": 97.91898480902776,
+      "max_mean": 98.22056966145833,
+      "bright_ratio": 0.026885850694444446,
+      "lap_var": 35.52516224735683,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_13",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 14,
+      "name": "速度达成30KM",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.1s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group14.mp4",
+      "mean": 97.60058604600695,
+      "max_mean": 98.07014865451389,
+      "bright_ratio": 0.031187065972222223,
+      "lap_var": 27.188124632337008,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_14",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 15,
+      "name": "里程素材",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group15.mp4",
+      "mean": 98.08798014322916,
+      "max_mean": 100.20303168402778,
+      "bright_ratio": 0.056953125,
+      "lap_var": 53.01923844343079,
+      "verdict": [
+        "有明显投影结构"
+      ],
+      "dir": "benchmark/groundtruth/group_15",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 16,
+      "name": "喝水素材",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group16.mp4",
+      "mean": 100.95322515190972,
+      "max_mean": 102.08763237847222,
+      "bright_ratio": 0.06566514756944444,
+      "lap_var": 24.28220616005722,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_16",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 17,
+      "name": "速度达成40KM",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.1s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.6s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group17.mp4",
+      "mean": 98.1425048828125,
+      "max_mean": 98.73243598090278,
+      "bright_ratio": 0.03976128472222222,
+      "lap_var": 36.43073423126644,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_17",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 18,
+      "name": "光轮轨迹",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group18.mp4",
+      "mean": 98.81933745659721,
+      "max_mean": 99.24776258680555,
+      "bright_ratio": 0.04366970486111111,
+      "lap_var": 28.892650232247945,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_18",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 19,
+      "name": "爬坡素材",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.2s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group19.mp4",
+      "mean": 97.12919715711806,
+      "max_mean": 99.41535264756945,
+      "bright_ratio": 0.038594835069444444,
+      "lap_var": 19.55992811086807,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_19",
+      "ok": true,
+      "subprocess_rc": 0
+    },
+    {
+      "group": 20,
+      "name": "下坡素材",
+      "frames": null,
+      "stills": [
+        "frame_00_0.4s.jpg",
+        "frame_01_2.8s.jpg",
+        "frame_02_5.1s.jpg",
+        "frame_03_7.5s.jpg",
+        "frame_04_9.9s.jpg",
+        "frame_05_12.3s.jpg",
+        "frame_06_14.7s.jpg",
+        "frame_07_17.0s.jpg",
+        "frame_08_19.4s.jpg",
+        "frame_09_21.8s.jpg"
+      ],
+      "video": "group20.mp4",
+      "mean": 101.84014431423611,
+      "max_mean": 103.26288411458333,
+      "bright_ratio": 0.076396484375,
+      "lap_var": 28.63079390306202,
+      "verdict": [
+        "偏模糊或扫描条纹主导"
+      ],
+      "dir": "benchmark/groundtruth/group_20",
+      "ok": true,
+      "subprocess_rc": 0
+    }
+  ],
+  "ok_groups": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "empty_or_dark": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ]
+}

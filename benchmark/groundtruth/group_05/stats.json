@@ -1,0 +1,28 @@
+{
+  "group": 5,
+  "name": "低电量",
+  "play_ok": true,
+  "play_raw": "80a00105",
+  "frames": 554,
+  "stills": [
+    "still_00_0.5s.jpg",
+    "still_01_2.9s.jpg",
+    "still_02_5.2s.jpg",
+    "still_03_7.6s.jpg",
+    "still_04_10.0s.jpg",
+    "still_05_12.3s.jpg",
+    "still_06_14.6s.jpg",
+    "still_07_17.0s.jpg",
+    "still_08_19.4s.jpg",
+    "still_09_21.7s.jpg"
+  ],
+  "video": "group.mp4",
+  "mean": 94.94579135838158,
+  "max_mean": 97.18835503472222,
+  "bright_ratio": 0.029895833333333333,
+  "lap_var": 9.98685459828682,
+  "verdict": [
+    "偏模糊或扫描条纹主导"
+  ],
+  "dir": "benchmark/groundtruth/group_05"
+}

@@ -1,0 +1,27 @@
+{
+  "group": 15,
+  "name": "里程素材",
+  "frames": null,
+  "stills": [
+    "frame_00_0.4s.jpg",
+    "frame_01_2.8s.jpg",
+    "frame_02_5.2s.jpg",
+    "frame_03_7.5s.jpg",
+    "frame_04_9.9s.jpg",
+    "frame_05_12.3s.jpg",
+    "frame_06_14.7s.jpg",
+    "frame_07_17.0s.jpg",
+    "frame_08_19.4s.jpg",
+    "frame_09_21.8s.jpg"
+  ],
+  "video": "group15.mp4",
+  "mean": 98.08798014322916,
+  "max_mean": 100.20303168402778,
+  "bright_ratio": 0.056953125,
+  "lap_var": 53.01923844343079,
+  "verdict": [
+    "有明显投影结构"
+  ],
+  "dir": "benchmark/groundtruth/group_15",
+  "ok": true
+}

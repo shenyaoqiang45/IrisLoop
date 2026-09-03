@@ -1,0 +1,24 @@
+{
+  "group": 12,
+  "subject": "手写绿色英文单词，近似“Ainstec”",
+  "recognizable": true,
+  "confidence": 0.86,
+  "issues": [],
+  "content_actions": [
+    "none"
+  ],
+  "summary": "投影内容为可辨认的手写英文字样，采集偏色和欠曝不影响识别。",
+  "_raw": "{\n  \"group\": 12,\n  \"subject\": \"手写绿色英文单词，近似“Ainstec”\",\n  \"recognizable\": true,\n  \"confidence\": 0.86,\n  \"issues\": [],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"投影内容为可辨认的手写英文字样，采集偏色和欠曝不影响识别。\"\n}",
+  "_usage": {
+    "prompt_tokens": 1056,
+    "completion_tokens": 602,
+    "total_tokens": 1658,
+    "completion_tokens_details": {
+      "reasoning_tokens": 510
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_12/frame_01_2.8s.jpg",
+  "ok": true,
+  "elapsed_s": 30.66
+}

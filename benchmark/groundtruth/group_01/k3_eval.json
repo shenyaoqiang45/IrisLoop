@@ -1,0 +1,27 @@
+{
+  "group": 1,
+  "subject": "两条绿色横条与中间向上箭头的开机提示画面",
+  "recognizable": true,
+  "confidence": 0.82,
+  "issues": [
+    "伪影干扰",
+    "对比不足"
+  ],
+  "content_actions": [
+    "none"
+  ],
+  "summary": "主体为可辨认的横条加向上箭头开机提示，小字不可读但不影响识别。",
+  "_raw": "{\"group\":1,\"subject\":\"两条绿色横条与中间向上箭头的开机提示画面\",\"recognizable\":true,\"confidence\":0.82,\"issues\":[\"伪影干扰\",\"对比不足\"],\"content_actions\":[\"none\"],\"summary\":\"主体为可辨认的横条加向上箭头开机提示，小字不可读但不影响识别。\"}",
+  "_usage": {
+    "prompt_tokens": 1056,
+    "completion_tokens": 172,
+    "total_tokens": 1228,
+    "completion_tokens_details": {
+      "reasoning_tokens": 88
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_01/still_01_2.9s.jpg",
+  "ok": true,
+  "elapsed_s": 15.88
+}

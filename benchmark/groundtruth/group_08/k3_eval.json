@@ -1,0 +1,28 @@
+{
+  "group": 8,
+  "subject": "IRIS GREEN 连接成功界面，含对勾图标与 Connection successful 文字",
+  "recognizable": true,
+  "confidence": 0.95,
+  "issues": [],
+  "content_actions": [
+    "none"
+  ],
+  "summary": "投影内容完整清晰，标题、图标与连接成功文字均可辨认，无需调整。",
+  "_raw": "{\"group\":8,\"subject\":\"IRIS GREEN 连接成功界面，含对勾图标与 Connection successful 文字\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容完整清晰，标题、图标与连接成功文字均可辨认，无需调整。\"}",
+  "_usage": {
+    "prompt_tokens": 1061,
+    "completion_tokens": 85,
+    "total_tokens": 1146,
+    "cached_tokens": 1024,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    }
+  },
+  "_mode": "still_01",
+  "_file": "benchmark/groundtruth/group_08/frame_01_2.8s.jpg",
+  "ok": true,
+  "elapsed_s": 15.14
+}

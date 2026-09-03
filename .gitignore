@@ -6,6 +6,11 @@ venv/
 captures/
 *.log
 
+# benchmark 只跟踪静帧 JPG + json，MP4 留本地
+benchmark/**/*.mp4
+benchmark/**/*.avi
+benchmark/**/*.mov
+
 # Office 临时锁文件
 ~$*
 

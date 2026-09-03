@@ -1,0 +1,27 @@
+{
+  "group": 12,
+  "name": "手写",
+  "frames": null,
+  "stills": [
+    "frame_00_0.4s.jpg",
+    "frame_01_2.8s.jpg",
+    "frame_02_5.2s.jpg",
+    "frame_03_7.5s.jpg",
+    "frame_04_9.9s.jpg",
+    "frame_05_12.3s.jpg",
+    "frame_06_14.7s.jpg",
+    "frame_07_17.1s.jpg",
+    "frame_08_19.4s.jpg",
+    "frame_09_21.8s.jpg"
+  ],
+  "video": "group12.mp4",
+  "mean": 95.95359223090279,
+  "max_mean": 98.10977105034722,
+  "bright_ratio": 0.027247178819444443,
+  "lap_var": 22.609489651575082,
+  "verdict": [
+    "偏模糊或扫描条纹主导"
+  ],
+  "dir": "benchmark/groundtruth/group_12",
+  "ok": true
+}

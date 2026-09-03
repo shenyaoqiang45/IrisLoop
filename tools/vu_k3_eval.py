@@ -2,8 +2,8 @@
 
 用法:
     set MOONSHOT_API_KEY=sk-...
-    python tools/vu_k3_eval.py --root captures/vu_testset_20260902_175407
-    python tools/vu_k3_eval.py --root captures/vu_testset_20260902_175407 --groups 1 2 3
+    python tools/vu_k3_eval.py --root benchmark/groundtruth
+    python tools/vu_k3_eval.py --root benchmark/groundtruth --groups 1 2 3
 """
 
 from __future__ import annotations
