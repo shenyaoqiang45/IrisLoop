@@ -35,10 +35,17 @@ Useful flags:
 
 ## Outputs
 
-Under `captures/loop_round1/<timestamp>/`:
+Outputs:
+
+- one round → `captures/loop_round1/<timestamp>/`
+- `--rounds N` → `captures/loop_rounds/<timestamp>/r01` … `rN` + `session_report.json`
+
+Per round:
 
 - `01_director_brief.json` — authored silhouette concept + Wan prompt  
 - `writer/wan.mp4` + `writer/frames/`  
 - `capture/group1.mp4` + stills  
 - `04_director_review.json` — loved / pass / next_intent / next_wan_prompt  
 - `round_report.json` — full round artifact  
+
+Tracked sample: `captures/loop_rounds/20260903_180639/` (dancing kitten, 3 rounds unsigned).
