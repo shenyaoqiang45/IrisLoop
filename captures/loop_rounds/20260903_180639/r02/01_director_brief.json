@@ -1,0 +1,8 @@
+{
+  "concept": "Make the kitten unambiguously dancing: standing tall on hind legs with an exaggerated side-to-side hip sway and both paws pumping in the air.",
+  "subject": "dancing kitten silhouette",
+  "wan_prompt": "High-contrast 1bpp silhouette animation, pure white graphic figure of a chubby kitten against a total black void. The kitten stands fully upright on its hind legs, torso tall and vertical, both front paws thrust high and pumping alternately, hips swinging in wide exaggerated arcs side to side, tail whipping low in counter-rhythm. Round belly, big head, thick bold masses, no interior detail, crisp cut-paper edges. Motion is big and comedic: two counts left, two counts right, an obvious hop with feet leaving ground every fourth beat, ears flicking on the off-beat. Static camera, centered composition, flat shadow-play style, seamless loop.",
+  "negative_prompt": "color, gradients, texture, fur detail, gray tones, background scenery, floor line, text, watermark, realistic lighting, camera movement, multiple cats, thin wobbly lines, noisy edges, photographic style",
+  "notes": "iteration: director next_wan_prompt from previous review",
+  "_from_review": true
+}

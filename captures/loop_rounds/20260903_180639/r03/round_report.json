@@ -1,0 +1,71 @@
+{
+  "wish": "viral internet-famous dancing kitten, cute meme cat dancing",
+  "round": 3,
+  "out": "captures/loop_rounds/20260903_180639/r03",
+  "model_writer": "wan2.2-t2v-plus",
+  "model_director": "kimi-k3",
+  "size": "832*480",
+  "brief": {
+    "concept": "Make the kitten much larger in frame with a fatter belly, thicker limbs, and wildly exaggerated paw-pumping and hip-swing poses so the dance reads as big comedy even in a single still.",
+    "subject": "dancing kitten silhouette",
+    "wan_prompt": "High-contrast 1bpp silhouette animation, pure white graphic figure of a very chubby kitten filling most of the frame against a total black void. The kitten stands fully upright on hind legs, huge round belly and oversized head, short thick limbs, both front paws thrust straight overhead and pumping alternately with extreme energy, hips thrown far out side to side in wide comic arcs, tail whipping low in counter-rhythm. Motion is maximal and slapstick: two big counts left, two big counts right, a full airborne hop with feet clearly off the ground every fourth beat, ears flicking sharply on the off-beat. Bold thick masses, crisp cut-paper edges, no interior detail, flat shadow-play style, static camera, centered composition, seamless loop.",
+    "negative_prompt": "color, gradients, texture, fur detail, gray tones, background scenery, floor line, text, watermark, realistic lighting, camera movement, multiple cats, thin wobbly lines, noisy edges, photographic style",
+    "notes": "iteration: director next_wan_prompt from previous review",
+    "_from_review": true
+  },
+  "writer": {
+    "mp4": "captures/loop_rounds/20260903_180639/r03/writer/wan.mp4",
+    "frames": [
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_00.jpg",
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_01.jpg",
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_02.jpg",
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_03.jpg",
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_04.jpg",
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_05.jpg",
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_06.jpg",
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_07.jpg",
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_08.jpg",
+      "captures/loop_rounds/20260903_180639/r03/writer/frames/frame_09.jpg"
+    ]
+  },
+  "capture": {
+    "group": 1,
+    "frames": 234,
+    "mean": 93.9488500072338,
+    "max_mean": 95.16496853298611,
+    "bright_ratio": 0.02642252604166667,
+    "lap_var": 15.682075030613515,
+    "dir": "captures\\loop_rounds\\20260903_180639\\r03\\capture"
+  },
+  "review": {
+    "subject_seen": "chubby upright kitten silhouette standing on hind legs with front paws raised overhead, clearly dancing",
+    "recognizable": true,
+    "confidence": 0.9,
+    "loved": false,
+    "issues": [
+      "gesture weak",
+      "other"
+    ],
+    "content_actions": [
+      "bolder_gesture",
+      "recenter"
+    ],
+    "pass": false,
+    "summary": "The kitten is instantly readable and charmingly chubby with both paws up, but the mass sits small in a large void and the hip-throw, tail-whip drama promised in the prompt isn't reading, so it lands as cute rather than a signable graphic punch.",
+    "next_intent": "Make the kitten fill the frame and sell the slapstick: huge belly swing, visible hip displacement, and a whipping tail counter-shape so each frame alone reads as mid-dance explosion.",
+    "next_wan_prompt": "High-contrast 1bpp silhouette animation, pure white graphic figure of an extremely chubby kitten filling nearly the entire frame edge to edge against a total black void. The kitten stands bolt upright on hind legs, enormous round belly dominating the body, oversized head with sharp ears, both front paws thrust straight overhead. Exaggerate the dance to cartoon extremes: hips thrown so far sideways the whole pear-shaped torso tilts off-axis, two massive counts left, two massive counts right, tail whipping in a wide low S-curve clearly separated from the body as counter-rhythm, and a full airborne hop with both feet visibly off the ground every fourth beat. Bold thick masses, crisp cut-paper edges, no interior detail, flat shadow-play style, static camera, perfectly centered, figure occupying at least 70 percent of frame height, seamless loop.",
+    "_usage": {
+      "prompt_tokens": 2752,
+      "completion_tokens": 463,
+      "total_tokens": 3215,
+      "completion_tokens_details": {
+        "reasoning_tokens": 80
+      }
+    },
+    "_stills": [
+      "captures/loop_rounds/20260903_180639/r03/capture/frame_00_0.4s.jpg",
+      "captures/loop_rounds/20260903_180639/r03/capture/frame_04_4.6s.jpg",
+      "captures/loop_rounds/20260903_180639/r03/capture/frame_07_7.8s.jpg"
+    ]
+  }
+}

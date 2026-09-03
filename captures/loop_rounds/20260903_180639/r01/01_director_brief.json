@@ -1,0 +1,15 @@
+{
+  "concept": "A chubby kitten silhouette caught mid-meme groove — hips swinging side to side, paws up like tiny maracas, tail conducting the beat — a single looping dance move with real swagger.",
+  "subject": "dancing kitten silhouette",
+  "wan_prompt": "High-contrast 1bpp silhouette animation, pure white graphic figure of a chubby kitten against a total black void background. The kitten stands on hind legs, front paws raised and bouncing, hips swaying rhythmically side to side in a loop, long tail whipping counter-rhythm like a metronome. Thick bold masses, round belly, big head, no interior detail, no outline shading, crisp cut-paper edges. Motion is authored and beat-synced: two counts left, two counts right, a small hop every fourth beat, ears flicking on the off-beat. Static camera, centered composition, flat graphic shadow-play style, seamless loop.",
+  "negative_prompt": "color, gradients, texture, fur detail, gray tones, background scenery, floor line, text, watermark, realistic lighting, camera movement, multiple cats, thin wobbly lines, noisy edges, photographic style",
+  "notes": "The joke and the charm live in the rhythm, not the rendering: one readable move (hip sway + tail counter-beat + hop accent) reads instantly at 640x480 1bpp. Keeping the kitten as one thick white mass on black void gives the MEMS laser clean, unbroken scan paths, and the loop structure makes it feel like an authored animated GIF rather than a stock clip.",
+  "_usage": {
+    "prompt_tokens": 377,
+    "completion_tokens": 354,
+    "total_tokens": 731,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7
+    }
+  }
+}

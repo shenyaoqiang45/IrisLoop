@@ -3,10 +3,10 @@ __pycache__/
 .venv/
 venv/
 
-# Local capture dumps; keep the published loop_round1 sample tracked
+# Local capture dumps; keep the published loop_rounds sample tracked
 captures/*
-!captures/loop_round1/
-!captures/loop_round1/**
+!captures/loop_rounds/
+!captures/loop_rounds/**
 *.log
 
 # Benchmark: track still JPGs + JSON; keep videos local

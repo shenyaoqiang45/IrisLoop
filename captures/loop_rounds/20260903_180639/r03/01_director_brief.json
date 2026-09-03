@@ -1,0 +1,8 @@
+{
+  "concept": "Make the kitten much larger in frame with a fatter belly, thicker limbs, and wildly exaggerated paw-pumping and hip-swing poses so the dance reads as big comedy even in a single still.",
+  "subject": "dancing kitten silhouette",
+  "wan_prompt": "High-contrast 1bpp silhouette animation, pure white graphic figure of a very chubby kitten filling most of the frame against a total black void. The kitten stands fully upright on hind legs, huge round belly and oversized head, short thick limbs, both front paws thrust straight overhead and pumping alternately with extreme energy, hips thrown far out side to side in wide comic arcs, tail whipping low in counter-rhythm. Motion is maximal and slapstick: two big counts left, two big counts right, a full airborne hop with feet clearly off the ground every fourth beat, ears flicking sharply on the off-beat. Bold thick masses, crisp cut-paper edges, no interior detail, flat shadow-play style, static camera, centered composition, seamless loop.",
+  "negative_prompt": "color, gradients, texture, fur detail, gray tones, background scenery, floor line, text, watermark, realistic lighting, camera movement, multiple cats, thin wobbly lines, noisy edges, photographic style",
+  "notes": "iteration: director next_wan_prompt from previous review",
+  "_from_review": true
+}

@@ -1,0 +1,30 @@
+{
+  "wish": "viral internet-famous dancing kitten, cute meme cat dancing",
+  "started": "20260903_180639",
+  "out": "captures/loop_rounds/20260903_180639",
+  "max_rounds": 3,
+  "rounds": [
+    {
+      "round": 1,
+      "out": "captures/loop_rounds/20260903_180639/r01",
+      "pass": false,
+      "loved": false,
+      "next_intent": "Make the kitten unambiguously dancing: standing tall on hind legs with an exaggerated side-to-side hip sway and both paws pumping in the air."
+    },
+    {
+      "round": 2,
+      "out": "captures/loop_rounds/20260903_180639/r02",
+      "pass": false,
+      "loved": false,
+      "next_intent": "Make the kitten much larger in frame with a fatter belly, thicker limbs, and wildly exaggerated paw-pumping and hip-swing poses so the dance reads as big comedy even in a single still."
+    },
+    {
+      "round": 3,
+      "out": "captures/loop_rounds/20260903_180639/r03",
+      "pass": false,
+      "loved": false,
+      "next_intent": "Make the kitten fill the frame and sell the slapstick: huge belly swing, visible hip displacement, and a whipping tail counter-shape so each frame alone reads as mid-dance explosion."
+    }
+  ],
+  "stopped": "max_rounds"
+}
