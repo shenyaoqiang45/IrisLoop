@@ -51,6 +51,9 @@ async def run_group(
     exposure: float | None,
     keepalive: bool,
     interval_100ms: int | None = None,
+    n_stills: int = 6,
+    jpeg_quality: int = 92,
+    out_dir: str | None = None,
 ) -> dict:
     cli = IrisBleClient(addr)
     await cli.connect()
@@ -77,19 +80,22 @@ async def run_group(
         cam.set_exposure(exposure)
         print(f"  手动曝光 {exposure}")
 
-    os.makedirs(OUT_DIR, exist_ok=True)
-    tag = time.strftime("%Y%m%d_%H%M%S")
-    out_dir = os.path.join(OUT_DIR, f"group{group}_{tag}")
+    if out_dir is None:
+        os.makedirs(OUT_DIR, exist_ok=True)
+        tag = time.strftime("%Y%m%d_%H%M%S")
+        out_dir = os.path.join(OUT_DIR, f"group{group}_{tag}")
     os.makedirs(out_dir, exist_ok=True)
 
     frames: list[np.ndarray] = []
     stats: list[dict] = []
     t0 = time.perf_counter()
     idx = 0
-    shot_times = np.linspace(0.5, seconds - 0.3, 6)  # 均匀抓 6 帧
+    n_stills = max(1, n_stills)
+    lo, hi = 0.4, max(0.6, seconds - 0.25)
+    shot_times = np.linspace(lo, hi, n_stills)
     next_shot = 0
 
-    print(f"  采集中 ({seconds}s) ...")
+    print(f"  采集中 ({seconds}s, {n_stills} 张 JPG) ...")
     while time.perf_counter() - t0 < seconds:
         ok, frame = cam.read()
         if not ok or frame is None:
@@ -98,8 +104,8 @@ async def run_group(
         frames.append(frame)
         stats.append(analyze(frame))
         if next_shot < len(shot_times) and el >= shot_times[next_shot]:
-            p = os.path.join(out_dir, f"frame_{idx:02d}_{el:.1f}s.png")
-            cv2.imwrite(p, frame)
+            p = os.path.join(out_dir, f"frame_{idx:02d}_{el:.1f}s.jpg")
+            cv2.imwrite(p, frame, [cv2.IMWRITE_JPEG_QUALITY, jpeg_quality])
             idx += 1
             next_shot += 1
         await asyncio.sleep(0)
@@ -167,6 +173,10 @@ async def main() -> int:
     ap.add_argument("--exposure", type=float, default=None)
     ap.add_argument("--interval", type=int, default=None,
                     help="每帧间隔（单位 100ms），默认 2=200ms/帧")
+    ap.add_argument("--n-stills", type=int, default=6,
+                    help="均匀抓拍 JPG 张数（组 20 建议 10）")
+    ap.add_argument("--jpeg-quality", type=int, default=92)
+    ap.add_argument("--out-dir", default=None, help="指定输出目录（单组时用）")
     ap.add_argument("--keepalive", action="store_true", help="采集完不停止播放")
     args = ap.parse_args()
 
@@ -175,12 +185,18 @@ async def main() -> int:
     print(f"  摄像头 index={args.camera}")
     print(f"  素材组 {args.group}")
 
+    if args.out_dir and len(args.group) != 1:
+        print("--out-dir 仅支持单组")
+        return 2
+
     results = []
     for g in args.group:
         results.append(
             await run_group(
                 args.address, g, args.seconds,
                 args.camera, args.exposure, args.keepalive, args.interval,
+                n_stills=args.n_stills, jpeg_quality=args.jpeg_quality,
+                out_dir=args.out_dir,
             )
         )
 

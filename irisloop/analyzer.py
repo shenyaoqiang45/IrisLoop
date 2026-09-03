@@ -151,77 +151,48 @@ def _b64_image(path: str) -> str:
 
 
 def assess_ai(target_path: str, capture_path: str) -> Assessment:
-    """调用多模态大模型评估（Moonshot Kimi）。"""
-    key = os.environ.get("MOONSHOT_API_KEY")
-    if not key:
-        raise RuntimeError("未设置 MOONSHOT_API_KEY")
-
-    import urllib.request
+    """调用 Kimi K3 评估目标图 vs 实拍图。"""
+    from irisloop import kimi_client as K
 
     prompt = """你是 MEMS 激光投影质检员。第一张是目标图(应投出的内容)，第二张是摄像头实拍。
-评估实拍效果，只回 JSON：
+绿色扫描条纹是采集伪影。禁止建议调焦距/FOV/硬件亮度。只回 JSON：
 {
-  "ok": bool,             // 整体是否可接受
+  "ok": bool,
   "orientation": "normal|flip_v|flip_h|rot180|unknown",
   "brightness": "too_dark|ok|too_bright",
   "sharpness": "blurry|ok",
   "distortion": "none|keystone|other",
-  "issues": ["..."],      // 主要问题
-  "suggestions": ["..."]  // 修正建议
+  "issues": ["..."],
+  "suggestions": ["..."]
 }"""
 
-    payload = {
-        "model": "kimi-k2-0905-preview" if key.startswith("sk-kimi-")
-        else "moonshot-v1-8k-vision-preview",
-        "messages": [
+    resp = K.chat(
+        [
             {
                 "role": "user",
                 "content": [
                     {"type": "text", "text": prompt},
                     {
                         "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{_b64_image(target_path)}"
-                        },
+                        "image_url": {"url": K.b64_data_url(target_path)},
                     },
                     {
                         "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{_b64_image(capture_path)}"
-                        },
+                        "image_url": {"url": K.b64_data_url(capture_path)},
                     },
                 ],
             }
         ],
-        "temperature": 0.1,
-    }
-
-    req = urllib.request.Request(
-        # Kimi 开放平台 key (sk-kimi-) 走 api.kimi.com，Moonshot key 走 api.moonshot.cn
-        "https://api.kimi.ai/v1/chat/completions"
-        if key.startswith("sk-kimi-")
-        else "https://api.moonshot.cn/v1/chat/completions",
-        data=json.dumps(payload).encode(),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {key}",
-        },
+        reasoning_effort="low",
+        response_format={"type": "json_object"},
     )
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        body = json.loads(resp.read())
-
-    text = body["choices"][0]["message"]["content"]
-    # 提取 JSON
-    start = text.find("{")
-    end = text.rfind("}") + 1
-    data = json.loads(text[start:end])
+    data = K.extract_json(K.message_text(resp))
 
     a = Assessment()
     a.ok = bool(data.get("ok", False))
     a.orientation = data.get("orientation", "unknown")
     a.issues = data.get("issues", [])
     a.suggestions = data.get("suggestions", [])
-    # AI 模式下部分数值指标留 0，以定性判断为主
     return a
 
 

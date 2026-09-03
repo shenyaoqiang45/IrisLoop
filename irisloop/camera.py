@@ -98,6 +98,23 @@ class UsbCamera:
         except Exception:
             return "unknown"
 
+    def set_auto_exposure(self, enabled: bool) -> None:
+        if self.cap is None:
+            return
+        # MSMF: 0.75 自动 / 0.25 手动；失败则忽略
+        try:
+            self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75 if enabled else 0.25)
+        except Exception:
+            pass
+
+    def set_exposure(self, value: float) -> None:
+        if self.cap is None:
+            return
+        try:
+            self.cap.set(cv2.CAP_PROP_EXPOSURE, float(value))
+        except Exception:
+            pass
+
     def info(self) -> str:
         w, h = self.actual_size
         return f"cam#{self.index} {w}x{h} @{self.actual_fps:.1f}fps backend={self.backend_name()}"
