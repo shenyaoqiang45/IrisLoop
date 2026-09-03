@@ -1,6 +1,6 @@
-"""在 Temp 目录里按通配符定位协议 xlsx 并导出为文本。
+"""Locate the protocol xlsx in Temp via globs and dump it to text.
 
-绕过 PowerShell 中文路径编码问题：全程在 Python 内处理路径。
+Avoids PowerShell Chinese-path encoding issues: all path handling stays in Python.
 """
 
 from __future__ import annotations
@@ -46,7 +46,7 @@ def dump(src: str, dst: str) -> None:
 def main() -> int:
     dst = sys.argv[1] if len(sys.argv) > 1 else r"f:\2026\IrisLoop\tools\ble_protocol_dump.txt"
 
-    # 先在 Temp 下找，再退到常见下载目录
+    # Search Temp first, then common download folders
     temp = os.environ.get("TEMP", r"C:\Windows\Temp")
     roots = [
         os.path.join(temp, "codebuddy-dropped-files"),
@@ -58,10 +58,11 @@ def main() -> int:
     for root in roots:
         if not os.path.isdir(root):
             continue
+        # Keep Chinese globs so vendor filenames still match; also search English *Iris*.xlsx
         for pat in ("*蓝牙*.xlsx", "*协议*.xlsx", "*Iris*.xlsx"):
             found.extend(glob.glob(os.path.join(root, "**", pat), recursive=True))
 
-    # 去重
+    # Dedupe
     seen = set()
     uniq = []
     for p in found:
@@ -75,10 +76,10 @@ def main() -> int:
         print("  ", p, os.path.getsize(p))
 
     if not uniq:
-        print("[error] 未找到协议 xlsx")
+        print("[error] protocol xlsx not found")
         return 1
 
-    # 优先名字里带 协议/蓝牙 的
+    # Prefer names containing 协议/蓝牙 (vendor Chinese filenames)
     target = None
     for p in uniq:
         b = os.path.basename(p)

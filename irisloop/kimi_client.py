@@ -1,9 +1,9 @@
-"""Kimi K3 API 客户端（图/视频理解）。
+"""Kimi K3 API client (image/video understanding).
 
-密钥只从环境变量读取，禁止写入仓库：
+Read the API key from the environment only; never commit it:
     MOONSHOT_API_KEY / KIMI_API_KEY
-可选:
-    MOONSHOT_BASE_URL  默认按 key 前缀推断
+Optional:
+    MOONSHOT_BASE_URL  inferred from the key prefix by default
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ DEFAULT_MODEL = "kimi-k3"
 def api_key() -> str:
     key = os.environ.get("MOONSHOT_API_KEY") or os.environ.get("KIMI_API_KEY")
     if not key:
-        raise RuntimeError("未设置 MOONSHOT_API_KEY 或 KIMI_API_KEY")
+        raise RuntimeError("MOONSHOT_API_KEY or KIMI_API_KEY is not set")
     return key
 
 
@@ -35,7 +35,7 @@ def base_url() -> str:
     key = api_key()
     if key.startswith("sk-kimi-"):
         return "https://api.kimi.ai/v1"
-    # 国内常用 moonshot.cn；国际文档为 moonshot.ai
+    # China endpoint is typically moonshot.cn; international docs use moonshot.ai
     return os.environ.get("MOONSHOT_API_HOST", "https://api.moonshot.cn").rstrip("/") + "/v1"
 
 
@@ -68,7 +68,7 @@ def _request(
             err = e.read().decode("utf-8", errors="replace")
             last_err = RuntimeError(f"Kimi API HTTP {e.code}: {err}")
             if e.code == 429 and attempt + 1 < retries:
-                # 组织并发上限为 1，等上一请求释放后再试
+                # org concurrency limit is 1; wait for the previous request to finish
                 time.sleep(2.0 + attempt * 2.0)
                 continue
             raise last_err from e
@@ -86,7 +86,7 @@ def chat(
     response_format: dict | None = None,
     timeout: float = 300.0,
 ) -> dict:
-    # kimi-k3 只接受 temperature=1
+    # kimi-k3 only accepts temperature=1
     if model.startswith("kimi-k3"):
         temperature = 1.0
     payload: dict[str, Any] = {
@@ -122,7 +122,7 @@ def message_text(resp: dict) -> str:
 
 
 def b64_data_url(path: str | Path, max_side: int = 1280, jpeg_quality: int = 80) -> str:
-    """读本地图，必要时缩小后转 data URL（控制请求体）。"""
+    """Load a local image, shrink if needed, and return a data URL (keeps request bodies small)."""
     import cv2
     import numpy as np
 
@@ -130,20 +130,20 @@ def b64_data_url(path: str | Path, max_side: int = 1280, jpeg_quality: int = 80)
     buf = np.fromfile(str(path), dtype=np.uint8)
     img = cv2.imdecode(buf, cv2.IMREAD_COLOR)
     if img is None:
-        raise ValueError(f"无法读图: {path}")
+        raise ValueError(f"cannot read image: {path}")
     h, w = img.shape[:2]
     scale = max_side / max(h, w)
     if scale < 1:
         img = cv2.resize(img, (int(w * scale), int(h * scale)))
     ok, enc = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, jpeg_quality])
     if not ok:
-        raise RuntimeError("JPEG 编码失败")
+        raise RuntimeError("JPEG encode failed")
     b64 = base64.b64encode(enc.tobytes()).decode("ascii")
     return f"data:image/jpeg;base64,{b64}"
 
 
 def upload_file(path: str | Path, purpose: str = "video") -> str:
-    """multipart 上传，返回 file id（用于 ms://）。"""
+    """multipart upload; returns a file id (for ms://)."""
     path = Path(path)
     boundary = "----IrisLoopBoundary7MA4YWxkTrZu0gW"
     mime = mimetypes.guess_type(str(path))[0] or "application/octet-stream"
@@ -170,7 +170,7 @@ def upload_file(path: str | Path, purpose: str = "video") -> str:
     )
     fid = data.get("id")
     if not fid:
-        raise RuntimeError(f"上传未返回 id: {data}")
+        raise RuntimeError(f"upload did not return an id: {data}")
     return str(fid)
 
 
@@ -185,5 +185,5 @@ def extract_json(text: str) -> dict:
     start = text.find("{")
     end = text.rfind("}") + 1
     if start < 0 or end <= start:
-        raise ValueError(f"回复中无 JSON: {text[:400]}")
+        raise ValueError(f"no JSON in reply: {text[:400]}")
     return json.loads(text[start:end])

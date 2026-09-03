@@ -1,16 +1,16 @@
 {
   "group": 4,
-  "subject": "IRIS GREEN 标识、对勾与电脑图标，下方文字 Connection successful",
+  "subject": "IRIS GREEN mark, checkmark, and computer icon with Connection successful text",
   "recognizable": true,
   "confidence": 0.95,
   "issues": [
-    "伪影干扰"
+    "capture artifacts"
   ],
   "content_actions": [
     "none"
   ],
-  "summary": "连接成功界面文字与图标清晰可辨认，仅有绿色扫描伪影，不影响识别。",
-  "_raw": "{\"group\":4,\"subject\":\"IRIS GREEN 标识、对勾与电脑图标，下方文字 Connection successful\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[\"伪影干扰\"],\"content_actions\":[\"none\"],\"summary\":\"连接成功界面文字与图标清晰可辨认，仅有绿色扫描伪影，不影响识别。\"}",
+  "summary": "Connection-success UI text and icons are clear; only green scan artifacts remain.",
+  "_raw": "{\"group\": 4, \"subject\": \"IRIS GREEN mark, checkmark, and computer icon with Connection successful text\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [\"capture artifacts\"], \"content_actions\": [\"none\"], \"summary\": \"Connection-success UI text and icons are clear; only green scan artifacts remain.\"}",
   "_usage": {
     "prompt_tokens": 1057,
     "completion_tokens": 152,

@@ -1,4 +1,4 @@
-"""IrisLoop: USB 摄像头视频流采集工具。"""
+"""IrisLoop: USB camera video capture toolkit."""
 
 __version__ = "0.1.0"
 

@@ -1,6 +1,6 @@
 {
   "group": 5,
-  "name": "低电量",
+  "name": "low battery",
   "play_ok": true,
   "play_raw": "80a00105",
   "frames": 554,
@@ -22,7 +22,7 @@
   "bright_ratio": 0.029895833333333333,
   "lap_var": 9.98685459828682,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_05"
 }

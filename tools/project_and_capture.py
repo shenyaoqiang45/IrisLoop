@@ -1,12 +1,12 @@
-"""投射素材组 + USB 摄像头同步采集 —— IrisLoop 闭环第一步。
+"""Project a material group and capture with a USB camera — IrisLoop closed-loop step 1.
 
-把「投射 -> 观察」串起来：BLE 下发播放命令，同时用摄像头录下
-投影仪在物理表面上的实际效果，用于确认图案、朝向、亮度、畸变。
+Chains project -> observe: send a BLE play command while recording what the
+projector actually looks like on a physical surface (pattern, orientation, brightness, distortion).
 
-用法:
+Usage:
     python tools/project_and_capture.py --group 1 --seconds 6
     python tools/project_and_capture.py --group 20 --seconds 6 --exposure -8
-    python tools/project_and_capture.py --group 1 20 --seconds 8   # 依次播两组
+    python tools/project_and_capture.py --group 1 20 --seconds 8   # play two groups in sequence
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ OUT_DIR = "captures"
 
 
 def analyze(frame: np.ndarray) -> dict:
-    """量化分析采集帧，判断是否有内容投出。"""
+    """Quantify a captured frame to decide whether content was projected."""
     g = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return {
         "mean": float(g.mean()),
@@ -57,28 +57,28 @@ async def run_group(
 ) -> dict:
     cli = IrisBleClient(addr)
     await cli.connect()
-    await cli.stop()  # 先停掉上一次播放
+    await cli.stop()  # stop any previous playback first
     await asyncio.sleep(0.3)
 
     gname = P.group_name(group)
-    # 播放总时长留足余量（单位 100ms）；帧间隔默认 2 -> 200ms/帧（5fps）
+    # Leave headroom on total play time (units of 100ms); default interval 2 -> 200ms/frame (5fps)
     total = int(seconds * 10) + 60
     interval = interval_100ms if interval_100ms is not None else 2
-    print(f"\n=== 播放 组{group} ({gname}) total={total/10:.0f}s interval={interval*100}ms ===")
+    print(f"\n=== play group {group} ({gname}) total={total/10:.0f}s interval={interval*100}ms ===")
     r = await cli.play(group_id=group, loop=False, total_100ms=total, interval_100ms=interval)
     print(f"  {'ok' if r.ok else 'fail'} raw={r.raw.hex()} {r.error}")
 
-    # 投影仪响应 + MEMS 起振需要时间
+    # Projector response + MEMS spin-up need time
     await asyncio.sleep(1.2)
 
-    # ---- 摄像头采集 ----
+    # ---- camera capture ----
     cam = UsbCamera(cam_index, 1280, 720, 30)
     cam.open()
     print(f"  camera: {cam.info()}")
     if exposure is not None:
         cam.set_auto_exposure(False)
         cam.set_exposure(exposure)
-        print(f"  手动曝光 {exposure}")
+        print(f"  manual exposure {exposure}")
 
     if out_dir is None:
         os.makedirs(OUT_DIR, exist_ok=True)
@@ -95,7 +95,7 @@ async def run_group(
     shot_times = np.linspace(lo, hi, n_stills)
     next_shot = 0
 
-    print(f"  采集中 ({seconds}s, {n_stills} 张 JPG) ...")
+    print(f"  capturing ({seconds}s, {n_stills} JPGs) ...")
     while time.perf_counter() - t0 < seconds:
         ok, frame = cam.read()
         if not ok or frame is None:
@@ -114,7 +114,7 @@ async def run_group(
     cam.release()
 
     if frames:
-        # 保存视频
+        # Save video
         vid = os.path.join(out_dir, f"group{group}.mp4")
         h, w = frames[0].shape[:2]
         wr = cv2.VideoWriter(vid, cv2.VideoWriter_fourcc(*"mp4v"), 20.0, (w, h))
@@ -125,24 +125,24 @@ async def run_group(
         means = [s["mean"] for s in stats]
         brights = [s["bright_ratio"] for s in stats]
         laps = [s["lap_var"] for s in stats]
-        print(f"\n  === 采集结果 ===")
-        print(f"  帧数 {len(frames)} / {elapsed:.1f}s -> {vid}")
-        print(f"  平均亮度 {min(means):.1f} ~ {max(means):.1f} (均值 {np.mean(means):.1f})")
-        print(f"  亮区占比 {min(brights)*100:.1f}% ~ {max(brights)*100:.1f}%")
-        print(f"  清晰度(LapVar) 均值 {np.mean(laps):.0f}")
-        print(f"  截图目录 {out_dir}")
+        print(f"\n  === capture result ===")
+        print(f"  frames {len(frames)} / {elapsed:.1f}s -> {vid}")
+        print(f"  brightness {min(means):.1f} ~ {max(means):.1f} (mean {np.mean(means):.1f})")
+        print(f"  bright-area ratio {min(brights)*100:.1f}% ~ {max(brights)*100:.1f}%")
+        print(f"  sharpness (LapVar) mean {np.mean(laps):.0f}")
+        print(f"  stills dir {out_dir}")
 
         verdict = []
         if max(means) < 12:
-            verdict.append("画面几乎全黑 -> 可能未投出/激光未亮/曝光过低")
+            verdict.append("almost fully black -> maybe not projected / laser off / exposure too low")
         if max(brights) < 0.005:
-            verdict.append("亮区极少 -> 可能只有极暗图案")
+            verdict.append("very little bright area -> maybe an extremely dark pattern")
         if np.mean(laps) < 50:
-            verdict.append("画面模糊或无内容")
+            verdict.append("blurry or no content")
         if not verdict:
-            verdict.append("画面有明显亮暗结构 -> 投影内容已投出")
+            verdict.append("clear bright/dark structure -> projected content is on")
         for v in verdict:
-            print(f"  判断: {v}")
+            print(f"  verdict: {v}")
 
         result = {
             "group": group,
@@ -154,12 +154,12 @@ async def run_group(
             "dir": out_dir,
         }
     else:
-        print("  [warn] 未采集到任何帧")
+        print("  [warn] no frames captured")
         result = {"group": group, "frames": 0}
 
     if not keepalive:
         await cli.stop()
-        print("  已停止播放")
+        print("  playback stopped")
     await cli.disconnect()
     return result
 
@@ -172,21 +172,21 @@ async def main() -> int:
     ap.add_argument("--camera", type=int, default=0)
     ap.add_argument("--exposure", type=float, default=None)
     ap.add_argument("--interval", type=int, default=None,
-                    help="每帧间隔（单位 100ms），默认 2=200ms/帧")
+                    help="Per-frame interval (units of 100ms); default 2=200ms/frame")
     ap.add_argument("--n-stills", type=int, default=6,
-                    help="均匀抓拍 JPG 张数（组 20 建议 10）")
+                    help="Number of evenly spaced JPG stills (10 recommended for group 20)")
     ap.add_argument("--jpeg-quality", type=int, default=92)
-    ap.add_argument("--out-dir", default=None, help="指定输出目录（单组时用）")
-    ap.add_argument("--keepalive", action="store_true", help="采集完不停止播放")
+    ap.add_argument("--out-dir", default=None, help="Output directory (single-group only)")
+    ap.add_argument("--keepalive", action="store_true", help="Do not stop playback after capture")
     args = ap.parse_args()
 
-    print(f"=== IrisLoop 投射+采集 ===")
-    print(f"  投影仪 {args.address}")
-    print(f"  摄像头 index={args.camera}")
-    print(f"  素材组 {args.group}")
+    print(f"=== IrisLoop project+capture ===")
+    print(f"  projector {args.address}")
+    print(f"  camera index={args.camera}")
+    print(f"  groups {args.group}")
 
     if args.out_dir and len(args.group) != 1:
-        print("--out-dir 仅支持单组")
+        print("--out-dir supports a single group only")
         return 2
 
     results = []
@@ -200,12 +200,12 @@ async def main() -> int:
             )
         )
 
-    print("\n=== 汇总 ===")
+    print("\n=== Summary ===")
     for r in results:
         if r.get("frames"):
-            print(f"  组{r['group']}: {r['frames']}帧  平均亮度{r['mean']:.1f}  "
-                  f"峰值{r['max_mean']:.1f}  亮区{r['bright_ratio']*100:.1f}%  "
-                  f"清晰度{r['lap_var']:.0f}")
+            print(f"  group {r['group']}: {r['frames']} frames  brightness mean {r['mean']:.1f}  "
+                  f"peak {r['max_mean']:.1f}  bright-area {r['bright_ratio']*100:.1f}%  "
+                  f"sharpness {r['lap_var']:.0f}")
     return 0
 
 

@@ -1,6 +1,6 @@
 {
   "group": 17,
-  "name": "速度达成40KM",
+  "name": "speed 40 km/h",
   "frames": null,
   "stills": [
     "frame_00_0.4s.jpg",
@@ -20,7 +20,7 @@
   "bright_ratio": 0.03976128472222222,
   "lap_var": 36.43073423126644,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_17",
   "ok": true

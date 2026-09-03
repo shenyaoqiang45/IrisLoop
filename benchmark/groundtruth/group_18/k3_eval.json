@@ -1,19 +1,19 @@
 {
   "group": 18,
-  "subject": "左右对称的放射状光轮轨迹",
+  "subject": "Symmetric radial light-wheel trails left and right",
   "recognizable": true,
   "confidence": 0.72,
   "issues": [
-    "伪影干扰",
-    "太碎",
-    "对比不足"
+    "capture artifacts",
+    "too fragmented",
+    "low contrast"
   ],
   "content_actions": [
     "simplify_silhouette",
     "thicken_strokes"
   ],
-  "summary": "可辨认为对称扇形/放射状光轮轨迹，但扫描点阵与欠曝使边缘偏碎，建议简化轮廓并加粗主光带。",
-  "_raw": "{\n  \"group\": 18,\n  \"subject\": \"左右对称的放射状光轮轨迹\",\n  \"recognizable\": true,\n  \"confidence\": 0.72,\n  \"issues\": [\n    \"伪影干扰\",\n    \"太碎\",\n    \"对比不足\"\n  ],\n  \"content_actions\": [\n    \"simplify_silhouette\",\n    \"thicken_strokes\"\n  ],\n  \"summary\": \"可辨认为对称扇形/放射状光轮轨迹，但扫描点阵与欠曝使边缘偏碎，建议简化轮廓并加粗主光带。\"\n}",
+  "summary": "Readable as symmetric fan/radial light-wheel trails; scan lattice and underexposure fragment edges — simplify outline and thicken main bands.",
+  "_raw": "{\"group\": 18, \"subject\": \"Symmetric radial light-wheel trails left and right\", \"recognizable\": true, \"confidence\": 0.72, \"issues\": [\"capture artifacts\", \"too fragmented\", \"low contrast\"], \"content_actions\": [\"simplify_silhouette\", \"thicken_strokes\"], \"summary\": \"Readable as symmetric fan/radial light-wheel trails; scan lattice and underexposure fragment edges — simplify outline and thicken main bands.\"}",
   "_usage": {
     "prompt_tokens": 1058,
     "completion_tokens": 295,

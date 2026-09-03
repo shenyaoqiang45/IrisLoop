@@ -1,6 +1,6 @@
 {
   "group": 4,
-  "name": "连接成功",
+  "name": "connected",
   "play_ok": true,
   "play_raw": "80a00104",
   "frames": 542,
@@ -22,7 +22,7 @@
   "bright_ratio": 0.02891818576388889,
   "lap_var": 38.57669915886081,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_04"
 }

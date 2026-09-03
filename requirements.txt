@@ -1,5 +1,5 @@
 opencv-python>=4.9.0
 numpy>=1.24
 
-# BLE 控制投影仪
+# BLE control for the projector
 bleak>=0.22.0

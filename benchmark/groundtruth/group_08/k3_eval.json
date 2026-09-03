@@ -1,14 +1,14 @@
 {
   "group": 8,
-  "subject": "IRIS GREEN 连接成功界面，含对勾图标与 Connection successful 文字",
+  "subject": "IRIS GREEN connection-success UI with checkmark and Connection successful text",
   "recognizable": true,
   "confidence": 0.95,
   "issues": [],
   "content_actions": [
     "none"
   ],
-  "summary": "投影内容完整清晰，标题、图标与连接成功文字均可辨认，无需调整。",
-  "_raw": "{\"group\":8,\"subject\":\"IRIS GREEN 连接成功界面，含对勾图标与 Connection successful 文字\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容完整清晰，标题、图标与连接成功文字均可辨认，无需调整。\"}",
+  "summary": "Full UI is clear; title, icon, and success text are readable; no content change needed.",
+  "_raw": "{\"group\": 8, \"subject\": \"IRIS GREEN connection-success UI with checkmark and Connection successful text\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Full UI is clear; title, icon, and success text are readable; no content change needed.\"}",
   "_usage": {
     "prompt_tokens": 1061,
     "completion_tokens": 85,

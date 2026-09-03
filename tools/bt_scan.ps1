@@ -89,4 +89,4 @@ $items | ForEach-Object {
     Write-Output ("  [{0}] {1,-8} {2,-20} rssi={3,-5} {4}" -f $_.Kind, $_.Address, $_.Name, $_.RSSI, $flag)
 }
 Write-Output ""
-Write-Output "  (Kind: Classic=BR/EDR, LE=低功耗; PAIRED=已配对)"
+Write-Output "  (Kind: Classic=BR/EDR, LE=Low Energy; PAIRED=already paired)"

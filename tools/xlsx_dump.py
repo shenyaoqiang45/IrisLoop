@@ -1,6 +1,6 @@
-"""把 xlsx 全部 sheet 导出为纯文本，便于完整阅读。
+"""Dump every sheet of an xlsx to plain text for full reading.
 
-用法: python tools/xlsx_dump.py <xlsx路径> [输出txt路径]
+Usage: python tools/xlsx_dump.py <xlsx-path> [output-txt-path]
 """
 
 from __future__ import annotations

@@ -1,6 +1,6 @@
-"""BLE 协议冒烟测试：只跑只读命令，不改动设备任何设置。
+"""BLE protocol smoke test: read-only commands only, no device settings changed.
 
-用法: python tools/ble_smoke.py F4:12:FA:B6:B7:CA
+Usage: python tools/ble_smoke.py F4:12:FA:B6:B7:CA
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ async def main(address: str) -> int:
 
     print("\n=== READ-ONLY COMMANDS ===")
 
-    # 读图片数
+    # Picture count
     frame = P.build_read(P.CMD_PIC_COUNT)
     print(f"  -> {P.describe(frame)}")
     r = await cli.send_command(frame, timeout=6.0)
@@ -36,7 +36,7 @@ async def main(address: str) -> int:
     else:
         print(f"  <- {r.error or 'fail'}  raw={r.raw.hex()}")
 
-    # 读亮度
+    # Brightness
     frame = P.build_read(P.CMD_BRIGHTNESS)
     print(f"  -> {P.describe(frame)}")
     r = await cli.send_command(frame, timeout=6.0)
@@ -45,7 +45,7 @@ async def main(address: str) -> int:
     else:
         print(f"  <- {r.error or 'fail'}  raw={r.raw.hex()}")
 
-    # 读畸变校正模式
+    # Keystone-correction mode
     frame = P.build_read(P.CMD_KEYSTONE_MODE)
     print(f"  -> {P.describe(frame)}")
     r = await cli.send_command(frame, timeout=6.0)
@@ -54,7 +54,7 @@ async def main(address: str) -> int:
     else:
         print(f"  <- {r.error or 'fail'}  raw={r.raw.hex()}")
 
-    # 读 SN（走命令通道，验证小端 ASCII 解析）
+    # SN via command channel (verify little-endian ASCII parse)
     frame = P.build_read(P.CMD_SN)
     print(f"  -> {P.describe(frame)}")
     r = await cli.send_command(frame, timeout=6.0)
@@ -64,7 +64,7 @@ async def main(address: str) -> int:
         print(f"  <- {r.error or 'fail'}  raw={r.raw.hex()}")
 
     await cli.disconnect()
-    print("\n=== DONE (未修改任何设备设置) ===")
+    print("\n=== DONE (no device settings changed) ===")
     return 0
 
 

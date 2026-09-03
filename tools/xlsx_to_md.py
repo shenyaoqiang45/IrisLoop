@@ -1,6 +1,6 @@
-"""把 doc/Iris Green蓝牙通信协议_20260324_V1.9.xlsx 转成 Markdown 保存到 doc/。
+"""Convert doc/Iris Green蓝牙通信协议_20260324_V1.9.xlsx to Markdown under doc/.
 
-用法: python tools/xlsx_to_md.py
+Usage: python tools/xlsx_to_md.py
 """
 
 from __future__ import annotations
@@ -17,12 +17,12 @@ def cell_str(v) -> str:
     if v is None:
         return ""
     s = str(v).replace("\r\n", "\n").replace("\r", "\n")
-    # 单元格内换行用 <br>，竖线转义，避免破坏 md 表格
+    # Newlines inside cells become <br>; escape pipes so markdown tables stay intact
     return s.replace("|", "\\|").replace("\n", "<br>").strip()
 
 
 def sheet_to_md(ws, out: list[str]) -> None:
-    # 合并单元格值填充（只取左上角值）
+    # Fill merged cells with the top-left value only
     merged: dict[tuple[int, int], object] = {}
     for rng in ws.merged_cells.ranges:
         v = ws.cell(row=rng.min_row, column=rng.min_col).value
@@ -37,7 +37,7 @@ def sheet_to_md(ws, out: list[str]) -> None:
         return cell_str(v)
 
     def dedup(row: list[str]) -> list[str]:
-        """合并单元格横向填充会产生重复列，同一行内相同值只保留首次出现。"""
+        """Horizontal merge fill repeats values; keep only the first occurrence in a row."""
         seen: set[str] = set()
         out: list[str] = []
         for v in row:
@@ -50,30 +50,30 @@ def sheet_to_md(ws, out: list[str]) -> None:
         return out
 
     max_r, max_c = ws.max_row, ws.max_column
-    # 修剪全空尾列
+    # Trim all-empty trailing columns
     while max_c > 1 and all(not get(r, max_c) for r in range(1, max_r + 1)):
         max_c -= 1
 
     for r in range(1, max_r + 1):
         row = dedup([get(r, c) for c in range(1, max_c + 1)])
-        # 去掉行首/行尾连续空列
+        # Strip consecutive empty columns at both ends
         while row and not row[0]:
             row.pop(0)
         while row and not row[-1]:
             row.pop()
         if not row:
             continue
-        # 单格非空 -> 段落文本；多格 -> 表格行
+        # One non-empty cell -> paragraph; several cells -> table row
         nonempty = [i for i, v in enumerate(row) if v]
         if len(nonempty) <= 1:
             v = row[nonempty[0]] if nonempty else ""
-            if v.isdigit():  # 纯数字残留行号，丢弃
+            if v.isdigit():  # leftover numeric row index; drop
                 continue
             out.append(v)
             out.append("")
         else:
             out.append("| " + " | ".join(row) + " |")
-            # 在连续表格块首行后补分隔行
+            # After the first row of a contiguous table block, insert the separator
             if len(out) < 2 or not out[-2].startswith("|"):
                 ncols = len(row)
                 out.insert(len(out) - 1, "|" + "---|" * ncols)
@@ -82,10 +82,10 @@ def sheet_to_md(ws, out: list[str]) -> None:
 def main() -> None:
     wb = openpyxl.load_workbook(SRC, data_only=True)
     out: list[str] = [
-        "# Iris Green 蓝牙通信协议 V1.9（2026-03-24）",
+        "# Iris Green Bluetooth Protocol V1.9 (2026-03-24)",
         "",
-        f"> 由 `{os.path.basename(SRC)}` 自动导出（tools/xlsx_to_md.py），仅作查阅，",
-        "> 协议变更请改 xlsx 源文件后重新导出。",
+        f"> Auto-exported from `{os.path.basename(SRC)}` by tools/xlsx_to_md.py; for reading only.",
+        "> Edit the xlsx source and re-export when the protocol changes.",
         "",
     ]
     for name in wb.sheetnames:
@@ -96,7 +96,7 @@ def main() -> None:
         out.append("")
 
     text = "\n".join(out)
-    # 清理 3+ 连续空行
+    # Collapse 3+ consecutive blank lines
     while "\n\n\n" in text:
         text = text.replace("\n\n\n", "\n\n")
     with open(DST, "w", encoding="utf-8") as f:

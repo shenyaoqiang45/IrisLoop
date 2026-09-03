@@ -1,14 +1,14 @@
 {
   "group": 13,
-  "subject": "IRIS GREEN 骑行图标与 Hello.Scarlett 字样",
+  "subject": "IRIS GREEN cycling icon with Hello.Scarlett text",
   "recognizable": true,
   "confidence": 0.96,
   "issues": [],
   "content_actions": [
     "none"
   ],
-  "summary": "投影内容清晰可辨，绿色扫描与欠曝属采集伪影，无需内容调整。",
-  "_raw": "{\"group\":13,\"subject\":\"IRIS GREEN 骑行图标与 Hello.Scarlett 字样\",\"recognizable\":true,\"confidence\":0.96,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容清晰可辨，绿色扫描与欠曝属采集伪影，无需内容调整。\"}",
+  "summary": "Projection is clear; green scan and underexposure are capture artifacts; no content change needed.",
+  "_raw": "{\"group\": 13, \"subject\": \"IRIS GREEN cycling icon with Hello.Scarlett text\", \"recognizable\": true, \"confidence\": 0.96, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Projection is clear; green scan and underexposure are capture artifacts; no content change needed.\"}",
   "_usage": {
     "prompt_tokens": 1057,
     "completion_tokens": 339,

@@ -1,6 +1,6 @@
 {
   "group": 20,
-  "name": "下坡素材",
+  "name": "descent",
   "frames": null,
   "stills": [
     "frame_00_0.4s.jpg",
@@ -20,7 +20,7 @@
   "bright_ratio": 0.076396484375,
   "lap_var": 28.63079390306202,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_20",
   "ok": true

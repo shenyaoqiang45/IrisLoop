@@ -1,25 +1,25 @@
-"""经 BLE 文件传输服务推送 640x480 1bpp 图片到 IrisGreen。
+"""Push a 640x480 1bpp image to IrisGreen over the BLE file-transfer service.
 
-协议（逆向自 iris-g-sdk: IrisProtocolConfig.kt + IrisUseCases.TransferFile）：
+Protocol (reversed from iris-g-sdk: IrisProtocolConfig.kt + IrisUseCases.TransferFile):
 
-    通道（注意与协议 xlsx R13/R14 描述相反，以 SDK 为准）:
-        START = adb40006-...-0003  (write, 带响应)
+    Channels (note: opposite of protocol xlsx R13/R14; SDK is authoritative):
+        START = adb40006-...-0003  (write, with response)
         DATA  = adb40006-...-0002  (write-no-response)
-        END   = adb40006-...-0004  (write, 带响应)
+        END   = adb40006-...-0004  (write, with response)
 
-    START/END 帧（内容完全相同，buildNamePacket）:
-        [0..3]  文件大小 u32 大端
-        [4..]   文件名 UTF-8，至少 16 字节，不足右侧补 0x00
+    START/END frame (identical contents, buildNamePacket):
+        [0..3]  file size u32 big-endian
+        [4..]   UTF-8 file name, at least 16 bytes, zero-padded on the right
 
-    流程:
-        1. 协商 MTU -> 目标 500（失败回落 23）
-        2. 写 START 帧 -> 延时 100ms
-        3. DATA 分包 (mtu-3) 写文件内容 -> 每包间隔 30ms
-        4. 写 END 帧（同一 namePacket）
+    Flow:
+        1. Negotiate MTU -> target 500 (fall back to 23)
+        2. Write START frame -> wait 100ms
+        3. DATA chunks (mtu-3) of file contents -> 30ms between packets
+        4. Write END frame (same namePacket)
 
-用法:
-    python tools/push_image.py --dry-run                # 只生成本地流
-    python tools/push_image.py --name 11_20.bmp         # 推送测试图
+Usage:
+    python tools/push_image.py --dry-run                # build local stream only
+    python tools/push_image.py --name 11_20.bmp         # push a test image
     python tools/push_image.py --kind iris --name 1_1.bmp --verify
 """
 
@@ -43,7 +43,7 @@ from irisloop.projector import (
 
 DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
 
-# SDK TransferFile 常量
+# SDK TransferFile constants
 TARGET_MTU = 500
 DEFAULT_ATT_MTU = 23
 ATT_HEADER_BYTES = 3
@@ -53,12 +53,12 @@ PACKET_DELAY_S = 0.03
 
 
 def build_name_packet(file_size: int, file_name: str) -> bytes:
-    """START/END 帧: 大小 u32 BE + 文件名(>=16B, 不足补 0)。"""
+    """START/END frame: size u32 BE + file name (>=16B, zero-padded)."""
     if file_size < 0:
-        raise ValueError("file_size 必须非负")
+        raise ValueError("file_size must be non-negative")
     clean = file_name.strip().replace("\\", "/").split("/")[-1]
     if not clean:
-        raise ValueError("file_name 不能为空")
+        raise ValueError("file_name must not be empty")
     name_bytes = clean.encode("utf-8")
     field_size = max(FILE_NAME_FIELD_MIN_BYTES, len(name_bytes))
     return file_size.to_bytes(4, "big") + name_bytes.ljust(field_size, b"\x00")
@@ -77,12 +77,12 @@ async def push(
 
     packet = build_name_packet(len(stream), file_name)
     print(f"  namePacket {len(packet)}B: {packet.hex()}")
-    print(f"  文件 {file_name}  {len(stream)}B")
+    print(f"  file {file_name}  {len(stream)}B")
 
     count_before = None
     if verify:
         count_before = await cli.get_picture_count()
-        print(f"  传输前图片总数 = {count_before}")
+        print(f"  picture count before transfer = {count_before}")
 
     client = cli.client
     assert client is not None
@@ -97,7 +97,7 @@ async def push(
         mtu = getattr(client, "mtu_size", DEFAULT_ATT_MTU) or DEFAULT_ATT_MTU
         chunk = max(1, mtu - ATT_HEADER_BYTES)
         n = (len(stream) + chunk - 1) // chunk
-        print(f"=== DATA {len(stream)}B / chunk={chunk} = {n} 包 -> ...0002 ===")
+        print(f"=== DATA {len(stream)}B / chunk={chunk} = {n} packets -> ...0002 ===")
         t0 = time.perf_counter()
         for i in range(n):
             part = stream[i * chunk:(i + 1) * chunk]
@@ -108,32 +108,32 @@ async def push(
                 sent = min((i + 1) * chunk, len(stream))
                 print(f"  {i+1}/{n}  {sent}B  {sent/el/1024:.1f} KB/s", flush=True)
 
-        # 3. END（同一 packet）
+        # 3. END (same packet)
         print("=== END -> ...0004 ===")
         await client.write_gatt_char(CHAR_FILE_END, packet, response=True)
-        print("  传输完成，等待设备处理...")
+        print("  transfer done, waiting for device to process...")
         await asyncio.sleep(2.0)
 
-        # 4. 验证图片数（设备处理期间可能短暂断开，需重连）
+        # 4. Verify picture count (device may briefly disconnect while processing; reconnect)
         if verify:
             try:
                 connected = client.is_connected
             except Exception:
                 connected = False
             if not connected:
-                print("  连接已断，重连...")
+                print("  connection dropped, reconnecting...")
                 await cli.disconnect()
                 await asyncio.sleep(1.0)
                 await cli.connect()
                 client = cli.client
                 assert client is not None
             count_after = await cli.get_picture_count()
-            print(f"  传输后图片总数 = {count_after}")
+            print(f"  picture count after transfer = {count_after}")
             if count_before is not None and count_after is not None:
                 if count_after > count_before:
-                    print(f"  [OK] 图片数 +{count_after - count_before}，设备已接受")
+                    print(f"  [OK] picture count +{count_after - count_before}, device accepted")
                     return True
-                print("  [WARN] 图片数不变（同名覆盖需拉取回读比对确认）")
+                print("  [WARN] picture count unchanged (same-name overwrite needs a pull-back compare)")
         return True
     finally:
         await cli.disconnect()
@@ -145,17 +145,17 @@ def main() -> int:
     ap.add_argument("--kind", default="checker",
                     choices=["iris", "checker", "grid", "solid"])
     ap.add_argument("--name", default="11_20.bmp",
-                    help="目标文件名（组_序号.bmp，如 11_20.bmp）")
-    ap.add_argument("--dry-run", action="store_true", help="只生成本地流不发")
+                    help="target filename (group_index.bmp, e.g. 11_20.bmp)")
+    ap.add_argument("--dry-run", action="store_true", help="build local stream only, do not send")
     ap.add_argument("--verify", action="store_true", default=True,
-                    help="传输前后读图片数验证（默认开）")
+                    help="read picture count before/after transfer (on by default)")
     args = ap.parse_args()
 
     img = make_test_image(args.kind)
-    print(f"=== 图像 {describe(img)} ===")
+    print(f"=== image {describe(img)} ===")
     save_bmp("captures/push_src.bmp", img)
     stream = build_stream(img)
-    print(f"  流 {len(stream)}B (头62 + 数据38400)")
+    print(f"  stream {len(stream)}B (header 62 + data 38400)")
 
     if args.dry_run:
         p = build_name_packet(len(stream), args.name)

@@ -9,7 +9,7 @@
   "groups": [
     {
       "group": 1,
-      "name": "开机",
+      "name": "boot",
       "play_ok": true,
       "play_raw": "80a00101",
       "frames": 643,
@@ -31,13 +31,13 @@
       "bright_ratio": 0.06940212673611111,
       "lap_var": 23.449846418409923,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_01"
     },
     {
       "group": 2,
-      "name": "充电",
+      "name": "charging",
       "play_ok": true,
       "play_raw": "80a00102",
       "frames": 555,
@@ -59,13 +59,13 @@
       "bright_ratio": 0.03579535590277778,
       "lap_var": 17.267619625533914,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_02"
     },
     {
       "group": 3,
-      "name": "未连接",
+      "name": "disconnected",
       "play_ok": true,
       "play_raw": "80a00103",
       "frames": 584,
@@ -87,13 +87,13 @@
       "bright_ratio": 0.024117838541666665,
       "lap_var": 29.1853491123864,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_03"
     },
     {
       "group": 4,
-      "name": "连接成功",
+      "name": "connected",
       "play_ok": true,
       "play_raw": "80a00104",
       "frames": 542,
@@ -115,13 +115,13 @@
       "bright_ratio": 0.02891818576388889,
       "lap_var": 38.57669915886081,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_04"
     },
     {
       "group": 5,
-      "name": "低电量",
+      "name": "low battery",
       "play_ok": true,
       "play_raw": "80a00105",
       "frames": 554,
@@ -143,7 +143,7 @@
       "bright_ratio": 0.029895833333333333,
       "lap_var": 9.98685459828682,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_05"
     },
@@ -171,7 +171,7 @@
       "bright_ratio": 0.028701171875,
       "lap_var": 38.42997442850429,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_06"
     },
@@ -197,7 +197,7 @@
       "bright_ratio": 0.027374131944444446,
       "lap_var": 40.578006780028986,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_07",
       "ok": true,
@@ -225,7 +225,7 @@
       "bright_ratio": 0.028531901041666665,
       "lap_var": 38.41406588429816,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_08",
       "ok": true,
@@ -253,7 +253,7 @@
       "bright_ratio": 0.028436414930555556,
       "lap_var": 38.16960566920222,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_09",
       "ok": true,
@@ -261,7 +261,7 @@
     },
     {
       "group": 10,
-      "name": "网格",
+      "name": "grid",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -281,7 +281,7 @@
       "bright_ratio": 0.026114366319444443,
       "lap_var": 39.7257713107361,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_10",
       "ok": true,
@@ -289,7 +289,7 @@
     },
     {
       "group": 11,
-      "name": "动画",
+      "name": "animation",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -309,7 +309,7 @@
       "bright_ratio": 0.026284722222222223,
       "lap_var": 14.021795358101054,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_11",
       "ok": true,
@@ -317,7 +317,7 @@
     },
     {
       "group": 12,
-      "name": "手写",
+      "name": "handwriting",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -337,7 +337,7 @@
       "bright_ratio": 0.027247178819444443,
       "lap_var": 22.609489651575082,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_12",
       "ok": true,
@@ -345,7 +345,7 @@
     },
     {
       "group": 13,
-      "name": "提示词",
+      "name": "prompt",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -365,7 +365,7 @@
       "bright_ratio": 0.026885850694444446,
       "lap_var": 35.52516224735683,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_13",
       "ok": true,
@@ -373,7 +373,7 @@
     },
     {
       "group": 14,
-      "name": "速度达成30KM",
+      "name": "speed 30 km/h",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -393,7 +393,7 @@
       "bright_ratio": 0.031187065972222223,
       "lap_var": 27.188124632337008,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_14",
       "ok": true,
@@ -401,7 +401,7 @@
     },
     {
       "group": 15,
-      "name": "里程素材",
+      "name": "mileage",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -421,7 +421,7 @@
       "bright_ratio": 0.056953125,
       "lap_var": 53.01923844343079,
       "verdict": [
-        "有明显投影结构"
+        "Clear projected structure"
       ],
       "dir": "benchmark/groundtruth/group_15",
       "ok": true,
@@ -429,7 +429,7 @@
     },
     {
       "group": 16,
-      "name": "喝水素材",
+      "name": "hydration",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -449,7 +449,7 @@
       "bright_ratio": 0.06566514756944444,
       "lap_var": 24.28220616005722,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_16",
       "ok": true,
@@ -457,7 +457,7 @@
     },
     {
       "group": 17,
-      "name": "速度达成40KM",
+      "name": "speed 40 km/h",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -477,7 +477,7 @@
       "bright_ratio": 0.03976128472222222,
       "lap_var": 36.43073423126644,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_17",
       "ok": true,
@@ -485,7 +485,7 @@
     },
     {
       "group": 18,
-      "name": "光轮轨迹",
+      "name": "light-wheel trail",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -505,7 +505,7 @@
       "bright_ratio": 0.04366970486111111,
       "lap_var": 28.892650232247945,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_18",
       "ok": true,
@@ -513,7 +513,7 @@
     },
     {
       "group": 19,
-      "name": "爬坡素材",
+      "name": "climb",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -533,7 +533,7 @@
       "bright_ratio": 0.038594835069444444,
       "lap_var": 19.55992811086807,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_19",
       "ok": true,
@@ -541,7 +541,7 @@
     },
     {
       "group": 20,
-      "name": "下坡素材",
+      "name": "descent",
       "frames": null,
       "stills": [
         "frame_00_0.4s.jpg",
@@ -561,7 +561,7 @@
       "bright_ratio": 0.076396484375,
       "lap_var": 28.63079390306202,
       "verdict": [
-        "偏模糊或扫描条纹主导"
+        "Soft focus or scan-line dominated"
       ],
       "dir": "benchmark/groundtruth/group_20",
       "ok": true,

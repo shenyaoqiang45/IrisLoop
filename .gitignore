@@ -6,23 +6,26 @@ venv/
 captures/
 *.log
 
-# benchmark 只跟踪静帧 JPG + json，MP4 留本地
+# Benchmark: track still JPGs + JSON; keep videos local
 benchmark/**/*.mp4
 benchmark/**/*.avi
 benchmark/**/*.mov
 
-# 体验官实拍原片留本地，笔记可入库
+# Experience officer: keep raw laser footage local; notes can be committed
 experience/laser-log/**/*.mp4
 experience/laser-log/**/*.mov
 experience/laser-log/**/*.avi
 experience/laser-log/**/*.raw
 experience/iteration-log/private/
 
-# Office 临时锁文件
+# Office lock files
 ~$*
 
-# 协议文档（xlsx 源文件与自动导出的 md 均由内部流程管理）
+# Protocol workbook (xlsx + auto-exported md managed internally)
 doc/
 
-# 逆向工程临时产物（Flutter 工程副本/SDK 解压/反编译工具）
+# Raw vendor protocol dump (Chinese source workbook extract)
+tools/ble_protocol_dump.txt
+
+# Reverse-engineering scratch (Flutter copies / SDK extracts / decompilers)
 tmp/

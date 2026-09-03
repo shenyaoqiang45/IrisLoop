@@ -1,6 +1,6 @@
-"""读取 BLE 设备的可读特征：设备信息、电量、自定义状态特征。
+"""Read BLE device readable characteristics: device info, battery, custom status.
 
-用法:
+Usage:
   python tools/bt_read_info.py --address F4:12:FA:B6:B7:CA
   python tools/bt_read_info.py --address F4:12:FA:B6:B7:CA --notify 10
 """
@@ -13,7 +13,7 @@ import sys
 
 from bleak import BleakClient
 
-# 标准 Device Information Service 字段
+# Standard Device Information Service fields
 DEVICE_INFO = {
     "00002a24-0000-1000-8000-00805f9b34fb": "Model Number",
     "00002a25-0000-1000-8000-00805f9b34fb": "Serial Number",
@@ -25,7 +25,7 @@ DEVICE_INFO = {
     "00002a19-0000-1000-8000-00805f9b34fb": "Battery Level",
 }
 
-# 投影仪自定义服务里的可读特征
+# Readable characteristics on the projector custom service
 CUSTOM_READ = {
     "adb40001-b1c6-11ed-afa1-0242ac120001": "custom:adb40001 (read)",
     "adb40002-b1c6-11ed-afa1-0242ac120002": "custom:adb40002 (notify/read)",
@@ -66,7 +66,7 @@ async def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--address", required=True)
     ap.add_argument("--notify", type=float, default=0.0,
-                    help="订阅 notify 特征并监听 N 秒（观察是否有主动上报）")
+                    help="subscribe to notify characteristics and listen N seconds (watch for unsolicited reports)")
     args = ap.parse_args()
 
     client = BleakClient(args.address, timeout=20.0)
@@ -74,7 +74,7 @@ async def main() -> int:
     try:
         await client.connect()
     except Exception as e:
-        print(f"[error] 连接失败: {type(e).__name__}: {e}")
+        print(f"[error] connect failed: {type(e).__name__}: {e}")
         return 1
 
     try:

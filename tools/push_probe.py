@@ -1,20 +1,20 @@
-"""BLE 文件传输服务推图探针 —— 确定开始/结束帧格式。
+"""BLE file-transfer push probe — determine START/END frame format.
 
-已知:
-  - 协议文档只给了通道用途，没给开始/结束帧格式
-  - 固件升级示例帧: 00 0F 45 10 + "xingzhe_ctrl_mems.bin"
-    其中 0x000F4510 = 1002768 ≈ 1MB，疑似「文件大小(u32 BE) + 文件名」
-  - 设备内图片均为 38462 字节完整 BMP（含 62 字节头）
-  - ⚠️ 旧 push_image.py 把数据写到了 0004(结束) 通道、结束写到了 0003(数据) 通道
+Known:
+  - Protocol docs list channel roles but not START/END frame layout
+  - Firmware-upgrade sample frame: 00 0F 45 10 + "xingzhe_ctrl_mems.bin"
+    where 0x000F4510 = 1002768 ≈ 1MB, likely "file size (u32 BE) + file name"
+  - On-device images are 38462-byte full BMPs (including 62-byte header)
+  - Old push_image.py wrote data to 0004 (END) and END to 0003 (DATA)
 
-判定手段:
-  - cmd 0x05 读图片总数（推送到新槽位会增加）
-  - adb40002 状态帧 / adb40003 indicate 回执的异常变化
+How we decide:
+  - cmd 0x05 picture count (increases when pushed to a new slot)
+  - Unusual changes on adb40002 status frames / adb40003 indicate replies
 
-用法:
-  python tools/push_probe.py                 # 全阶段: 基线 -> START 候选 -> 完整传输
-  python tools/push_probe.py --stage base    # 只测基线
-  python tools/push_probe.py --stage start   # 只试 START 候选
+Usage:
+  python tools/push_probe.py                 # all stages: baseline -> START candidates -> full transfer
+  python tools/push_probe.py --stage base    # baseline only
+  python tools/push_probe.py --stage start   # START candidates only
   python tools/push_probe.py --stage full --start-fmt size_be_name --end-fmt one
 """
 
@@ -33,24 +33,24 @@ from irisloop.image_pack import build_stream, describe, make_test_image, save_bm
 from irisloop.projector import (
     CHAR_MAIN_CMD,
     CHAR_MAIN_NOTIFY,
-    CHAR_SEC_WRITE_1,  # adb40006-...-0003 数据
-    CHAR_SEC_WRITE_2,  # adb40006-...-0002 开始
-    CHAR_SEC_WRITE_3,  # adb40006-...-0004 结束
+    CHAR_SEC_WRITE_1,  # adb40006-...-0003 data
+    CHAR_SEC_WRITE_2,  # adb40006-...-0002 start
+    CHAR_SEC_WRITE_3,  # adb40006-...-0004 end
 )
 
 DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
 
-# 设备自身生成的 BMP 头（test-data/1_1.bmp 前 62 字节），与 image_pack.BMP_HEAD
-# 仅差 xPelsPerMeter/yPelsPerMeter(0 vs 2835) 和 clrUsed(2 vs 0)。
-# 推送时用设备同款头，排除固件头部校验差异。
+# Device-generated BMP header (first 62 bytes of test-data/1_1.bmp). Differs from
+# image_pack.BMP_HEAD only in xPelsPerMeter/yPelsPerMeter (0 vs 2835) and clrUsed (2 vs 0).
+# Use the device header when pushing so firmware header checks do not reject us.
 DEVICE_BMP_HEAD = bytes.fromhex(
     "424D3E960000000000003E0000002800000080020000E00100000100010000"
     "00000000960000000000000000000002000000000000000000000000FFFFFF00"
 )
 
-CH_START = CHAR_SEC_WRITE_2   # ...0002 开始
-CH_DATA = CHAR_SEC_WRITE_1    # ...0003 数据
-CH_END = CHAR_SEC_WRITE_3     # ...0004 结束
+CH_START = CHAR_SEC_WRITE_2   # ...0002 start
+CH_DATA = CHAR_SEC_WRITE_1    # ...0003 data
+CH_END = CHAR_SEC_WRITE_3     # ...0004 end
 
 
 def build_start(fmt: str, name: str, size: int) -> bytes:
@@ -104,7 +104,7 @@ class Probe:
             await self.client.start_notify(CHAR_MAIN_CMD,
                                            lambda s, d: self._log("40003", d))
         except Exception as e:
-            print(f"  (adb40003 indicate 订阅失败: {e})")
+            print(f"  (adb40003 indicate subscribe failed: {e})")
 
     async def disconnect(self):
         if self.client:
@@ -115,7 +115,7 @@ class Probe:
             self.client = None
 
     async def pic_count(self) -> int | None:
-        """经 adb40003 读图片总数。"""
+        """Read picture count via adb40003."""
         got: list[bytes] = []
         assert self.client is not None
 
@@ -144,25 +144,25 @@ class Probe:
     def dump_since(self, mark: int, limit: int = 16):
         fresh = self.frames[mark:]
         if not fresh:
-            print("    (无新帧)")
+            print("    (no new frames)")
             return
         for ts, ch, b in fresh[:limit]:
             print(f"    t={ts:6.2f}s {ch} {b.hex()}")
         if len(fresh) > limit:
-            print(f"    ... 共 {len(fresh)} 帧")
+            print(f"    ... {len(fresh)} frames total")
 
 
 async def stage_base(p: Probe) -> None:
-    print("\n--- 基线: 图片总数 + 通道活动 ---")
+    print("\n--- baseline: picture count + channel activity ---")
     n = await p.pic_count()
-    print(f"  图片总数 = {n}")
+    print(f"  picture count = {n}")
     mark = len(p.frames)
     await asyncio.sleep(2.0)
     p.dump_since(mark)
 
 
 async def stage_start(p: Probe, name: str, size: int, fmts: list[str]) -> None:
-    print("\n--- START 帧候选（只发开始帧，观察 2s）---")
+    print("\n--- START frame candidates (START only, watch 2s) ---")
     for fmt in fmts:
         payload = build_start(fmt, name, size)
         mark = len(p.frames)
@@ -180,11 +180,11 @@ async def stage_start(p: Probe, name: str, size: int, fmts: list[str]) -> None:
 async def stage_full(p: Probe, name: str, stream: bytes,
                      start_fmt: str, end_fmt: str,
                      chunk: int, gap: float) -> None:
-    print(f"\n--- 完整传输 {name} ({len(stream)}B) "
+    print(f"\n--- full transfer {name} ({len(stream)}B) "
           f"start={start_fmt} end={end_fmt} chunk={chunk} ---")
 
     before = await p.pic_count()
-    print(f"  传输前图片总数 = {before}")
+    print(f"  picture count before transfer = {before}")
 
     start_payload = build_start(start_fmt, name, len(stream))
     mark = len(p.frames)
@@ -193,7 +193,7 @@ async def stage_full(p: Probe, name: str, stream: bytes,
     await asyncio.sleep(0.5)
 
     n = (len(stream) + chunk - 1) // chunk
-    print(f"  DATA {len(stream)}B / {chunk} = {n} 包 -> adb40006-0003")
+    print(f"  DATA {len(stream)}B / {chunk} = {n} packets -> adb40006-0003")
     sent = 0
     t = time.perf_counter()
     for i in range(n):
@@ -211,25 +211,25 @@ async def stage_full(p: Probe, name: str, stream: bytes,
         print(f"  END -> {end_payload.hex()}")
         await p.client.write_gatt_char(CH_END, end_payload, response=True)
     else:
-        print("  END (不发)")
+        print("  END (not sent)")
 
     await asyncio.sleep(2.0)
-    print("  传输期间新帧:")
+    print("  new frames during transfer:")
     p.dump_since(mark, limit=24)
 
-    # 设备常在收到完整文件后主动断开处理，需重连再读
+    # Device often disconnects after a complete file to process it; reconnect then re-read
     await asyncio.sleep(1.0)
-    print("  传输后强制重连再读图片数...")
+    print("  force reconnect after transfer, then re-read picture count...")
     await p.disconnect()
     await asyncio.sleep(1.0)
     await p.connect()
     after = await p.pic_count()
-    print(f"  传输后图片总数 = {after}")
+    print(f"  picture count after transfer = {after}")
     if before is not None and after is not None:
         if after > before:
-            print(f"  ✅ 图片数 +{after-before}，设备接受了文件！")
+            print(f"  picture count +{after-before}, device accepted the file")
         elif after == before:
-            print("  ⚠️ 图片数不变：可能是覆盖了同名文件（需回读比对确认），或被拒绝")
+            print("  picture count unchanged: maybe same-name overwrite (needs pull-back compare), or rejected")
 
 
 async def main() -> int:
@@ -238,7 +238,7 @@ async def main() -> int:
     ap.add_argument("--stage", default="all",
                     choices=["base", "start", "full", "all"])
     ap.add_argument("--name", default="11_20.bmp",
-                    help="目标文件名（默认 11_20.bmp：动画组末尾槽位，大概率是新增）")
+                    help="target filename (default 11_20.bmp: last animation-group slot, likely a new add)")
     ap.add_argument("--kind", default="checker")
     ap.add_argument("--start-fmt", default="size_be_name",
                     choices=["size_be_name", "size_le_name", "name",
@@ -248,14 +248,14 @@ async def main() -> int:
     ap.add_argument("--chunk", type=int, default=244)
     ap.add_argument("--gap", type=float, default=0.0)
     ap.add_argument("--device-head", action="store_true", default=True,
-                    help="用设备同款 62B 头（默认开）")
+                    help="use the device's 62B header (on by default)")
     args = ap.parse_args()
 
     img = make_test_image(args.kind)
     stream = build_stream(img)
     if args.device_head:
         stream = DEVICE_BMP_HEAD + stream[62:]
-    print(f"=== 图像 {describe(img)}  流 {len(stream)}B ===")
+    print(f"=== image {describe(img)}  stream {len(stream)}B ===")
     save_bmp("captures/push_probe_src.bmp", img)
 
     p = Probe(args.address)

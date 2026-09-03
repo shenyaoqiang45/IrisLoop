@@ -1,8 +1,8 @@
-"""监听 adb40002 通道，观察状态帧结构与节奏。
+"""Listen on adb40002 and inspect status-frame layout and cadence.
 
-可选发一条只读命令，看是否有命令响应混入。
+Optionally send one read-only command to see whether a command response is mixed in.
 
-用法:
+Usage:
   python tools/ble_listen.py F4:12:FA:B6:B7:CA 12
   python tools/ble_listen.py F4:12:FA:B6:B7:CA 12 --cmd 11
 """
@@ -42,7 +42,7 @@ async def main(address: str, seconds: float, cmd: int | None) -> int:
         frame = P.build_read(cmd)
         await asyncio.sleep(0.5)
         sent_at = time.perf_counter() - t0
-        print(f"\n  -> 发送读命令 cmd=0x{cmd:02X} : {frame.hex()}")
+        print(f"\n  -> send read cmd=0x{cmd:02X} : {frame.hex()}")
         await client.write_gatt_char(CHAR_MAIN_CMD, frame, response=True)
 
     print(f"\n=== LISTEN {seconds}s ===")
@@ -50,9 +50,9 @@ async def main(address: str, seconds: float, cmd: int | None) -> int:
     await client.stop_notify(CHAR_MAIN_NOTIFY)
     await client.disconnect()
 
-    print(f"  共收到 {len(frames)} 帧")
+    print(f"  received {len(frames)} frames")
     if sent_at is not None:
-        print(f"  命令发送于 t={sent_at:.2f}s")
+        print(f"  command sent at t={sent_at:.2f}s")
 
     print("\n=== FRAMES ===")
     prev: bytes | None = None
@@ -77,18 +77,18 @@ async def main(address: str, seconds: float, cmd: int | None) -> int:
 
         mark = ""
         if sent_at is not None and abs(ts - sent_at) < 0.3:
-            mark = "  <<< 命令发送点"
+            mark = "  <<< command send"
         print(f"  t={ts:6.2f}s  {raw.hex():<24} {tag}{diff}{mark}")
 
-    # 统计节奏
+    # Cadence stats
     if len(frames) >= 2:
         gaps = [frames[i + 1][0] - frames[i][0] for i in range(len(frames) - 1)]
         avg = sum(gaps) / len(gaps)
-        print(f"\n  平均帧间隔: {avg*1000:.0f} ms  ({1/avg:.1f} fps)" if avg > 0 else "")
+        print(f"\n  mean frame interval: {avg*1000:.0f} ms  ({1/avg:.1f} fps)" if avg > 0 else "")
 
     status_n = sum(1 for _, r in frames if P.is_status_frame(r))
     resp_n = sum(1 for _, r in frames if r and r[0] in (0x80, 0x08))
-    print(f"\n  状态帧 {status_n} 个 / 命令响应 {resp_n} 个")
+    print(f"\n  status frames {status_n} / command responses {resp_n}")
     return 0
 
 

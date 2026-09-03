@@ -1,6 +1,6 @@
-"""从 bmp_head.mat 提取 62 字节 BMP 头，并与仓库里的真 BMP 交叉验证。
+"""Extract the 62-byte BMP header from bmp_head.mat and cross-check against a real BMP in the tree.
 
-同时校验 im2Bytes.m 的位打包规则（fliplr + MSB-first）。
+Also verify im2Bytes.m bit packing (fliplr + MSB-first).
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def parse_bmp_header(h: bytes) -> dict:
     import struct
 
     (size, _r1, _r2, offset) = struct.unpack("<IHHI", h[2:14])
-    # BITMAPINFOHEADER: I i i H H I I i i I I  -> 40 字节，显式拆两段避开对齐
+    # BITMAPINFOHEADER: I i i H H I I i i I I  -> 40 bytes; split in two to avoid alignment issues
     (dib, w, hh, planes, bpp) = struct.unpack("<IiiHH", h[14:30])   # 16B
     (comp, img_size, xpels, ypels, clrused, clrimp) = struct.unpack("<IIiiII", h[30:54])  # 24B
     return {
@@ -45,14 +45,14 @@ def parse_bmp_header(h: bytes) -> dict:
 
 
 def pack_like_im2bytes(gray: np.ndarray) -> bytes:
-    """复刻 im2Bytes.m: fliplr -> 按行展平 -> MSB-first 位打包。
+    """Replicate im2Bytes.m: fliplr -> flatten by row -> MSB-first bit pack.
 
-    MATLAB: pic = fliplr(pic); bits = reshape(pic',1,[]); 按 8 位一组 MSB 在前。
-    pic' 是转置，展开顺序等价于「按列优先」= 逐列扫描。
+    MATLAB: pic = fliplr(pic); bits = reshape(pic',1,[]); groups of 8 bits, MSB first.
+    pic' is a transpose; unroll order equals column-major = scan by column.
     """
     bw = (gray > 127).astype(np.uint8)
     flipped = np.fliplr(bw)
-    # 转置后按行展开 == 原图按列优先展开
+    # Transpose then row-unroll == original image unrolled column-major
     bits = flipped.T.reshape(-1)
     pad = (-bits.size) % 8
     if pad:
@@ -67,43 +67,43 @@ def main() -> int:
     print(f"=== bmp_head.mat -> {len(head)} bytes ===")
     print("  " + head.hex().upper())
     info = parse_bmp_header(head)
-    print("\n=== 解析 ===")
+    print("\n=== parse ===")
     for k, v in info.items():
         print(f"  {k:<16}: {v}")
 
     try:
         with open(REF_BMP, "rb") as f:
             ref = f.read()
-        print(f"\n=== 参照 {REF_BMP} ===")
-        print(f"  文件长度: {len(ref)}")
-        print(f"  前62字节: {ref[:62].hex().upper()}")
-        print(f"  与 head 一致: {ref[:62] == head}")
+        print(f"\n=== reference {REF_BMP} ===")
+        print(f"  file length: {len(ref)}")
+        print(f"  first 62 bytes: {ref[:62].hex().upper()}")
+        print(f"  matches head: {ref[:62] == head}")
         if len(ref) >= 62:
             payload = ref[62:]
-            print(f"  数据长度: {len(payload)} (期望 38400)")
+            print(f"  data length: {len(payload)} (expected 38400)")
     except FileNotFoundError:
-        print(f"\n[warn] 参照 BMP 不存在: {REF_BMP}")
+        print(f"\n[warn] reference BMP not found: {REF_BMP}")
 
-    # 校验位打包：拿参照图重打包，应与原数据一致
+    # Verify bit packing: re-pack the reference image; should match original payload
     try:
         import cv2
 
         img = cv2.imread(REF_BMP, cv2.IMREAD_GRAYSCALE)
         if img is not None:
-            print(f"\n=== 位打包校验 (cv2 读图 {img.shape}) ===")
+            print(f"\n=== bit-pack check (cv2 read {img.shape}) ===")
             packed = pack_like_im2bytes(img)
-            print(f"  打包长度: {len(packed)}")
+            print(f"  packed length: {len(packed)}")
             with open(REF_BMP, "rb") as f:
                 ref = f.read()
             ref_payload = ref[62 : 62 + len(packed)]
             same = packed == ref_payload
-            print(f"  与参照BMP数据一致: {same}")
+            print(f"  matches reference BMP payload: {same}")
             if not same:
                 n = min(len(packed), len(ref_payload))
                 diff = sum(1 for i in range(n) if packed[i] != ref_payload[i])
-                print(f"  不同字节数: {diff}/{n}")
+                print(f"  differing bytes: {diff}/{n}")
     except ImportError:
-        print("\n[warn] cv2 不可用，跳过打包校验")
+        print("\n[warn] cv2 unavailable, skip pack check")
 
     return 0
 

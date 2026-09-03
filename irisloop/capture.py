@@ -1,4 +1,4 @@
-"""采集主流程：读取摄像头 -> 写盘 -> 可选预览。"""
+"""Capture pipeline: read camera -> write to disk -> optional preview."""
 
 from __future__ import annotations
 
@@ -51,11 +51,11 @@ def capture(
 
     if measure or cam.actual_fps <= 1.0:
         measured = cam.measure_fps(seconds=1.5)
-        print(f"[camera] 实测帧率 {measured:.1f} fps")
+        print(f"[camera] measured fps {measured:.1f}")
 
-    # 后端上报值不可信时回退到请求值，避免写入 fps=0 的视频
+    # If the backend-reported value is untrustworthy, fall back to the requested fps so we never write fps=0
     write_fps = cam.actual_fps if cam.actual_fps > 1.0 else float(fps)
-    print(f"[camera] 写入帧率 {write_fps:.2f} fps")
+    print(f"[camera] write fps {write_fps:.2f}")
 
     path = output or default_output_path(output_dir)
     rec = VideoRecorder(path, write_fps, cam.actual_size, codec)
@@ -72,13 +72,13 @@ def capture(
     start = time.perf_counter()
     last = start
     smooth_fps = 0.0
-    print("[info] 采集中：q 退出，p 暂停/继续")
+    print("[info] capturing: q quit, p pause/resume")
 
     try:
         while True:
             ok, frame = cam.read()
             if not ok or frame is None:
-                print("[warn] 读取帧失败，跳过")
+                print("[warn] frame read failed, skipping")
                 continue
 
             now = time.perf_counter()
@@ -111,10 +111,10 @@ def capture(
                 break
             if key == ord("p"):
                 paused = not paused
-                print(f"[info] {'已暂停' if paused else '继续采集'}")
+                print(f"[info] {'paused' if paused else 'resumed'}")
 
             if duration is not None and (time.perf_counter() - start) >= duration:
-                print(f"[info] 达到设定时长 {duration}s，停止")
+                print(f"[info] reached duration {duration}s, stopping")
                 break
     finally:
         elapsed = time.perf_counter() - start
@@ -125,6 +125,6 @@ def capture(
 
     stats["elapsed_s"] = round(elapsed, 2)
     stats["avg_fps"] = round(frame_count / elapsed, 2) if elapsed > 0 else 0.0
-    print(f"[done] {stats['frames']} 帧 / {elapsed:.1f}s -> {stats['path']} "
+    print(f"[done] {stats['frames']} frames / {elapsed:.1f}s -> {stats['path']} "
           f"({stats['size_mb']} MB, codec={stats['codec']})")
     return stats

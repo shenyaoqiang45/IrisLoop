@@ -1,14 +1,14 @@
 {
   "group": 2,
-  "subject": "电池充电图标",
+  "subject": "Battery charging icon",
   "recognizable": true,
   "confidence": 0.98,
   "issues": [],
   "content_actions": [
     "none"
   ],
-  "summary": "绿色电池与闪电充电符号清晰可辨，电量格明确，采集伪影不影响内容识别。",
-  "_raw": "{\n  \"group\": 2,\n  \"subject\": \"电池充电图标\",\n  \"recognizable\": true,\n  \"confidence\": 0.98,\n  \"issues\": [],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"绿色电池与闪电充电符号清晰可辨，电量格明确，采集伪影不影响内容识别。\"\n}",
+  "summary": "Green battery and lightning charge symbol are clear; charge bars are distinct; capture artifacts do not block recognition.",
+  "_raw": "{\"group\": 2, \"subject\": \"Battery charging icon\", \"recognizable\": true, \"confidence\": 0.98, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Green battery and lightning charge symbol are clear; charge bars are distinct; capture artifacts do not block recognition.\"}",
   "_usage": {
     "prompt_tokens": 1056,
     "completion_tokens": 181,

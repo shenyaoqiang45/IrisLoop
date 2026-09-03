@@ -1,15 +1,15 @@
-"""640x480 1bpp 图片打包（复刻 im2Bytes.m，已用真机 BMP 验证）。
+"""640x480 1bpp image packing (reimplements im2Bytes.m, verified against a real-device BMP).
 
-打包语义（对照 F:\\2026\\LE3AutoCam\\alignment_test_h.bmp 验证）:
-    1. 二值化（阈值 127）
-    2. fliplr 水平翻转
-    3. 行主序展开比特（MATLAB reshape(pic',1,[]) 列主序 == numpy 行主序）
-    4. 每 8 bit 打包 1 字节，MSB 在前
-    5. 前附 62 字节 BMP 头
+Packing semantics (verified against F:\\2026\\LE3AutoCam\\alignment_test_h.bmp):
+    1. binarize (threshold 127)
+    2. fliplr horizontal flip
+    3. row-major bit flatten (MATLAB reshape(pic',1,[]) column-major == numpy row-major)
+    4. pack 8 bits per byte, MSB first
+    5. prepend a 62-byte BMP header
 
-注意: 文档写的「124 字节头」有误，实为 62 字节
-      (14 文件头 + 40 DIB + 8 双色调色板)，
-      BMP 头内 file_size=38462、data_offset=62 可自校验。
+Note: the document's "124-byte header" is wrong; it is 62 bytes
+      (14-byte file header + 40 DIB + 8 dual-color palette).
+      The BMP header's file_size=38462 and data_offset=62 self-check.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ DATA_BYTES = ROW_BYTES * HEIGHT # 38400
 HEAD_BYTES = 62
 STREAM_BYTES = HEAD_BYTES + DATA_BYTES  # 38462
 
-# 来自 bmp_head.mat（已验证: 640x480, 1bpp, data_offset=62, size=38400）
+# From bmp_head.mat (verified: 640x480, 1bpp, data_offset=62, size=38400)
 BMP_HEAD = bytes.fromhex(
     "424D3E960000000000003E0000002800000080020000E00100000100010000"
     "00000000960000120B0000120B0000000000000000000000000000FFFFFF00"
@@ -38,14 +38,15 @@ def binarize(gray: np.ndarray, threshold: int = 127) -> np.ndarray:
 
 
 def pack(bw: np.ndarray) -> bytes:
-    """二值图 -> 38400 字节设备载荷。
+    """Binary image -> 38400-byte device payload.
 
-    设备读取 BMP 数据是自底向上行序（BMP 标准存储），因此打包前需
-    先 flipud 把图像上下翻转，使设备读出的第一行是图像最后一行。
-    已用真机 BMP (test-data/1_1.bmp) 反推验证：flipud 后解包为正向。
+    The device reads BMP pixel data bottom-up (standard BMP storage), so pack()
+    must flipud first so the first row the device reads is the last image row.
+    Verified by reverse-engineering a real-device BMP (test-data/1_1.bmp):
+    unpacking after flipud yields an upright image.
     """
     if bw.shape != (HEIGHT, WIDTH):
-        raise ValueError(f"期望 {HEIGHT}x{WIDTH}, 实际 {bw.shape}")
+        raise ValueError(f"expected {HEIGHT}x{WIDTH}, got {bw.shape}")
     a = np.flipud(np.fliplr(bw.astype(np.uint8)))
     bits = a.reshape(-1).reshape(-1, 8)
     weights = (1 << np.arange(7, -1, -1)).astype(np.uint8)
@@ -53,14 +54,15 @@ def pack(bw: np.ndarray) -> bytes:
 
 
 def build_stream(bw: np.ndarray) -> bytes:
-    """62 字节头 + 38400 字节数据 = 38462 字节。"""
+    """62-byte header + 38400-byte data = 38462 bytes."""
     return BMP_HEAD + pack(bw)
 
 
 def save_bmp(path: str, bw: np.ndarray) -> None:
-    """存成可在 PC 上直接查看的 BMP（自底向上行序）。
+    """Write a BMP that can be viewed on a PC (bottom-up row order).
 
-    pack() 已含 flipud（设备自底向上读取），直接 reshape 写出即是标准 BMP。
+    pack() already includes flipud (device reads bottom-up); reshaping that
+    payload and writing it out is a standard BMP.
     """
     rows = np.frombuffer(pack(bw), dtype=np.uint8).reshape(HEIGHT, ROW_BYTES)
     with open(path, "wb") as f:
@@ -68,11 +70,11 @@ def save_bmp(path: str, bw: np.ndarray) -> None:
         f.write(rows.tobytes())
 
 
-# ---------------- 测试图生成 ----------------
+# ---------------- test-image generation ----------------
 
 
 def make_test_image(kind: str = "iris") -> np.ndarray:
-    """生成 640x480 二值测试图。带方向标记，便于肉眼判断翻转/镜像。"""
+    """Build a 640x480 binary test image with orientation marks for spotting flip/mirror."""
     img = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
 
     if kind == "checker":
@@ -88,20 +90,20 @@ def make_test_image(kind: str = "iris") -> np.ndarray:
             img[i:i + 2, :] = 1
     elif kind == "solid":
         img[:] = 1
-    else:  # iris: 文字 + 边框 + 角标
+    else:  # iris: text + border + corner marks
         cv2.rectangle(img, (8, 8), (WIDTH - 9, HEIGHT - 9), 1, 3)
         cv2.putText(img, "IRIS", (150, 200), cv2.FONT_HERSHEY_SIMPLEX,
                     3.2, 1, 8, cv2.LINE_AA)
         cv2.putText(img, "L O O P", (140, 300), cv2.FONT_HERSHEY_SIMPLEX,
                     1.8, 1, 5, cv2.LINE_AA)
-        # 方向标记：左上角实心方块（唯一，可判别翻转/镜像）
+        # orientation mark: solid square top-left (unique, detects flip/mirror)
         cv2.rectangle(img, (20, 20), (80, 80), 1, -1)
-        # 右上角空心方块（判别水平镜像）
+        # hollow square top-right (detects horizontal mirror)
         cv2.rectangle(img, (WIDTH - 81, 20), (WIDTH - 21, 80), 1, 3)
-        # 底部中心短线（判别垂直翻转）
+        # short bar at bottom center (detects vertical flip)
         cv2.line(img, (WIDTH // 2 - 60, HEIGHT - 25),
                  (WIDTH // 2 + 60, HEIGHT - 25), 1, 4)
-        # 刻度尺，判断缩放
+        # scale ticks, to judge scaling
         for x in range(40, WIDTH - 40, 10):
             h = 14 if (x // 10) % 5 == 0 else 7
             cv2.line(img, (x, HEIGHT - 60), (x, HEIGHT - 60 - h), 1, 2)
@@ -111,5 +113,5 @@ def make_test_image(kind: str = "iris") -> np.ndarray:
 
 def describe(bw: np.ndarray) -> str:
     return (f"{bw.shape[1]}x{bw.shape[0]} 1bpp  "
-            f"白像素={int(bw.sum())} ({bw.mean()*100:.1f}%)  "
-            f"载荷={DATA_BYTES}B")
+            f"white_pixels={int(bw.sum())} ({bw.mean()*100:.1f}%)  "
+            f"payload={DATA_BYTES}B")

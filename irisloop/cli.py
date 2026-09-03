@@ -1,4 +1,4 @@
-"""命令行入口：irisloop 摄像头视频采集。"""
+"""CLI entry point: irisloop USB camera video capture."""
 
 from __future__ import annotations
 
@@ -12,30 +12,30 @@ from .capture import capture
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="irisloop",
-        description="USB 摄像头视频流采集并保存到本地",
+        description="Capture a USB camera video stream and save it locally",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    p.add_argument("-o", "--output", default=None, help="输出文件路径，默认 captures/capture_<时间戳>.mp4")
-    p.add_argument("-d", "--output-dir", default="captures", help="未指定 --output 时的输出目录")
-    p.add_argument("-i", "--camera-index", type=int, default=0, help="摄像头索引")
-    p.add_argument("--width", type=int, default=1280, help="请求宽度")
-    p.add_argument("--height", type=int, default=720, help="请求高度")
-    p.add_argument("--fps", type=int, default=30, help="请求帧率")
-    p.add_argument("-t", "--duration", type=float, default=None, help="录制时长(秒)，不设则手动停止")
-    p.add_argument("--no-preview", action="store_true", help="不显示预览窗口（后台录制）")
-    p.add_argument("--no-timestamp", action="store_true", help="画面上不叠加时间戳")
-    p.add_argument("--no-measure", action="store_true", help="跳过启动时的实测帧率")
-    p.add_argument("--codec", default=None, help="强制指定编码，如 mp4v / MJPG / XVID")
-    p.add_argument("--list", action="store_true", help="列出可用摄像头后退出")
+    p.add_argument("-o", "--output", default=None, help="output file path; default captures/capture_<timestamp>.mp4")
+    p.add_argument("-d", "--output-dir", default="captures", help="output directory when --output is omitted")
+    p.add_argument("-i", "--camera-index", type=int, default=0, help="camera index")
+    p.add_argument("--width", type=int, default=1280, help="requested width")
+    p.add_argument("--height", type=int, default=720, help="requested height")
+    p.add_argument("--fps", type=int, default=30, help="requested frame rate")
+    p.add_argument("-t", "--duration", type=float, default=None, help="record duration in seconds; omit to stop manually")
+    p.add_argument("--no-preview", action="store_true", help="do not show preview window (headless record)")
+    p.add_argument("--no-timestamp", action="store_true", help="do not overlay a timestamp on frames")
+    p.add_argument("--no-measure", action="store_true", help="skip measured fps at startup")
+    p.add_argument("--codec", default=None, help="force codec, e.g. mp4v / MJPG / XVID")
+    p.add_argument("--list", action="store_true", help="list available cameras and exit")
     return p
 
 
 def cmd_list() -> int:
     cams = probe_cameras()
     if not cams:
-        print("未发现可用摄像头")
+        print("no cameras found")
         return 1
-    print("可用摄像头：")
+    print("available cameras:")
     for c in cams:
         print(f"  [{c['index']}] {c['width']}x{c['height']} @{c['fps']:.0f}fps backend={c['backend']}")
     return 0
@@ -62,7 +62,7 @@ def main(argv=None) -> int:
             codec=args.codec,
         )
     except KeyboardInterrupt:
-        print("\n[info] 已中断（视频已保存）")
+        print("\n[info] interrupted (video saved)")
     except Exception as e:
         print(f"[error] {type(e).__name__}: {e}", file=sys.stderr)
         return 1

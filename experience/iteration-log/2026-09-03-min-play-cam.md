@@ -1,22 +1,26 @@
-# 2026-09-03 最低可玩门槛：笔记本摄像头 vs USB cam
+# 2026-09-03 Minimum play barrier: laptop camera vs USB cam
 
-## 假设
+## Hypothesis
 
-用户侧只要 **IrisGreen（蓝牙）+ 笔记本自带摄像头** 就能玩闭环观察，不必再买 USB cam。
+Users should be able to run the observe step with **IrisGreen (BLE) + a laptop built-in camera**,
+without buying a USB webcam.
 
-## 本机探测（开发工作站）
+## Probe on the developer workstation
 
-- 机型：MSI MS-7B89，`PCSystemType=1` **台式机**
-- 系统成像设备：仅 `Microsoft LifeCam HD-3000`（USB）
-- OpenCV `cam#0` 1280×720 MJPG 出帧成功（mean≈131）
-- 无笔记本前置/后置摄像头可测
+- Host: MSI MS-7B89, `PCSystemType=1` **desktop**
+- Imaging devices: only `Microsoft LifeCam HD-3000` (USB)
+- OpenCV `cam#0` 1280×720 MJPG still OK (mean ≈ 131)
+- No laptop front/rear camera available on this machine
 
-## 软件改动
+## Software changes
 
-`irisloop/camera.py`：打开失败时从强制 MJPG 回退到摄像头默认格式（内置摄像头常见 YUY2/NV12）。
+`irisloop/camera.py`: if MJPG fails, fall back to the camera’s native format
+(built-in webcams often use YUY2/NV12).
 
-探测脚本：`python tools/min_play_test.py`；真机投射加 `--ble --group 1`。
+Probe script: `python tools/min_play_test.py`; add `--ble --group 1` for on-device projection.
 
-## 下一步
+## Next
 
-换一台带摄像头的笔记本，把镜头对准投影面再跑同一脚本。普通笔记本没有后置镜头：拍桌面可把屏幕合到 20–40°，拍墙面用二合一帐篷模式。
+Re-run the same script on a laptop with a built-in camera aimed at the projection surface.
+Most notebooks have no rear camera: for a desk projection, fold the lid to ~20–40° so the
+top webcam looks down; for a wall, use a 2-in-1 tent mode.

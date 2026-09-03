@@ -1,6 +1,6 @@
 {
   "group": 15,
-  "name": "里程素材",
+  "name": "mileage",
   "frames": null,
   "stills": [
     "frame_00_0.4s.jpg",
@@ -20,7 +20,7 @@
   "bright_ratio": 0.056953125,
   "lap_var": 53.01923844343079,
   "verdict": [
-    "有明显投影结构"
+    "Clear projected structure"
   ],
   "dir": "benchmark/groundtruth/group_15",
   "ok": true

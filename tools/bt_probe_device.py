@@ -1,6 +1,6 @@
-"""针对单个 BLE 设备深度探测：广播数据 + GATT 服务/特征。
+"""Deep-probe a single BLE device: advertisement data + GATT services/characteristics.
 
-用法:
+Usage:
   python tools/bt_probe_device.py --name Iris
   python tools/bt_probe_device.py --address F4:12:FA:B6:B7:CA --connect
 """
@@ -62,7 +62,7 @@ def _adv_summary(dev, adv) -> str:
 
 
 async def scan_target(name: str | None, address: str | None, seconds: float):
-    """扫描并筛选出目标设备的广播数据。"""
+    """Scan and keep advertisement data for the target device."""
     hits: dict[str, tuple] = {}
 
     def cb(device, adv):
@@ -83,7 +83,7 @@ async def scan_target(name: str | None, address: str | None, seconds: float):
         pass
 
     if not kwargs and name:
-        # 回退：按 service uuid 过滤不可行时，直接全量扫后过滤
+        # Fallback: when service-uuid filtering is not usable, scan all then filter
         scanner = BleakScanner()
     else:
         scanner = BleakScanner(**kwargs) if kwargs else BleakScanner()
@@ -93,7 +93,7 @@ async def scan_target(name: str | None, address: str | None, seconds: float):
     await scanner.stop()
 
     if not hits:
-        # 回退路径：从已发现设备里按名字找
+        # Fallback: find by name among already-discovered devices
         try:
             devs = scanner.get_discovered_devices()
         except Exception:
@@ -113,14 +113,14 @@ async def dump_gatt(address: str) -> int:
     try:
         client = BleakClient(address, timeout=20.0)
     except Exception as e:
-        print(f"[error] 创建客户端失败: {type(e).__name__}: {e}")
+        print(f"[error] failed to create client: {type(e).__name__}: {e}")
         return 1
 
     try:
         await client.connect()
     except Exception as e:
-        print(f"[error] 连接失败: {type(e).__name__}: {e}")
-        print("        (可能需要先在 Windows 设置里配对)")
+        print(f"[error] connect failed: {type(e).__name__}: {e}")
+        print("        (you may need to pair first in Windows Settings)")
         return 1
 
     try:
@@ -136,7 +136,7 @@ async def dump_gatt(address: str) -> int:
         try:
             services = client.services
         except Exception as e:
-            print(f"[error] 枚举服务失败: {type(e).__name__}: {e}")
+            print(f"[error] failed to enumerate services: {type(e).__name__}: {e}")
             return 1
 
         if not services:
@@ -158,21 +158,21 @@ async def dump_gatt(address: str) -> int:
 
 async def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--name", default=None, help="设备名子串，大小写不敏感")
+    ap.add_argument("--name", default=None, help="device-name substring, case-insensitive")
     ap.add_argument("--address", default=None)
     ap.add_argument("--timeout", type=float, default=15.0)
-    ap.add_argument("--connect", action="store_true", help="连接并枚举 GATT")
+    ap.add_argument("--connect", action="store_true", help="connect and enumerate GATT")
     args = ap.parse_args()
 
     if not args.name and not args.address:
-        print("需要 --name 或 --address")
+        print("need --name or --address")
         return 1
 
     print(f"=== SCAN ({args.timeout}s) target: {args.name or args.address} ===")
     hits = await scan_target(args.name, args.address, args.timeout)
 
     if not hits:
-        print("  未发现匹配设备")
+        print("  no matching device found")
         return 1
 
     print(f"  matched: {len(hits)}")
@@ -185,7 +185,7 @@ async def main() -> int:
         target = args.address or list(hits.keys())[0]
         return await dump_gatt(target)
 
-    print("  (加 --connect 可连接并枚举 GATT 服务)")
+    print("  (add --connect to connect and enumerate GATT services)")
     return 0
 
 

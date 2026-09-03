@@ -1,8 +1,8 @@
-"""确定 im2Bytes.m 位打包的确切语义（用参照 BMP 反推）。
+"""Pin down the exact bit-packing semantics of im2Bytes.m (reverse from a reference BMP).
 
 MATLAB: pic=fliplr(pic); bits=reshape(pic',1,[]);
-恒等式: 列主序展开 A'  ==  行主序展开 A
-因此 numpy 应写作 a.reshape(-1)（C 序），而非 a.T.reshape(-1)。
+Identity: column-major unroll of A'  ==  row-major unroll of A
+So numpy should use a.reshape(-1) (C order), not a.T.reshape(-1).
 """
 
 from __future__ import annotations
@@ -34,20 +34,20 @@ def as_rows(b: bytes) -> np.ndarray:
     return np.frombuffer(b, dtype=np.uint8).reshape(NROWS, ROW_BYTES)
 
 
-# im2Bytes 语义：水平翻转 + 行主序 MSB 打包
+# im2Bytes semantics: horizontal flip + row-major MSB pack
 cand = pack(np.fliplr(bw))
 cand_rows = as_rows(cand)
 pay_rows = as_rows(payload)
 
-print("\n=== 逐行差异定位 (候选 vs 原始载荷) ===")
+print("\n=== per-row diff (candidate vs original payload) ===")
 diff_rows = [r for r in range(NROWS) if not np.array_equal(cand_rows[r], pay_rows[r])]
-print(f"  直接比对: {len(diff_rows)} 行不同 -> {diff_rows[:12]}")
+print(f"  direct compare: {len(diff_rows)} rows differ -> {diff_rows[:12]}")
 
 flipped = np.flipud(cand_rows)
 d2 = [r for r in range(NROWS) if not np.array_equal(flipped[r], pay_rows[r])]
-print(f"  垂直翻转后: {len(d2)} 行不同 -> {d2[:12]}")
+print(f"  after vertical flip: {len(d2)} rows differ -> {d2[:12]}")
 
-print("\n=== 尝试行偏移 (-3..+3) ===")
+print("\n=== try row offset (-3..+3) ===")
 best = None
 for shift in range(-3, 4):
     for base, bname in ((cand_rows, "direct"), (flipped, "vflip")):

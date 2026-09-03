@@ -1,14 +1,14 @@
 {
   "group": 15,
-  "subject": "里程完成界面，显示 0.0 km",
+  "subject": "Mileage completed UI showing 0.0 km",
   "recognizable": true,
   "confidence": 0.95,
   "issues": [],
   "content_actions": [
     "none"
   ],
-  "summary": "投影内容清晰可辨：Completed 字样、0.0 数值与 km 单位均明确，采集伪影不影响识别。",
-  "_raw": "{\"group\":15,\"subject\":\"里程完成界面，显示 0.0 km\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容清晰可辨：Completed 字样、0.0 数值与 km 单位均明确，采集伪影不影响识别。\"}",
+  "summary": "Clear Completed label, 0.0 value, and km unit; capture artifacts do not block recognition.",
+  "_raw": "{\"group\": 15, \"subject\": \"Mileage completed UI showing 0.0 km\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Clear Completed label, 0.0 value, and km unit; capture artifacts do not block recognition.\"}",
   "_usage": {
     "prompt_tokens": 1057,
     "completion_tokens": 244,

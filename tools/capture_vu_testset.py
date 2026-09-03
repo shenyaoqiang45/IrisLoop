@@ -1,13 +1,13 @@
-"""采集素材组 1–20 的 USB 实拍，落成视频理解测试集。
+"""Capture USB stills for material groups 1–20 into a video-understanding test set.
 
-每组用独立子进程跑 project_and_capture（规避 Windows Bleak 重连失效）。
+Each group runs project_and_capture in a separate subprocess (avoids Windows Bleak reconnect failures).
 
-工作目录（临时）:
+Working directory (temporary):
     captures/vu_testset_<tag>/group_XX/
-固化为评测集时请移到:
+When freezing as an eval set, move to:
     benchmark/groundtruth/
 
-用法:
+Usage:
     python tools/capture_vu_testset.py
     python tools/capture_vu_testset.py --groups 7 8 9 10 --tag 20260902_175407
 """
@@ -57,16 +57,16 @@ def analyze_dir(group: int, out_dir: Path) -> dict:
 
     verdict: list[str] = []
     if not jpgs:
-        verdict.append("无 JPG")
+        verdict.append("no JPG")
     else:
         if max(means) < 12:
-            verdict.append("几乎全黑")
+            verdict.append("almost fully black")
         if max(brights) < 0.005:
-            verdict.append("亮区极少")
+            verdict.append("very little bright area")
         if float(np.mean(laps)) < 50:
-            verdict.append("偏模糊或扫描条纹主导")
+            verdict.append("blurry or scan-stripe dominated")
         if not verdict:
-            verdict.append("有明显投影结构")
+            verdict.append("clear projection structure")
 
     entry = {
         "group": group,
@@ -122,7 +122,7 @@ def run_one_group(
         "--out-dir",
         str(out_dir),
     ]
-    print(f"\n=== 子进程采集 组 {group:02d} ({P.group_name(group)}) ===")
+    print(f"\n=== subprocess capture group {group:02d} ({P.group_name(group)}) ===")
     print(" ", " ".join(cmd))
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
@@ -135,14 +135,14 @@ def run_one_group(
         )
         rc = proc.returncode
     except subprocess.TimeoutExpired:
-        print("  [error] 子进程超时")
+        print("  [error] subprocess timed out")
         rc = -1
 
     entry = analyze_dir(group, out_dir)
     entry["subprocess_rc"] = rc
     print(
         f"  jpg={len(entry['stills'])} video={'yes' if entry['video'] else 'no'} "
-        f"亮度={entry['mean']:.1f} 亮区={entry['bright_ratio']*100:.1f}% "
+        f"brightness={entry['mean']:.1f} bright_area={entry['bright_ratio']*100:.1f}% "
         f"| {'; '.join(entry['verdict'])}"
     )
     return entry
@@ -165,9 +165,9 @@ def main() -> int:
     ap.add_argument("--jpeg-quality", type=int, default=92)
     ap.add_argument("--tag", default=None)
     ap.add_argument("--settle", type=float, default=SETTLE_S,
-                    help="组间等待秒数，给 BLE 栈冷却")
+                    help="Seconds to wait between groups so the BLE stack can cool down")
     ap.add_argument("--skip-ok", action="store_true",
-                    help="跳过 manifest 里已成功的组")
+                    help="Skip groups already marked successful in the manifest")
     args = ap.parse_args()
 
     tag = args.tag or time.strftime("%Y%m%d_%H%M%S")
@@ -182,17 +182,17 @@ def main() -> int:
             for r in old.get("groups") or []:
                 if r.get("stills"):
                     results_by_group[int(r["group"])] = r
-            print(f"已有组: {sorted(results_by_group)}")
+            print(f"Existing groups: {sorted(results_by_group)}")
         except Exception:
             pass
 
-    print("=== IrisLoop 视频理解测试集采集（子进程模式）===")
-    print(f"  输出 {root}")
-    print(f"  组 {args.groups}")
+    print("=== IrisLoop video-understanding test-set capture (subprocess mode) ===")
+    print(f"  output {root}")
+    print(f"  groups {args.groups}")
 
     for g in args.groups:
         if args.skip_ok and results_by_group.get(g, {}).get("ok"):
-            print(f"\n=== 跳过已成功 组 {g:02d} ===")
+            print(f"\n=== skip already-ok group {g:02d} ===")
             continue
         out_dir = root / f"group_{g:02d}"
         entry = run_one_group(
@@ -208,7 +208,7 @@ def main() -> int:
         )
         results_by_group[g] = entry
 
-        # 写中间 manifest，方便中断后续采
+        # Write an intermediate manifest so a later resume can continue
         results = [results_by_group[k] for k in sorted(results_by_group)]
         manifest = {
             "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -228,14 +228,14 @@ def main() -> int:
         time.sleep(args.settle)
 
     results = [results_by_group[k] for k in sorted(results_by_group)]
-    print("\n=== 汇总 ===")
-    print(f"  目录 {root}")
+    print("\n=== Summary ===")
+    print(f"  dir {root}")
     print(f"  manifest {man_path}")
-    print(f"  成功: {[r['group'] for r in results if r.get('ok')]}")
-    print(f"  失败/全黑: {[r['group'] for r in results if not r.get('ok')]}")
+    print(f"  ok: {[r['group'] for r in results if r.get('ok')]}")
+    print(f"  fail/black: {[r['group'] for r in results if not r.get('ok')]}")
     for r in results:
         print(
-            f"  组{r['group']:02d} {r.get('name','')}  "
+            f"  group {r['group']:02d} {r.get('name','')}  "
             f"jpg={len(r.get('stills') or [])}  "
             f"{'; '.join(r.get('verdict') or [])}"
         )

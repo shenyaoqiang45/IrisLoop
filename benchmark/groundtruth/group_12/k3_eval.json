@@ -1,14 +1,14 @@
 {
   "group": 12,
-  "subject": "手写绿色英文单词，近似“Ainstec”",
+  "subject": "Handwritten green English word, approximately Ainstec",
   "recognizable": true,
   "confidence": 0.86,
   "issues": [],
   "content_actions": [
     "none"
   ],
-  "summary": "投影内容为可辨认的手写英文字样，采集偏色和欠曝不影响识别。",
-  "_raw": "{\n  \"group\": 12,\n  \"subject\": \"手写绿色英文单词，近似“Ainstec”\",\n  \"recognizable\": true,\n  \"confidence\": 0.86,\n  \"issues\": [],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"投影内容为可辨认的手写英文字样，采集偏色和欠曝不影响识别。\"\n}",
+  "summary": "Recognizable handwritten English lettering; color cast and underexposure do not block recognition.",
+  "_raw": "{\"group\": 12, \"subject\": \"Handwritten green English word, approximately Ainstec\", \"recognizable\": true, \"confidence\": 0.86, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Recognizable handwritten English lettering; color cast and underexposure do not block recognition.\"}",
   "_usage": {
     "prompt_tokens": 1056,
     "completion_tokens": 602,

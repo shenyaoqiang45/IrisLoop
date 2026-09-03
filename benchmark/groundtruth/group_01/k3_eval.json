@@ -1,17 +1,17 @@
 {
   "group": 1,
-  "subject": "两条绿色横条与中间向上箭头的开机提示画面",
+  "subject": "Boot prompt: two green bars with an upward arrow in the middle",
   "recognizable": true,
   "confidence": 0.82,
   "issues": [
-    "伪影干扰",
-    "对比不足"
+    "capture artifacts",
+    "low contrast"
   ],
   "content_actions": [
     "none"
   ],
-  "summary": "主体为可辨认的横条加向上箭头开机提示，小字不可读但不影响识别。",
-  "_raw": "{\"group\":1,\"subject\":\"两条绿色横条与中间向上箭头的开机提示画面\",\"recognizable\":true,\"confidence\":0.82,\"issues\":[\"伪影干扰\",\"对比不足\"],\"content_actions\":[\"none\"],\"summary\":\"主体为可辨认的横条加向上箭头开机提示，小字不可读但不影响识别。\"}",
+  "summary": "Recognizable bars-plus-up-arrow boot cue; fine text is unreadable but does not block recognition.",
+  "_raw": "{\"group\": 1, \"subject\": \"Boot prompt: two green bars with an upward arrow in the middle\", \"recognizable\": true, \"confidence\": 0.82, \"issues\": [\"capture artifacts\", \"low contrast\"], \"content_actions\": [\"none\"], \"summary\": \"Recognizable bars-plus-up-arrow boot cue; fine text is unreadable but does not block recognition.\"}",
   "_usage": {
     "prompt_tokens": 1056,
     "completion_tokens": 172,

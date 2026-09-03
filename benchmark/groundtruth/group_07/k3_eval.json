@@ -1,6 +1,6 @@
 {
   "group": 7,
-  "subject": "IRIS GREEN 连接成功提示界面（对勾+设备图标+文字）",
+  "subject": "IRIS GREEN connection-success prompt (checkmark + device icon + text)",
   "recognizable": true,
   "confidence": 0.97,
   "motion": "static",
@@ -8,8 +8,8 @@
   "content_actions": [
     "none"
   ],
-  "summary": "绿色投影文字与图标全程清晰可辨认，画面静止无内容问题，仅有正常采集伪影。",
-  "_raw": "{\"group\":7,\"subject\":\"IRIS GREEN 连接成功提示界面（对勾+设备图标+文字）\",\"recognizable\":true,\"confidence\":0.97,\"motion\":\"static\",\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"绿色投影文字与图标全程清晰可辨认，画面静止无内容问题，仅有正常采集伪影。\"}",
+  "summary": "Green projected text and icons stay clear throughout; static frame with only normal capture artifacts.",
+  "_raw": "{\"group\": 7, \"subject\": \"IRIS GREEN connection-success prompt (checkmark + device icon + text)\", \"recognizable\": true, \"confidence\": 0.97, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Green projected text and icons stay clear throughout; static frame with only normal capture artifacts.\", \"motion\": \"static\"}",
   "_usage": {
     "prompt_tokens": 41282,
     "completion_tokens": 103,

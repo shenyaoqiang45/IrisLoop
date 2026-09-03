@@ -20,7 +20,7 @@
   "bright_ratio": 0.028531901041666665,
   "lap_var": 38.41406588429816,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_08",
   "ok": true

@@ -1,6 +1,6 @@
-"""推送单张图片到 1_1.bmp 并常亮显示 —— 最小闭环专用。
+"""Push a single image to 1_1.bmp and keep it on — for the smallest closed loop.
 
-用法:
+Usage:
     python tools/push_single.py data/01a_upload_alignment_h.jpg
     python tools/push_single.py data/foo.png --name 1_1.bmp --no-play
 """
@@ -40,7 +40,7 @@ def load_bw(path: str) -> np.ndarray:
     buf = np.fromfile(path, dtype=np.uint8)
     img = cv2.imdecode(buf, cv2.IMREAD_GRAYSCALE)
     if img is None:
-        raise ValueError(f"无法读取 {path}")
+        raise ValueError(f"cannot read {path}")
     if img.shape != (480, 640):
         img = cv2.resize(img, (640, 480), interpolation=cv2.INTER_AREA)
     return binarize(img)
@@ -48,16 +48,16 @@ def load_bw(path: str) -> np.ndarray:
 
 async def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("image", help="源图片路径")
+    ap.add_argument("image", help="source image path")
     ap.add_argument("--address", default=DEFAULT_ADDR)
-    ap.add_argument("--name", default="1_1.bmp", help="目标文件名（默认 1_1.bmp）")
-    ap.add_argument("--no-play", action="store_true", help="推送后不触发播放")
+    ap.add_argument("--name", default="1_1.bmp", help="target filename (default 1_1.bmp)")
+    ap.add_argument("--no-play", action="store_true", help="push without triggering playback")
     args = ap.parse_args()
 
     bw = load_bw(args.image)
     stream = build_stream(bw)
     print(f"=== {args.image} ===")
-    print(f"  {describe(bw)}  流={len(stream)}B")
+    print(f"  {describe(bw)}  stream={len(stream)}B")
 
     cli = IrisBleClient(args.address)
     print(f"=== CONNECT {args.address} ===")
@@ -66,9 +66,9 @@ async def main() -> int:
     assert client is not None
 
     try:
-        # 先清空组 1，避免残留多帧轮播（如之前推入的敦煌 1_2..1_10）
+        # Clear group 1 first so leftover multi-frame slideshows (e.g. Dunhuang 1_2..1_10) do not remain
         from irisloop import protocol as P
-        print("=== 清空组 1 (0xA2) ===")
+        print("=== clear group 1 (0xA2) ===")
         r = await cli.send_command(P.cmd_delete_group(1))
         print(f"  {'ok' if r.ok else r.error}")
         await asyncio.sleep(0.5)
@@ -87,16 +87,16 @@ async def main() -> int:
             )
             await asyncio.sleep(PACKET_DELAY_S)
         await client.write_gatt_char(CHAR_FILE_END, packet, response=True)
-        print(f"  pushed {len(stream)}B / {n} 包")
+        print(f"  pushed {len(stream)}B / {n} packets")
 
         if not args.no_play:
-            # 组 1 单张播放：interval 设大避免闪烁（实际只有 1 张无所谓）
+            # Group 1 single-frame play: large interval to avoid flicker (irrelevant with only 1 frame)
             from irisloop import protocol as P
             await cli.stop()
             await asyncio.sleep(0.3)
-            # 读图片数确认删除生效
+            # Read picture count to confirm delete took effect
             n = await cli.get_picture_count()
-            print(f"  当前图片总数 = {n}")
+            print(f"  current picture count = {n}")
             r = await cli.play(group_id=1, loop=True, total_100ms=36000, interval_100ms=50)
             print(f"  play group1: {'ok' if r.ok else r.error}")
     finally:

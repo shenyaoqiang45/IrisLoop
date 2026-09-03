@@ -1,7 +1,7 @@
-"""视频录制：带编码回退的 VideoWriter 封装。
+"""Video recording: VideoWriter wrapper with codec fallback.
 
-本机实测：mp4v / MJPG / XVID 可用，avc1(H.264) 因缺 OpenH264 不可用，
-因此必须按扩展名逐个尝试，不能写死单一编码。
+On this machine mp4v / MJPG / XVID work; avc1 (H.264) fails without OpenH264,
+so codecs must be tried per extension instead of hard-coding one.
 """
 
 from __future__ import annotations
@@ -49,15 +49,15 @@ class VideoRecorder:
                 self.used_codec = codec
                 return codec
             writer.release()
-            errors.append(f"{codec} 不可用")
+            errors.append(f"{codec} unavailable")
 
-        raise RuntimeError(f"无法创建视频文件 {self.path}（{'；'.join(errors)}）")
+        raise RuntimeError(f"cannot create video file {self.path} ({'; '.join(errors)})")
 
     def write(self, frame: np.ndarray) -> bool:
         if self.writer is None:
             return False
         h, w = frame.shape[:2]
-        # VideoWriter 不会自动缩放，尺寸不符会静默丢帧
+        # VideoWriter will not auto-scale; a size mismatch silently drops frames
         if (w, h) != self.size:
             frame = cv2.resize(frame, self.size)
         self.writer.write(frame)

@@ -1,6 +1,6 @@
 {
   "group": 10,
-  "name": "网格",
+  "name": "grid",
   "frames": null,
   "stills": [
     "frame_00_0.4s.jpg",
@@ -20,7 +20,7 @@
   "bright_ratio": 0.026114366319444443,
   "lap_var": 39.7257713107361,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_10",
   "ok": true

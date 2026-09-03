@@ -1,6 +1,6 @@
 {
   "group": 1,
-  "name": "开机",
+  "name": "boot",
   "play_ok": true,
   "play_raw": "80a00101",
   "frames": 643,
@@ -22,7 +22,7 @@
   "bright_ratio": 0.06940212673611111,
   "lap_var": 23.449846418409923,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_01"
 }

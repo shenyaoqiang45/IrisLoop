@@ -7,18 +7,18 @@
   "results": [
     {
       "group": 1,
-      "subject": "两条绿色横条与中间向上箭头的开机提示画面",
+      "subject": "Boot prompt: two green bars with an upward arrow in the middle",
       "recognizable": true,
       "confidence": 0.82,
       "issues": [
-        "伪影干扰",
-        "对比不足"
+        "capture artifacts",
+        "low contrast"
       ],
       "content_actions": [
         "none"
       ],
-      "summary": "主体为可辨认的横条加向上箭头开机提示，小字不可读但不影响识别。",
-      "_raw": "{\"group\":1,\"subject\":\"两条绿色横条与中间向上箭头的开机提示画面\",\"recognizable\":true,\"confidence\":0.82,\"issues\":[\"伪影干扰\",\"对比不足\"],\"content_actions\":[\"none\"],\"summary\":\"主体为可辨认的横条加向上箭头开机提示，小字不可读但不影响识别。\"}",
+      "summary": "Recognizable bars-plus-up-arrow boot cue; fine text is unreadable but does not block recognition.",
+      "_raw": "{\"group\": 1, \"subject\": \"Boot prompt: two green bars with an upward arrow in the middle\", \"recognizable\": true, \"confidence\": 0.82, \"issues\": [\"capture artifacts\", \"low contrast\"], \"content_actions\": [\"none\"], \"summary\": \"Recognizable bars-plus-up-arrow boot cue; fine text is unreadable but does not block recognition.\"}",
       "_usage": {
         "prompt_tokens": 1056,
         "completion_tokens": 172,
@@ -34,15 +34,15 @@
     },
     {
       "group": 2,
-      "subject": "电池充电图标",
+      "subject": "Battery charging icon",
       "recognizable": true,
       "confidence": 0.98,
       "issues": [],
       "content_actions": [
         "none"
       ],
-      "summary": "绿色电池与闪电充电符号清晰可辨，电量格明确，采集伪影不影响内容识别。",
-      "_raw": "{\n  \"group\": 2,\n  \"subject\": \"电池充电图标\",\n  \"recognizable\": true,\n  \"confidence\": 0.98,\n  \"issues\": [],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"绿色电池与闪电充电符号清晰可辨，电量格明确，采集伪影不影响内容识别。\"\n}",
+      "summary": "Green battery and lightning charge symbol are clear; charge bars are distinct; capture artifacts do not block recognition.",
+      "_raw": "{\"group\": 2, \"subject\": \"Battery charging icon\", \"recognizable\": true, \"confidence\": 0.98, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Green battery and lightning charge symbol are clear; charge bars are distinct; capture artifacts do not block recognition.\"}",
       "_usage": {
         "prompt_tokens": 1056,
         "completion_tokens": 181,
@@ -58,18 +58,18 @@
     },
     {
       "group": 3,
-      "subject": "IRIS GREEN 设备连接界面，含路由器图标与 Link up 字样",
+      "subject": "IRIS GREEN device connection UI with router icon and Link up text",
       "recognizable": true,
       "confidence": 0.92,
       "issues": [
-        "对比不足",
-        "伪影干扰"
+        "low contrast",
+        "capture artifacts"
       ],
       "content_actions": [
         "none"
       ],
-      "summary": "投影内容清晰可辨，标题、图标与 Link up 状态文字均可识别，绿色扫描伪影不影响判读。",
-      "_raw": "{\n  \"group\": 3,\n  \"subject\": \"IRIS GREEN 设备连接界面，含路由器图标与 Link up 字样\",\n  \"recognizable\": true,\n  \"confidence\": 0.92,\n  \"issues\": [\"对比不足\", \"伪影干扰\"],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"投影内容清晰可辨，标题、图标与 Link up 状态文字均可识别，绿色扫描伪影不影响判读。\"\n}",
+      "summary": "Projection is clear; title, icon, and Link up status text are readable; green scan artifacts do not hurt judgment.",
+      "_raw": "{\"group\": 3, \"subject\": \"IRIS GREEN device connection UI with router icon and Link up text\", \"recognizable\": true, \"confidence\": 0.92, \"issues\": [\"low contrast\", \"capture artifacts\"], \"content_actions\": [\"none\"], \"summary\": \"Projection is clear; title, icon, and Link up status text are readable; green scan artifacts do not hurt judgment.\"}",
       "_usage": {
         "prompt_tokens": 1057,
         "completion_tokens": 157,
@@ -85,17 +85,17 @@
     },
     {
       "group": 4,
-      "subject": "IRIS GREEN 标识、对勾与电脑图标，下方文字 Connection successful",
+      "subject": "IRIS GREEN mark, checkmark, and computer icon with Connection successful text",
       "recognizable": true,
       "confidence": 0.95,
       "issues": [
-        "伪影干扰"
+        "capture artifacts"
       ],
       "content_actions": [
         "none"
       ],
-      "summary": "连接成功界面文字与图标清晰可辨认，仅有绿色扫描伪影，不影响识别。",
-      "_raw": "{\"group\":4,\"subject\":\"IRIS GREEN 标识、对勾与电脑图标，下方文字 Connection successful\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[\"伪影干扰\"],\"content_actions\":[\"none\"],\"summary\":\"连接成功界面文字与图标清晰可辨认，仅有绿色扫描伪影，不影响识别。\"}",
+      "summary": "Connection-success UI text and icons are clear; only green scan artifacts remain.",
+      "_raw": "{\"group\": 4, \"subject\": \"IRIS GREEN mark, checkmark, and computer icon with Connection successful text\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [\"capture artifacts\"], \"content_actions\": [\"none\"], \"summary\": \"Connection-success UI text and icons are clear; only green scan artifacts remain.\"}",
       "_usage": {
         "prompt_tokens": 1057,
         "completion_tokens": 152,
@@ -111,15 +111,15 @@
     },
     {
       "group": 5,
-      "subject": "低电量电池图标",
+      "subject": "Low-battery icon",
       "recognizable": true,
       "confidence": 0.98,
       "issues": [],
       "content_actions": [
         "none"
       ],
-      "summary": "低电量电池图标轮廓和电量格清晰可辨，采集伪影不影响内容识别。",
-      "_raw": "{\"group\":5,\"subject\":\"低电量电池图标\",\"recognizable\":true,\"confidence\":0.98,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"低电量电池图标轮廓和电量格清晰可辨，采集伪影不影响内容识别。\"}",
+      "summary": "Low-battery outline and charge bars are clear; capture artifacts do not block recognition.",
+      "_raw": "{\"group\": 5, \"subject\": \"Low-battery icon\", \"recognizable\": true, \"confidence\": 0.98, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Low-battery outline and charge bars are clear; capture artifacts do not block recognition.\"}",
       "_usage": {
         "prompt_tokens": 1057,
         "completion_tokens": 263,
@@ -135,15 +135,15 @@
     },
     {
       "group": 6,
-      "subject": "IRIS GREEN 连接成功界面",
+      "subject": "IRIS GREEN connection-success UI",
       "recognizable": true,
       "confidence": 0.95,
       "issues": [],
       "content_actions": [
         "none"
       ],
-      "summary": "投影文字与图标清晰可辨，采集伪影不影响内容识别。",
-      "_raw": "{\"group\":6,\"subject\":\"IRIS GREEN 连接成功界面\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影文字与图标清晰可辨，采集伪影不影响内容识别。\"}",
+      "summary": "Projected text and icons are clear; capture artifacts do not block recognition.",
+      "_raw": "{\"group\": 6, \"subject\": \"IRIS GREEN connection-success UI\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Projected text and icons are clear; capture artifacts do not block recognition.\"}",
       "_usage": {
         "prompt_tokens": 1061,
         "completion_tokens": 229,
@@ -159,7 +159,7 @@
     },
     {
       "group": 7,
-      "subject": "IRIS GREEN 连接成功提示界面（对勾+设备图标+文字）",
+      "subject": "IRIS GREEN connection-success prompt (checkmark + device icon + text)",
       "recognizable": true,
       "confidence": 0.97,
       "motion": "static",
@@ -167,8 +167,8 @@
       "content_actions": [
         "none"
       ],
-      "summary": "绿色投影文字与图标全程清晰可辨认，画面静止无内容问题，仅有正常采集伪影。",
-      "_raw": "{\"group\":7,\"subject\":\"IRIS GREEN 连接成功提示界面（对勾+设备图标+文字）\",\"recognizable\":true,\"confidence\":0.97,\"motion\":\"static\",\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"绿色投影文字与图标全程清晰可辨认，画面静止无内容问题，仅有正常采集伪影。\"}",
+      "summary": "Green projected text and icons stay clear throughout; static frame with only normal capture artifacts.",
+      "_raw": "{\"group\": 7, \"subject\": \"IRIS GREEN connection-success prompt (checkmark + device icon + text)\", \"recognizable\": true, \"confidence\": 0.97, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Green projected text and icons stay clear throughout; static frame with only normal capture artifacts.\", \"motion\": \"static\"}",
       "_usage": {
         "prompt_tokens": 41282,
         "completion_tokens": 103,
@@ -184,15 +184,15 @@
     },
     {
       "group": 8,
-      "subject": "IRIS GREEN 连接成功界面，含对勾图标与 Connection successful 文字",
+      "subject": "IRIS GREEN connection-success UI with checkmark and Connection successful text",
       "recognizable": true,
       "confidence": 0.95,
       "issues": [],
       "content_actions": [
         "none"
       ],
-      "summary": "投影内容完整清晰，标题、图标与连接成功文字均可辨认，无需调整。",
-      "_raw": "{\"group\":8,\"subject\":\"IRIS GREEN 连接成功界面，含对勾图标与 Connection successful 文字\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容完整清晰，标题、图标与连接成功文字均可辨认，无需调整。\"}",
+      "summary": "Full UI is clear; title, icon, and success text are readable; no content change needed.",
+      "_raw": "{\"group\": 8, \"subject\": \"IRIS GREEN connection-success UI with checkmark and Connection successful text\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Full UI is clear; title, icon, and success text are readable; no content change needed.\"}",
       "_usage": {
         "prompt_tokens": 1061,
         "completion_tokens": 85,
@@ -212,15 +212,15 @@
     },
     {
       "group": 9,
-      "subject": "IRIS GREEN 设备连接成功界面",
+      "subject": "IRIS GREEN device connection-success UI",
       "recognizable": true,
       "confidence": 0.96,
       "issues": [],
       "content_actions": [
         "none"
       ],
-      "summary": "投影内容清晰可辨认，标志、对勾图标和“Connection successful”文字均明确。",
-      "_raw": "{\"group\":9,\"subject\":\"IRIS GREEN 设备连接成功界面\",\"recognizable\":true,\"confidence\":0.96,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容清晰可辨认，标志、对勾图标和“Connection successful”文字均明确。\"}",
+      "summary": "Projection is clear; logo, checkmark, and Connection successful text are explicit.",
+      "_raw": "{\"group\": 9, \"subject\": \"IRIS GREEN device connection-success UI\", \"recognizable\": true, \"confidence\": 0.96, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Projection is clear; logo, checkmark, and Connection successful text are explicit.\"}",
       "_usage": {
         "prompt_tokens": 1061,
         "completion_tokens": 228,
@@ -236,19 +236,19 @@
     },
     {
       "group": 10,
-      "subject": "绿色网格线（先显示 IRIS GREEN 连接成功界面，后切换为静态网格）",
+      "subject": "Green grid lines (after briefly showing IRIS GREEN connection-success UI)",
       "recognizable": true,
       "confidence": 0.95,
       "motion": "static",
       "issues": [
-        "太细",
-        "伪影干扰"
+        "too thin",
+        "capture artifacts"
       ],
       "content_actions": [
         "thicken_strokes"
       ],
-      "summary": "网格图案清晰可辨认，全程静态，仅线条偏细并伴随轻微扫描伪影，建议加粗线条。",
-      "_raw": "{\n  \"group\": 10,\n  \"subject\": \"绿色网格线（先显示 IRIS GREEN 连接成功界面，后切换为静态网格）\",\n  \"recognizable\": true,\n  \"confidence\": 0.95,\n  \"motion\": \"static\",\n  \"issues\": [\"太细\", \"伪影干扰\"],\n  \"content_actions\": [\"thicken_strokes\"],\n  \"summary\": \"网格图案清晰可辨认，全程静态，仅线条偏细并伴随轻微扫描伪影，建议加粗线条。\"\n}",
+      "summary": "Grid pattern is recognizable and static; lines are a bit thin with mild scan artifacts — thicken strokes.",
+      "_raw": "{\"group\": 10, \"subject\": \"Green grid lines (after briefly showing IRIS GREEN connection-success UI)\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [\"too thin\", \"capture artifacts\"], \"content_actions\": [\"thicken_strokes\"], \"summary\": \"Grid pattern is recognizable and static; lines are a bit thin with mild scan artifacts — thicken strokes.\", \"motion\": \"static\"}",
       "_usage": {
         "prompt_tokens": 41277,
         "completion_tokens": 161,
@@ -264,18 +264,18 @@
     },
     {
       "group": 11,
-      "subject": "一条游动的鲸鱼",
+      "subject": "A swimming whale",
       "recognizable": true,
       "confidence": 0.92,
       "motion": "animated",
       "issues": [
-        "伪影干扰"
+        "capture artifacts"
       ],
       "content_actions": [
         "none"
       ],
-      "summary": "开头显示连接成功界面后切换为绿色鲸鱼游动动画，轮廓清晰、动作连贯，主体完全可辨认。",
-      "_raw": "{\n  \"group\": 11,\n  \"subject\": \"一条游动的鲸鱼\",\n  \"recognizable\": true,\n  \"confidence\": 0.92,\n  \"motion\": \"animated\",\n  \"issues\": [\"伪影干扰\"],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"开头显示连接成功界面后切换为绿色鲸鱼游动动画，轮廓清晰、动作连贯，主体完全可辨认。\"\n}",
+      "summary": "After a brief connection-success splash, a green swimming whale animation; silhouette clear and motion coherent.",
+      "_raw": "{\"group\": 11, \"subject\": \"A swimming whale\", \"recognizable\": true, \"confidence\": 0.92, \"issues\": [\"capture artifacts\"], \"content_actions\": [\"none\"], \"summary\": \"After a brief connection-success splash, a green swimming whale animation; silhouette clear and motion coherent.\", \"motion\": \"animated\"}",
       "_usage": {
         "prompt_tokens": 41277,
         "completion_tokens": 119,
@@ -291,15 +291,15 @@
     },
     {
       "group": 12,
-      "subject": "手写绿色英文单词，近似“Ainstec”",
+      "subject": "Handwritten green English word, approximately Ainstec",
       "recognizable": true,
       "confidence": 0.86,
       "issues": [],
       "content_actions": [
         "none"
       ],
-      "summary": "投影内容为可辨认的手写英文字样，采集偏色和欠曝不影响识别。",
-      "_raw": "{\n  \"group\": 12,\n  \"subject\": \"手写绿色英文单词，近似“Ainstec”\",\n  \"recognizable\": true,\n  \"confidence\": 0.86,\n  \"issues\": [],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"投影内容为可辨认的手写英文字样，采集偏色和欠曝不影响识别。\"\n}",
+      "summary": "Recognizable handwritten English lettering; color cast and underexposure do not block recognition.",
+      "_raw": "{\"group\": 12, \"subject\": \"Handwritten green English word, approximately Ainstec\", \"recognizable\": true, \"confidence\": 0.86, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Recognizable handwritten English lettering; color cast and underexposure do not block recognition.\"}",
       "_usage": {
         "prompt_tokens": 1056,
         "completion_tokens": 602,
@@ -315,15 +315,15 @@
     },
     {
       "group": 13,
-      "subject": "IRIS GREEN 骑行图标与 Hello.Scarlett 字样",
+      "subject": "IRIS GREEN cycling icon with Hello.Scarlett text",
       "recognizable": true,
       "confidence": 0.96,
       "issues": [],
       "content_actions": [
         "none"
       ],
-      "summary": "投影内容清晰可辨，绿色扫描与欠曝属采集伪影，无需内容调整。",
-      "_raw": "{\"group\":13,\"subject\":\"IRIS GREEN 骑行图标与 Hello.Scarlett 字样\",\"recognizable\":true,\"confidence\":0.96,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容清晰可辨，绿色扫描与欠曝属采集伪影，无需内容调整。\"}",
+      "summary": "Projection is clear; green scan and underexposure are capture artifacts; no content change needed.",
+      "_raw": "{\"group\": 13, \"subject\": \"IRIS GREEN cycling icon with Hello.Scarlett text\", \"recognizable\": true, \"confidence\": 0.96, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Projection is clear; green scan and underexposure are capture artifacts; no content change needed.\"}",
       "_usage": {
         "prompt_tokens": 1057,
         "completion_tokens": 339,
@@ -339,18 +339,18 @@
     },
     {
       "group": 14,
-      "subject": "绿色数字“30”，对应速度达成30KM",
+      "subject": "Green numeral 30 for the 30 km/h speed milestone",
       "recognizable": true,
       "confidence": 0.92,
       "issues": [
-        "伪影干扰",
-        "太碎"
+        "capture artifacts",
+        "too fragmented"
       ],
       "content_actions": [
         "none"
       ],
-      "summary": "主体“30”清晰可辨认，碎裂粒子与绿色扫描伪影不影响内容识别。",
-      "_raw": "{\"group\":14,\"subject\":\"绿色数字“30”，对应速度达成30KM\",\"recognizable\":true,\"confidence\":0.92,\"issues\":[\"伪影干扰\",\"太碎\"],\"content_actions\":[\"none\"],\"summary\":\"主体“30”清晰可辨认，碎裂粒子与绿色扫描伪影不影响内容识别。\"}",
+      "summary": "Subject 30 is clear; particle debris and green scan artifacts do not block recognition.",
+      "_raw": "{\"group\": 14, \"subject\": \"Green numeral 30 for the 30 km/h speed milestone\", \"recognizable\": true, \"confidence\": 0.92, \"issues\": [\"capture artifacts\", \"too fragmented\"], \"content_actions\": [\"none\"], \"summary\": \"Subject 30 is clear; particle debris and green scan artifacts do not block recognition.\"}",
       "_usage": {
         "prompt_tokens": 1059,
         "completion_tokens": 225,
@@ -366,15 +366,15 @@
     },
     {
       "group": 15,
-      "subject": "里程完成界面，显示 0.0 km",
+      "subject": "Mileage completed UI showing 0.0 km",
       "recognizable": true,
       "confidence": 0.95,
       "issues": [],
       "content_actions": [
         "none"
       ],
-      "summary": "投影内容清晰可辨：Completed 字样、0.0 数值与 km 单位均明确，采集伪影不影响识别。",
-      "_raw": "{\"group\":15,\"subject\":\"里程完成界面，显示 0.0 km\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容清晰可辨：Completed 字样、0.0 数值与 km 单位均明确，采集伪影不影响识别。\"}",
+      "summary": "Clear Completed label, 0.0 value, and km unit; capture artifacts do not block recognition.",
+      "_raw": "{\"group\": 15, \"subject\": \"Mileage completed UI showing 0.0 km\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Clear Completed label, 0.0 value, and km unit; capture artifacts do not block recognition.\"}",
       "_usage": {
         "prompt_tokens": 1057,
         "completion_tokens": 244,
@@ -390,18 +390,18 @@
     },
     {
       "group": 16,
-      "subject": "侧身人物举瓶喝水",
+      "subject": "Side profile of a person drinking from a bottle",
       "recognizable": true,
       "confidence": 0.92,
       "issues": [
-        "构图偏左",
-        "门缝分割画面"
+        "composition shifted left",
+        "door gap splits the frame"
       ],
       "content_actions": [
         "recenter"
       ],
-      "summary": "喝水人物主体清晰可辨认，绿色偏色和扫描纹属采集伪影，主要问题是投影位置偏左且被门缝切开。",
-      "_raw": "{\"group\":16,\"subject\":\"侧身人物举瓶喝水\",\"recognizable\":true,\"confidence\":0.92,\"issues\":[\"构图偏左\",\"门缝分割画面\"],\"content_actions\":[\"recenter\"],\"summary\":\"喝水人物主体清晰可辨认，绿色偏色和扫描纹属采集伪影，主要问题是投影位置偏左且被门缝切开。\"}",
+      "summary": "Drinking figure is clear; green cast and scan lines are capture artifacts; main issues are leftward placement and a door-gap split.",
+      "_raw": "{\"group\": 16, \"subject\": \"Side profile of a person drinking from a bottle\", \"recognizable\": true, \"confidence\": 0.92, \"issues\": [\"composition shifted left\", \"door gap splits the frame\"], \"content_actions\": [\"recenter\"], \"summary\": \"Drinking figure is clear; green cast and scan lines are capture artifacts; main issues are leftward placement and a door-gap split.\"}",
       "_usage": {
         "prompt_tokens": 1057,
         "completion_tokens": 300,
@@ -417,18 +417,18 @@
     },
     {
       "group": 17,
-      "subject": "绿色数字“40”（速度达成40KM）",
+      "subject": "Green numeral 40 for the 40 km/h speed milestone",
       "recognizable": true,
       "confidence": 0.92,
       "issues": [
-        "伪影干扰",
-        "太碎"
+        "capture artifacts",
+        "too fragmented"
       ],
       "content_actions": [
         "none"
       ],
-      "summary": "主体数字40清晰可辨，绿色扫描碎裂和条纹属于采集伪影，不影响内容识别。",
-      "_raw": "{\"group\":17,\"subject\":\"绿色数字“40”（速度达成40KM）\",\"recognizable\":true,\"confidence\":0.92,\"issues\":[\"伪影干扰\",\"太碎\"],\"content_actions\":[\"none\"],\"summary\":\"主体数字40清晰可辨，绿色扫描碎裂和条纹属于采集伪影，不影响内容识别。\"}",
+      "summary": "Numeral 40 is clear; green scan fragmentation is a capture artifact and does not block recognition.",
+      "_raw": "{\"group\": 17, \"subject\": \"Green numeral 40 for the 40 km/h speed milestone\", \"recognizable\": true, \"confidence\": 0.92, \"issues\": [\"capture artifacts\", \"too fragmented\"], \"content_actions\": [\"none\"], \"summary\": \"Numeral 40 is clear; green scan fragmentation is a capture artifact and does not block recognition.\"}",
       "_usage": {
         "prompt_tokens": 1059,
         "completion_tokens": 210,
@@ -444,20 +444,20 @@
     },
     {
       "group": 18,
-      "subject": "左右对称的放射状光轮轨迹",
+      "subject": "Symmetric radial light-wheel trails left and right",
       "recognizable": true,
       "confidence": 0.72,
       "issues": [
-        "伪影干扰",
-        "太碎",
-        "对比不足"
+        "capture artifacts",
+        "too fragmented",
+        "low contrast"
       ],
       "content_actions": [
         "simplify_silhouette",
         "thicken_strokes"
       ],
-      "summary": "可辨认为对称扇形/放射状光轮轨迹，但扫描点阵与欠曝使边缘偏碎，建议简化轮廓并加粗主光带。",
-      "_raw": "{\n  \"group\": 18,\n  \"subject\": \"左右对称的放射状光轮轨迹\",\n  \"recognizable\": true,\n  \"confidence\": 0.72,\n  \"issues\": [\n    \"伪影干扰\",\n    \"太碎\",\n    \"对比不足\"\n  ],\n  \"content_actions\": [\n    \"simplify_silhouette\",\n    \"thicken_strokes\"\n  ],\n  \"summary\": \"可辨认为对称扇形/放射状光轮轨迹，但扫描点阵与欠曝使边缘偏碎，建议简化轮廓并加粗主光带。\"\n}",
+      "summary": "Readable as symmetric fan/radial light-wheel trails; scan lattice and underexposure fragment edges — simplify outline and thicken main bands.",
+      "_raw": "{\"group\": 18, \"subject\": \"Symmetric radial light-wheel trails left and right\", \"recognizable\": true, \"confidence\": 0.72, \"issues\": [\"capture artifacts\", \"too fragmented\", \"low contrast\"], \"content_actions\": [\"simplify_silhouette\", \"thicken_strokes\"], \"summary\": \"Readable as symmetric fan/radial light-wheel trails; scan lattice and underexposure fragment edges — simplify outline and thicken main bands.\"}",
       "_usage": {
         "prompt_tokens": 1058,
         "completion_tokens": 295,
@@ -473,17 +473,17 @@
     },
     {
       "group": 19,
-      "subject": "骑自行车的人（公路车骑行爬坡姿态）",
+      "subject": "Cyclist in a road-bike climbing posture",
       "recognizable": true,
       "confidence": 0.95,
       "issues": [
-        "伪影干扰"
+        "capture artifacts"
       ],
       "content_actions": [
         "none"
       ],
-      "summary": "骑行者剪影轮廓清晰完整，人、车、轮均可辨认，绿色扫描条纹属采集伪影，内容无需调整。",
-      "_raw": "{\"group\":19,\"subject\":\"骑自行车的人（公路车骑行爬坡姿态）\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[\"伪影干扰\"],\"content_actions\":[\"none\"],\"summary\":\"骑行者剪影轮廓清晰完整，人、车、轮均可辨认，绿色扫描条纹属采集伪影，内容无需调整。\"}",
+      "summary": "Clear full silhouette of rider and bike; green scan stripes are capture artifacts; content needs no change.",
+      "_raw": "{\"group\": 19, \"subject\": \"Cyclist in a road-bike climbing posture\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [\"capture artifacts\"], \"content_actions\": [\"none\"], \"summary\": \"Clear full silhouette of rider and bike; green scan stripes are capture artifacts; content needs no change.\"}",
       "_usage": {
         "prompt_tokens": 1057,
         "completion_tokens": 97,
@@ -499,20 +499,20 @@
     },
     {
       "group": 20,
-      "subject": "骑山地车下坡的人，带地面阴影",
+      "subject": "Mountain biker descending with ground shadow",
       "recognizable": true,
       "confidence": 0.85,
       "issues": [
-        "太碎",
-        "伪影干扰",
-        "对比不足"
+        "too fragmented",
+        "capture artifacts",
+        "low contrast"
       ],
       "content_actions": [
         "simplify_silhouette",
         "drop_background"
       ],
-      "summary": "山地车下坡主体清晰可辨，绿色扫描条纹为采集伪影，建议简化剪影去除细碎背景纹理。",
-      "_raw": "{\"group\": 20, \"subject\": \"骑山地车下坡的人，带地面阴影\", \"recognizable\": true, \"confidence\": 0.85, \"issues\": [\"太碎\", \"伪影干扰\", \"对比不足\"], \"content_actions\": [\"simplify_silhouette\", \"drop_background\"], \"summary\": \"山地车下坡主体清晰可辨，绿色扫描条纹为采集伪影，建议简化剪影去除细碎背景纹理。\"}",
+      "summary": "Descent silhouette is clear; green scan stripes are capture artifacts — simplify silhouette and remove busy background texture.",
+      "_raw": "{\"group\": 20, \"subject\": \"Mountain biker descending with ground shadow\", \"recognizable\": true, \"confidence\": 0.85, \"issues\": [\"too fragmented\", \"capture artifacts\", \"low contrast\"], \"content_actions\": [\"simplify_silhouette\", \"drop_background\"], \"summary\": \"Descent silhouette is clear; green scan stripes are capture artifacts — simplify silhouette and remove busy background texture.\"}",
       "_usage": {
         "prompt_tokens": 1057,
         "completion_tokens": 131,

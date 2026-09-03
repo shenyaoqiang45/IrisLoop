@@ -1,16 +1,16 @@
-"""从 IrisGreen 拉取设备内素材到本地 data/。
+"""Pull on-device IrisGreen assets to local data/.
 
-设备没有 BLE 读图命令；协议规定切到 WiFi AP 后走 HTTP：
-    打开 WiFi:  写 0x02 到 adb40005
-    上传/取图:  http://192.168.4.1/upload/<name>.bmp
-    切回 BLE:  http://192.168.4.1/switch/ble
+There is no BLE read-image command; the protocol switches to a WiFi AP then HTTP:
+    Open WiFi:  write 0x02 to adb40005
+    Upload/fetch:  http://192.168.4.1/upload/<name>.bmp
+    Switch back to BLE:  http://192.168.4.1/switch/ble
 
-流程:
-    1. BLE 扫描并连接，读图片总数
-    2. 打开设备 WiFi
-    3. 本机 WLAN 连上 AP
-    4. 探测目录，再按协议文件名逐张 GET
-    5. 切回 BLE
+Flow:
+    1. BLE scan and connect, read picture count
+    2. Open device WiFi
+    3. Join the AP from this PC's WLAN
+    4. Probe the directory, then GET each protocol filename
+    5. Switch back to BLE
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
 DEFAULT_HOST = "192.168.4.1"
 OUT_DIR = "data"
 
-# 协议 Sheet2 给出的各组最大张数（十进制组号）
+# Max frames per group from protocol Sheet2 (decimal group IDs)
 GROUP_MAX = {
     1: 10, 2: 3, 3: 1, 4: 1, 5: 2,
     10: 1, 11: 20, 12: 5, 13: 10,
@@ -63,7 +63,7 @@ def http_get_retry(url: str, timeout: float = 10.0, tries: int = 5) -> tuple[int
 
 
 async def find_device(timeout: float = 12.0, address: str | None = None):
-    """返回 (address, BLEDevice|None)。尽量带回扫描到的设备对象，便于 WinRT 立刻连接。"""
+    """Return (address, BLEDevice|None). Prefer the scanned device object so WinRT can connect immediately."""
     found = await BleakScanner.discover(timeout=timeout, return_adv=True)
     if address:
         for addr, (dev, adv) in found.items():
@@ -76,15 +76,15 @@ async def find_device(timeout: float = 12.0, address: str | None = None):
             return addr, dev
     if address:
         return address, None
-    raise RuntimeError("未扫描到 IrisGreen")
+    raise RuntimeError("IrisGreen not found in scan")
 
 
 def build_wifi_cred(ssid: str, password: str) -> bytes:
-    """构造 adb40005 命令01：配置 WiFi 名称/密码（共 98 字节）。"""
+    """Build adb40005 command 01: configure WiFi SSID/password (98 bytes total)."""
     sb = ssid.encode("utf-8")
     pb = password.encode("utf-8")
     if len(sb) > 32 or len(pb) > 64:
-        raise ValueError("SSID/密码过长")
+        raise ValueError("SSID/password too long")
     name = sb.ljust(32, b"\x00")
     pwd = pb.ljust(64, b"\x00")
     return bytes([0x01, len(sb)]) + name + pwd
@@ -96,7 +96,7 @@ async def ble_prepare(
     password: str = "AinstecIris123456789",
     device=None,
 ) -> tuple[int, str, str]:
-    """连接、读图片数、配置并打开 WiFi。返回 (图片总数, ssid, password)。"""
+    """Connect, read picture count, configure and open WiFi. Return (picture count, ssid, password)."""
     suffix = address.replace(":", "")[-6:].upper()
     ssid = ssid or f"Iris-G-WLAN-{suffix}"
     print(f"=== BLE CONNECT {address} ===")
@@ -110,16 +110,16 @@ async def ble_prepare(
         n = await cli.get_picture_count()
         if n is not None:
             count = n
-            print(f"  图片总数 {count}")
+            print(f"  picture count {count}")
         else:
-            print("  读图片总数失败")
+            print("  failed to read picture count")
         cred = build_wifi_cred(ssid, password)
         print(f"=== SET WIFI ssid={ssid} pass={password} ===")
         await client.write_gatt_char(CHAR_MAIN_CMD2, cred, response=True)
         await asyncio.sleep(0.5)
         print("=== OPEN WIFI (adb40005 <- 02) ===")
         await client.write_gatt_char(CHAR_MAIN_CMD2, b"\x02", response=True)
-        print("  已发送打开 WiFi")
+        print("  sent open-WiFi")
         await asyncio.sleep(1.0)
     finally:
         try:
@@ -159,7 +159,7 @@ def pick_ssid(ssids: list[str], hint: str) -> str | None:
 
 
 def write_wlan_profile(ssid: str, password: str, path: str) -> None:
-    # 设备示例里 SSID=密码；若开放网络，仍先尝试 WPA2
+    # Device samples use SSID=password; if the network is open, still try WPA2 first
     xml = f"""<?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
     <name>{ssid}</name>
@@ -190,8 +190,8 @@ def write_wlan_profile(ssid: str, password: str, path: str) -> None:
 
 def wifi_connected_to(ssid: str) -> bool:
     out = run(["netsh", "wlan", "show", "interfaces"])
-    # 关联成功时会打印 SSID/BSSID；断开时没有这两行。
-    # 避免依赖「已连接」中文（控制台编码会乱码）。
+    # Association success prints SSID/BSSID; disconnect has neither line.
+    # Do not depend on the Chinese "connected" string (console encoding garbles it).
     has_ssid = re.search(rf"SSID\s*:\s*{re.escape(ssid)}\s*$", out, re.I | re.M)
     has_bssid = re.search(r"BSSID\s*:\s*([0-9a-f:]{17})", out, re.I)
     return bool(has_ssid and has_bssid)
@@ -199,7 +199,7 @@ def wifi_connected_to(ssid: str) -> bool:
 
 def connect_wifi(ssid: str, password: str) -> bool:
     if wifi_connected_to(ssid):
-        log(f"  WLAN 已在 {ssid}")
+        log(f"  WLAN already on {ssid}")
         return True
     profile = os.path.join(os.environ.get("TEMP", "."), "iris_wlan.xml")
     run(["netsh", "wlan", "delete", "profile", f"name={ssid}"])
@@ -209,31 +209,31 @@ def connect_wifi(ssid: str, password: str) -> bool:
     deadline = time.time() + 30
     while time.time() < deadline:
         if wifi_connected_to(ssid):
-            log(f"  WLAN 已连接 {ssid}")
-            # 等 DHCP
+            log(f"  WLAN connected {ssid}")
+            # Wait for DHCP
             for _ in range(15):
                 ip = run(["netsh", "interface", "ip", "show", "addresses", "WLAN"])
                 if "192.168.4." in ip:
-                    log("  已拿到 192.168.4.x")
+                    log("  got 192.168.4.x")
                     return True
                 time.sleep(1.0)
-            log("  已关联但未拿到 192.168.4.x")
+            log("  associated but no 192.168.4.x yet")
             return True
         time.sleep(1.0)
-    log("  等待连接超时")
+    log("  connect wait timed out")
     log(run(["netsh", "wlan", "show", "interfaces"]))
     return False
 
 
 def _wlan_local_ip() -> str | None:
-    """拿到连着设备热点时的本机地址（通常 192.168.4.2）。"""
+    """Local address while on the device hotspot (usually 192.168.4.2)."""
     out = run(["netsh", "interface", "ip", "show", "addresses", "WLAN"])
     m = re.search(r"192\.168\.4\.\d+", out)
     return m.group(0) if m else None
 
 
 def http_get(url: str, timeout: float = 8.0) -> tuple[int, bytes, str]:
-    """直连设备 AP，绑定 WLAN 地址并禁用系统代理（避免 Meta/Clash TUN 劫持）。"""
+    """Talk to the device AP directly: bind the WLAN address and disable system proxy (avoids Meta/Clash TUN hijack)."""
     import http.client
     import socket
     from urllib.parse import urlparse
@@ -254,7 +254,7 @@ def http_get(url: str, timeout: float = 8.0) -> tuple[int, bytes, str]:
             )
 
     src = _wlan_local_ip()
-    # 环境代理也可能劫持；临时清空
+    # Env proxies can hijack too; clear them temporarily
     old_env = {k: os.environ.pop(k) for k in list(os.environ)
                if k.lower() in ("http_proxy", "https_proxy", "all_proxy", "http_proxy", "https_proxy")}
     try:
@@ -304,7 +304,7 @@ def names_from_resource(data: bytes) -> list[str]:
     text = data.decode("utf-8", errors="replace")
     names = set(re.findall(r'"([^"]+\.(?:bmp|json|bin|dat))"', text, flags=re.I))
     names.update(re.findall(r'[\w.\-/]+\.bmp', text, flags=re.I))
-    # 常见字段
+    # Common fields
     try:
         import json
         obj = json.loads(text)
@@ -346,12 +346,12 @@ def pull_all(host: str, out_dir: str, expected: int, switch_ble: bool = False) -
     code, body, ctype = http_get_retry(base + "/", timeout=8.0, tries=8)
     print(f"  / -> {code} {len(body)}B {ctype}")
     if code != 200:
-        print(f"  {host} 不可达或文件服务未就绪")
+        print(f"  {host} unreachable or file service not ready")
         return 0
     save_file(out_dir, "_index.html", body)
     listed = parse_names(body)
 
-    # resource.json 通常有完整素材清单；首页只显示前 5 个文件
+    # resource.json usually has the full asset list; the home page only shows the first 5 files
     code, res, _ = http_get_retry(base + "/resource.json", timeout=8.0, tries=6)
     if code == 200 and res:
         save_file(out_dir, "resource.json", res)
@@ -362,7 +362,7 @@ def pull_all(host: str, out_dir: str, expected: int, switch_ble: bool = False) -
         save_file(out_dir, "config.json", cfg)
         listed.extend(names_from_resource(cfg))
 
-    # 去重，优先真实文件名
+    # Dedupe; prefer real filenames
     targets: list[str] = []
     seen: set[str] = set()
     for n in listed:
@@ -373,7 +373,7 @@ def pull_all(host: str, out_dir: str, expected: int, switch_ble: bool = False) -
         targets.append(n.lstrip("/"))
 
     if len(targets) < 10:
-        print("  列表偏少，追加协议候选名")
+        print("  listing looks short; append protocol candidate names")
         for n in candidate_names():
             key = n.lower()
             if key not in seen:
@@ -383,14 +383,14 @@ def pull_all(host: str, out_dir: str, expected: int, switch_ble: bool = False) -
     print(f"=== DOWNLOAD {len(targets)} files -> {out_dir}/ ===")
     miss = 0
     for i, name in enumerate(targets, 1):
-        # ESP32 文件服务器：下载路径是 /filename（上传才是 /upload/filename）
+        # ESP32 file server: download path is /filename (upload is /upload/filename)
         url = f"{base}/{name}"
         code, body, _ = http_get_retry(url, timeout=15.0, tries=4)
         if code == -1:
             miss += 1
             print(f"  fail {name}")
             if miss >= 12:
-                print("  连续失败过多，暂停 3s 后继续")
+                print("  too many consecutive failures; pause 3s then continue")
                 time.sleep(3.0)
                 miss = 0
             continue
@@ -405,10 +405,10 @@ def pull_all(host: str, out_dir: str, expected: int, switch_ble: bool = False) -
                 print(f"  [{saved}] {tag} {os.path.basename(name)}  {len(body)}B")
         time.sleep(0.05)
 
-    print(f"  已保存 {saved} 个文件" + (f"（设备上报 {expected} 张）" if expected >= 0 else ""))
+    print(f"  saved {saved} files" + (f" (device reported {expected})" if expected >= 0 else ""))
     if switch_ble:
         http_get(base + "/switch/ble", timeout=5.0)
-        print("  已请求切回 BLE")
+        print("  requested switch back to BLE")
     return saved
 
 
@@ -420,7 +420,7 @@ async def main() -> int:
     ap.add_argument("--ssid", default="")
     ap.add_argument("--password", default="")
     ap.add_argument("--skip-ble", action="store_true")
-    ap.add_argument("--skip-wifi", action="store_true", help="本机已连上设备 AP")
+    ap.add_argument("--skip-wifi", action="store_true", help="this PC is already on the device AP")
     args = ap.parse_args()
 
     count = -1
@@ -430,11 +430,11 @@ async def main() -> int:
     device = None
     if not args.skip_ble:
         addr, device = await find_device(address=args.address)
-        print(f"  目标 {addr}")
+        print(f"  target {addr}")
         count, ssid, password = await ble_prepare(
             addr, ssid=ssid, password=password, device=device,
         )
-        print("  等待 AP 起来 ...")
+        print("  waiting for AP to come up ...")
         await asyncio.sleep(5.0)
 
     if not args.skip_wifi:
@@ -447,7 +447,7 @@ async def main() -> int:
         ssid = ssid or pick_ssid(ssids, suffix) or f"Iris-G-WLAN-{suffix}"
         print(f"=== CONNECT AP {ssid} / {password} ===")
         if not connect_wifi(ssid, password):
-            print("  WiFi 连接失败，无法下载")
+            print("  WiFi connect failed, cannot download")
             return 2
         time.sleep(1.0)
 

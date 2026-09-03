@@ -1,4 +1,4 @@
-"""USB 摄像头采集封装。"""
+"""USB camera capture wrapper."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ from typing import Iterator, List, Optional, Tuple
 import cv2
 import numpy as np
 
-# Windows 下 MSMF 能正确上报 fps，DSHOW 上报 0，故先试 MSMF
+# On Windows, MSMF reports fps correctly; DSHOW reports 0, so try MSMF first
 PREFERRED_BACKENDS = (cv2.CAP_MSMF, cv2.CAP_DSHOW, cv2.CAP_ANY)
-# USB 外置常用 MJPG；笔记本内置摄像头多为 YUY2/NV12，强制 MJPG 会黑屏或打不开
+# External USB cams often use MJPG; built-in laptop cams are usually YUY2/NV12 — forcing MJPG can black-screen or fail to open
 FOURCC_TRIES: Tuple[Optional[str], ...] = ("MJPG", None)
 
 
@@ -43,7 +43,7 @@ class UsbCamera:
                 cap = cv2.VideoCapture(self.index, backend)
                 if not cap.isOpened():
                     cap.release()
-                    errors.append(f"backend={backend} fourcc={fourcc or 'default'} 打开失败")
+                    errors.append(f"backend={backend} fourcc={fourcc or 'default'} open failed")
                     continue
 
                 if fourcc:
@@ -55,19 +55,19 @@ class UsbCamera:
                 ok, frame = cap.read()
                 if not ok or frame is None or frame.size < 100:
                     cap.release()
-                    errors.append(f"backend={backend} fourcc={fourcc or 'default'} 读取首帧失败")
+                    errors.append(f"backend={backend} fourcc={fourcc or 'default'} first-frame read failed")
                     continue
 
                 h, w = frame.shape[:2]
                 self.cap = cap
                 self.fourcc = fourcc
                 self.actual_size = (w, h)
-                # 后端上报值可能不可靠（DSHOW 恒为 0），稍后用 measure_fps 校准
+                # Backend-reported fps can be unreliable (DSHOW is always 0); calibrate later with measure_fps
                 self.actual_fps = float(cap.get(cv2.CAP_PROP_FPS))
                 return
 
         raise RuntimeError(
-            f"无法打开摄像头 index={self.index}（{'；'.join(errors) or '无可用后端'}）"
+            f"cannot open camera index={self.index} ({'; '.join(errors) or 'no usable backend'})"
         )
 
     def read(self) -> Tuple[bool, Optional[np.ndarray]]:
@@ -81,7 +81,7 @@ class UsbCamera:
             self.cap = None
 
     def measure_fps(self, seconds: float = 2.0) -> float:
-        """实测帧率。后端上报值不可信时以实测为准。"""
+        """Measure actual frame rate. Prefer this when the backend-reported value is untrustworthy."""
         if self.cap is None:
             return 0.0
         count = 0
@@ -106,7 +106,7 @@ class UsbCamera:
     def set_auto_exposure(self, enabled: bool) -> None:
         if self.cap is None:
             return
-        # MSMF: 0.75 自动 / 0.25 手动；失败则忽略
+        # MSMF: 0.75 auto / 0.25 manual; ignore failures
         try:
             self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75 if enabled else 0.25)
         except Exception:
@@ -138,7 +138,7 @@ class UsbCamera:
 
 @contextlib.contextmanager
 def quiet_opencv() -> Iterator[None]:
-    """探测不存在的设备索引时 OpenCV 会刷大量 warning，临时静音。"""
+    """Mute OpenCV warnings that flood when probing missing device indices."""
     try:
         previous = cv2.setLogLevel(0)  # LOG_LEVEL_SILENT
     except Exception:
@@ -151,7 +151,7 @@ def quiet_opencv() -> Iterator[None]:
 
 
 def probe_cameras(max_index: int = 8) -> List[dict]:
-    """探测可用摄像头。返回的是各摄像头默认分辨率。"""
+    """Probe available cameras. Returned sizes are each camera's default resolution."""
     results: List[dict] = []
     with quiet_opencv():
         for index in range(max_index):

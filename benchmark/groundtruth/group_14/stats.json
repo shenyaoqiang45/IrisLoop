@@ -1,6 +1,6 @@
 {
   "group": 14,
-  "name": "速度达成30KM",
+  "name": "speed 30 km/h",
   "frames": null,
   "stills": [
     "frame_00_0.4s.jpg",
@@ -20,7 +20,7 @@
   "bright_ratio": 0.031187065972222223,
   "lap_var": 27.188124632337008,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_14",
   "ok": true

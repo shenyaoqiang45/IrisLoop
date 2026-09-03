@@ -1,6 +1,6 @@
-"""用 Kimi K3 跑实拍理解用例（每组只用一张 still_01*.jpg）。
+"""Run captured-still understanding cases with Kimi K3 (one still_01*.jpg per group).
 
-用法:
+Usage:
     set MOONSHOT_API_KEY=sk-...
     python tools/vu_k3_eval.py --root benchmark/groundtruth
     python tools/vu_k3_eval.py --root benchmark/groundtruth --groups 1 2 3
@@ -21,24 +21,24 @@ from irisloop import protocol as P
 from irisloop import kimi_client as K
 
 SYSTEM = (
-    "你是 MEMS 绿色激光投影的视觉理解质检员。"
-    "画面来自 USB 相机拍摄物理墙面上的投影。"
-    "绿色扫描条纹、轻微欠曝、偏色是采集伪影，不是内容失败。"
-    "禁止建议调节焦距、FOV、硬件亮度或设备参数；只评价投影内容是否可辨认。"
-    "只输出 JSON，不要 Markdown。"
+    "You are a visual-understanding QA inspector for MEMS green laser projection. "
+    "The image is a USB-camera photo of a projection on a physical wall. "
+    "Green scan stripes, slight underexposure, and color shift are capture artifacts, not content failure. "
+    "Do not suggest changing focus, FOV, hardware brightness, or device parameters; only judge whether the projected content is recognizable. "
+    "Output JSON only, no Markdown."
 )
 
-PROMPT = """请分析这张 MEMS 激光投影实拍 JPG。素材组 ID={gid}（{gname}）。
+PROMPT = """Analyze this MEMS laser-projection still JPG. Material group ID={gid} ({gname}).
 
-只回 JSON：
+Return JSON only:
 {{
   "group": {gid},
-  "subject": "你认出的主体（中文短句，认不出写 unknown）",
+  "subject": "the subject you recognize (short English phrase, or unknown)",
   "recognizable": true/false,
-  "confidence": 0.0到1.0,
-  "issues": ["太细|太碎|对比不足|主体不清|伪影干扰|其他..."],
+  "confidence": 0.0 to 1.0,
+  "issues": ["too thin|too fragmented|low contrast|subject unclear|artifact interference|other..."],
   "content_actions": ["thicken_strokes|simplify_silhouette|drop_background|recenter|none"],
-  "summary": "一句话中文结论"
+  "summary": "one-sentence English conclusion"
 }}"""
 
 
@@ -46,7 +46,7 @@ def find_still01(group_dir: Path) -> Path | None:
     hits = sorted(group_dir.glob("still_01*.jpg"))
     if hits:
         return hits[0]
-    # 兼容 project_and_capture 的 frame_01_*.jpg
+    # Compatible with project_and_capture frame_01_*.jpg
     hits = sorted(group_dir.glob("frame_01_*.jpg"))
     return hits[0] if hits else None
 
@@ -85,21 +85,21 @@ def eval_still(gid: int, gname: str, still: Path, *, effort: str) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--root", required=True, help="vu_testset 目录")
+    ap.add_argument("--root", required=True, help="vu_testset directory")
     ap.add_argument("--groups", type=int, nargs="*", default=None)
     ap.add_argument("--effort", choices=["low", "high", "max"], default="low")
     ap.add_argument("--sleep", type=float, default=2.5,
-                    help="组间等待（账号并发=1 时建议 >=2）")
+                    help="Wait between groups (>=2 recommended when account concurrency=1)")
     ap.add_argument("--skip-ok", action="store_true",
-                    help="跳过已有成功 k3_eval.json 的组")
+                    help="Skip groups that already have a successful k3_eval.json")
     args = ap.parse_args()
 
     root = Path(args.root)
     if not root.is_dir():
-        print(f"目录不存在: {root}")
+        print(f"Directory does not exist: {root}")
         return 2
 
-    print("=== Kimi K3 单帧理解评测（still_01）===")
+    print("=== Kimi K3 single-frame understanding eval (still_01) ===")
     print(f"  base={K.base_url()}  model={K.DEFAULT_MODEL}  effort={args.effort}")
     print(f"  root={root}")
 
@@ -118,16 +118,16 @@ def main() -> int:
             try:
                 old = json.loads(prev.read_text(encoding="utf-8"))
                 if old.get("ok") and "recognizable" in old:
-                    print(f"\n--- 组 {gid:02d} ({gname}) 跳过已成功 ---")
+                    print(f"\n--- group {gid:02d} ({gname}) skip already-ok ---")
                     results.append(old)
                     continue
             except Exception:
                 pass
 
         still = find_still01(gdir)
-        print(f"\n--- 组 {gid:02d} ({gname}) ---")
+        print(f"\n--- group {gid:02d} ({gname}) ---")
         if still is None:
-            print("  跳过: 无 still_01*.jpg / frame_01_*.jpg")
+            print("  skip: no still_01*.jpg / frame_01_*.jpg")
             results.append({"group": gid, "name": gname, "ok": False, "error": "no still_01"})
             continue
 
@@ -174,17 +174,17 @@ def main() -> int:
     report_path = root / "k3_report.json"
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print("\n=== 汇总 ===")
+    print("\n=== Summary ===")
     print(f"  report: {report_path}")
     for r in results:
         if r.get("ok"):
             print(
-                f"  组{r.get('group'):02d}  "
+                f"  group {r.get('group'):02d}  "
                 f"{'OK' if r.get('recognizable') else 'NO'}  "
                 f"{r.get('subject')}  | {r.get('summary')}"
             )
         else:
-            print(f"  组{r.get('group'):02d}  ERR  {r.get('error')}")
+            print(f"  group {r.get('group'):02d}  ERR  {r.get('error')}")
     return 0 if not report["errors"] else 1
 
 

@@ -1,9 +1,9 @@
-"""最低可玩门槛探测：笔记本自带摄像头能否代替 USB cam。
+"""Minimum playability probe: can a laptop's built-in camera replace a USB cam.
 
-目标硬件（理想）：IrisGreen（BLE）+ 带蓝牙的笔记本自带摄像头。
-不需要外置 USB 摄像头。
+Ideal hardware: IrisGreen (BLE) + a Bluetooth laptop with a built-in camera.
+No external USB camera required.
 
-用法:
+Usage:
     python tools/min_play_test.py
     python tools/min_play_test.py --ble --group 1 --seconds 5
 """
@@ -100,7 +100,7 @@ def classify_names(names: list[str]) -> dict:
 def grab_still(index: int, out_path: Path) -> dict:
     cam = UsbCamera(index, 1280, 720, 30)
     cam.open()
-    # 丢弃几帧让自动曝光稳定
+    # Drop a few frames so auto-exposure can settle
     frame = None
     ok = False
     for _ in range(12):
@@ -131,44 +131,44 @@ def verdict(profile: dict, probes: list[dict], stills: list[dict]) -> list[str]:
     cls = classify_names(pnp)
     n_ok = sum(1 for s in stills if s.get("ok"))
 
-    lines.append(f"主机类型: {kind} ({profile.get('manufacturer')} {profile.get('model')})")
-    lines.append(f"系统登记的成像设备: {pnp or '无'}")
-    lines.append(f"OpenCV 可用索引: {[p['index'] for p in probes] or '无'}")
-    lines.append(f"成功出帧的摄像头: {n_ok}/{len(stills)}")
+    lines.append(f"Host type: {kind} ({profile.get('manufacturer')} {profile.get('model')})")
+    lines.append(f"PnP imaging devices: {pnp or 'none'}")
+    lines.append(f"OpenCV usable indexes: {[p['index'] for p in probes] or 'none'}")
+    lines.append(f"Cameras that produced a frame: {n_ok}/{len(stills)}")
 
     if kind == "desktop" and not cls["likely_builtin"]:
         lines.append(
-            "结论: 当前是台式机，没有笔记本内置/后置摄像头，只有外置 USB cam 可测。"
-            "最低门槛（笔记本 BLE + 自带摄像头）需要换一台带摄像头的笔记本实机验证。"
+            "Verdict: this is a desktop with no laptop built-in/rear camera; only an external USB cam can be tested. "
+            "The minimum bar (laptop BLE + built-in camera) needs a laptop with a camera."
         )
         if n_ok:
-            lines.append("本机 USB cam 采集链路可用，软件侧已支持内置摄像头的 MJPG 回退。")
+            lines.append("USB cam capture path works on this machine; software already supports MJPG fallback for built-in cameras.")
         return lines
 
     if not probes:
         lines.append(
-            "结论: 系统未枚举到摄像头。检查：Windows 隐私-相机允许桌面应用、BIOS 摄像头开关、驱动。"
+            "Verdict: no camera enumerated. Check Windows Privacy > Camera for desktop apps, BIOS camera switch, and drivers."
         )
         return lines
 
     if n_ok:
         lines.append(
-            "结论: 本机摄像头能出帧。用户最低可玩路径可以是："
-            "笔记本蓝牙连 IrisGreen + 把自带摄像头对准投影面（不必再买 USB cam）。"
+            "Verdict: this machine's camera can produce frames. Minimum user path: "
+            "connect IrisGreen over laptop Bluetooth and aim the built-in camera at the projection surface (no USB cam required)."
         )
         lines.append(
-            "姿势提示: 普通笔记本摄像头在屏幕顶端朝向用户；拍桌面投影可把屏幕合到约 20–40° 让镜头朝下；"
-            "拍墙面投影用二合一帐篷模式或把整机侧过来。后置镜头仅部分二合一/翻转屏机型才有。"
+            "Pose tip: a typical laptop camera sits at the top of the lid facing the user; to shoot a desk projection, fold the lid to about 20–40° so the lens points down; "
+            "for a wall projection use tent/2-in-1 mode or rotate the chassis. A rear camera exists only on some 2-in-1 / flip models."
         )
     else:
-        lines.append("结论: 设备在列表里但读不到帧，多半是占用/权限/IR 摄像头被误选。")
+        lines.append("Verdict: a device is listed but no frames were read — likely in use, permission denied, or an IR camera was selected.")
     return lines
 
 
 async def ble_loop(addr: str, group: int, seconds: float, camera: int, out_dir: str) -> int:
     from tools.project_and_capture import run_group
 
-    print(f"\n=== BLE 投射 + 本机摄像头 ===")
+    print(f"\n=== BLE project + local camera ===")
     print(f"  {addr}  group={group}  cam={camera}  {seconds}s")
     r = await run_group(
         addr, group, seconds, camera, None, False, None,
@@ -179,35 +179,35 @@ async def ble_loop(addr: str, group: int, seconds: float, camera: int, out_dir: 
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="探测笔记本自带摄像头能否代替 USB cam")
-    ap.add_argument("--ble", action="store_true", help="同时 BLE 播一组并采集")
+    ap = argparse.ArgumentParser(description="Probe whether a laptop built-in camera can replace a USB cam")
+    ap.add_argument("--ble", action="store_true", help="Also BLE-play one group and capture")
     ap.add_argument("--address", default=DEFAULT_ADDR)
     ap.add_argument("--group", type=int, default=1)
     ap.add_argument("--seconds", type=float, default=5.0)
-    ap.add_argument("--camera", type=int, default=None, help="BLE 采集用的摄像头索引，默认第一个可用")
+    ap.add_argument("--camera", type=int, default=None, help="Camera index for BLE capture; default first usable")
     args = ap.parse_args()
 
     tag = time.strftime("%Y%m%d_%H%M%S")
     out_root = Path("captures") / f"min_play_{tag}"
     out_root.mkdir(parents=True, exist_ok=True)
 
-    print("=== IrisLoop 最低可玩门槛探测 ===")
+    print("=== IrisLoop minimum playability probe ===")
     profile = host_profile()
     print(json.dumps({k: profile[k] for k in profile if k != "cim_raw"}, ensure_ascii=False, indent=2))
 
     with quiet_opencv():
         probes = probe_cameras()
-    print("\nOpenCV 探测:")
+    print("\nOpenCV probe:")
     for p in probes:
         print(f"  [{p['index']}] {p['width']}x{p['height']} @{p['fps']:.0f}fps {p['backend']}")
     if not probes:
-        print("  (无)")
+        print("  (none)")
 
     stills = []
     indexes = [p["index"] for p in probes] or [0]
     for idx in indexes:
         dest = out_root / f"cam{idx}_still.jpg"
-        print(f"\n抓拍 cam#{idx} -> {dest}")
+        print(f"\nGrab cam#{idx} -> {dest}")
         try:
             s = grab_still(idx, dest)
         except Exception as e:
@@ -215,7 +215,7 @@ def main() -> int:
         stills.append(s)
         print(f"  {s}")
 
-    print("\n=== 判断 ===")
+    print("\n=== Verdict ===")
     for line in verdict(profile, probes, stills):
         print("  " + line)
 
@@ -228,10 +228,10 @@ def main() -> int:
     }
     report_path = out_root / "report.json"
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"\n报告 {report_path}")
+    print(f"\nReport {report_path}")
 
     if not args.ble:
-        print("\n下一步: 在带摄像头的笔记本上再跑一次；真机投射加 --ble --group 1")
+        print("\nNext: run again on a laptop with a camera; live projection add --ble --group 1")
         return 0 if any(s.get("ok") for s in stills) else 1
 
     import asyncio

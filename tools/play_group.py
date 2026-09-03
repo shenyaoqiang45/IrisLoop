@@ -1,18 +1,18 @@
-"""播放 IrisGreen 素材组。
+"""Play an IrisGreen material group.
 
-素材组 ID 参考协议文档（MATERIAL_GROUPS）：
-    1  = 开机        2 = 充电       3 = 未连接     4 = 连接成功
-    5  = 低电量      0x0A=网格      0x0B=动画      0x0C=手写
-    0x0D=提示词      0x0E=速度达成30KM  0x0F=里程    0x10=喝水
-    0x11=速度达成40KM 0x12=光轮轨迹 0x13=爬坡      0x14=下坡
-    ...  0x33=电量   0x37=计时器    ...
+Material group IDs from the protocol (MATERIAL_GROUPS):
+    1  = boot        2 = charging    3 = disconnected   4 = connected
+    5  = low battery  0x0A=grid      0x0B=animation     0x0C=handwriting
+    0x0D=prompt       0x0E=speed 30KM  0x0F=odometer    0x10=drink water
+    0x11=speed 40KM   0x12=light-wheel trail  0x13=climb  0x14=descend
+    ...  0x33=battery   0x37=timer    ...
 
-用法:
-    python tools/play_group.py --group 1              # 播组1，不循环
-    python tools/play_group.py --group 20 --loop      # 循环播组20
+Usage:
+    python tools/play_group.py --group 1              # play group 1, no loop
+    python tools/play_group.py --group 20 --loop      # loop group 20
     python tools/play_group.py --group 1 --interval 50 --total 300
-    python tools/play_group.py --stop                 # 停止播放
-    python tools/play_group.py --group 1 --images test-data/1_*.bmp  # 先上传再播
+    python tools/play_group.py --stop                 # stop playback
+    python tools/play_group.py --group 1 --images test-data/1_*.bmp  # upload then play
 """
 
 from __future__ import annotations
@@ -34,15 +34,15 @@ DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
 async def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--address", default=DEFAULT_ADDR)
-    ap.add_argument("--group", type=lambda x: int(x, 0), help="素材组 ID，如 1 / 20 / 0x0B")
+    ap.add_argument("--group", type=lambda x: int(x, 0), help="material group ID, e.g. 1 / 20 / 0x0B")
     ap.add_argument("--loop", action="store_true")
-    ap.add_argument("--total", type=int, default=100, help="总播放时长，单位 100ms")
-    ap.add_argument("--interval", type=int, default=2, help="每帧间隔，单位 100ms")
-    ap.add_argument("--stop", action="store_true", help="停止播放")
+    ap.add_argument("--total", type=int, default=100, help="total play time, units of 100ms")
+    ap.add_argument("--interval", type=int, default=2, help="per-frame interval, units of 100ms")
+    ap.add_argument("--stop", action="store_true", help="stop playback")
     args = ap.parse_args()
 
     if not args.stop and args.group is None:
-        print("需要 --group 或 --stop")
+        print("need --group or --stop")
         return 1
 
     cli = IrisBleClient(args.address)
@@ -72,8 +72,8 @@ async def main() -> int:
         else:
             print(f"  {r.error}  raw={r.raw.hex()}")
 
-        # 播放期间回读状态，确认设备在工作
-        print("\n=== 状态观察 (6s) ===")
+        # Re-read status during play to confirm the device is working
+        print("\n=== status watch (6s) ===")
         for i in range(6):
             await asyncio.sleep(1.0)
             print(f"  {i+1}s ...", flush=True)

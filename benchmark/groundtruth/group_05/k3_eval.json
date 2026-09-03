@@ -1,14 +1,14 @@
 {
   "group": 5,
-  "subject": "低电量电池图标",
+  "subject": "Low-battery icon",
   "recognizable": true,
   "confidence": 0.98,
   "issues": [],
   "content_actions": [
     "none"
   ],
-  "summary": "低电量电池图标轮廓和电量格清晰可辨，采集伪影不影响内容识别。",
-  "_raw": "{\"group\":5,\"subject\":\"低电量电池图标\",\"recognizable\":true,\"confidence\":0.98,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"低电量电池图标轮廓和电量格清晰可辨，采集伪影不影响内容识别。\"}",
+  "summary": "Low-battery outline and charge bars are clear; capture artifacts do not block recognition.",
+  "_raw": "{\"group\": 5, \"subject\": \"Low-battery icon\", \"recognizable\": true, \"confidence\": 0.98, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Low-battery outline and charge bars are clear; capture artifacts do not block recognition.\"}",
   "_usage": {
     "prompt_tokens": 1057,
     "completion_tokens": 263,

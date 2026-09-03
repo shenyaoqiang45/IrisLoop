@@ -1,14 +1,14 @@
 {
   "group": 6,
-  "subject": "IRIS GREEN 连接成功界面",
+  "subject": "IRIS GREEN connection-success UI",
   "recognizable": true,
   "confidence": 0.95,
   "issues": [],
   "content_actions": [
     "none"
   ],
-  "summary": "投影文字与图标清晰可辨，采集伪影不影响内容识别。",
-  "_raw": "{\"group\":6,\"subject\":\"IRIS GREEN 连接成功界面\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影文字与图标清晰可辨，采集伪影不影响内容识别。\"}",
+  "summary": "Projected text and icons are clear; capture artifacts do not block recognition.",
+  "_raw": "{\"group\": 6, \"subject\": \"IRIS GREEN connection-success UI\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Projected text and icons are clear; capture artifacts do not block recognition.\"}",
   "_usage": {
     "prompt_tokens": 1061,
     "completion_tokens": 229,

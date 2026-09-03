@@ -1,16 +1,16 @@
 {
   "group": 19,
-  "subject": "骑自行车的人（公路车骑行爬坡姿态）",
+  "subject": "Cyclist in a road-bike climbing posture",
   "recognizable": true,
   "confidence": 0.95,
   "issues": [
-    "伪影干扰"
+    "capture artifacts"
   ],
   "content_actions": [
     "none"
   ],
-  "summary": "骑行者剪影轮廓清晰完整，人、车、轮均可辨认，绿色扫描条纹属采集伪影，内容无需调整。",
-  "_raw": "{\"group\":19,\"subject\":\"骑自行车的人（公路车骑行爬坡姿态）\",\"recognizable\":true,\"confidence\":0.95,\"issues\":[\"伪影干扰\"],\"content_actions\":[\"none\"],\"summary\":\"骑行者剪影轮廓清晰完整，人、车、轮均可辨认，绿色扫描条纹属采集伪影，内容无需调整。\"}",
+  "summary": "Clear full silhouette of rider and bike; green scan stripes are capture artifacts; content needs no change.",
+  "_raw": "{\"group\": 19, \"subject\": \"Cyclist in a road-bike climbing posture\", \"recognizable\": true, \"confidence\": 0.95, \"issues\": [\"capture artifacts\"], \"content_actions\": [\"none\"], \"summary\": \"Clear full silhouette of rider and bike; green scan stripes are capture artifacts; content needs no change.\"}",
   "_usage": {
     "prompt_tokens": 1057,
     "completion_tokens": 97,

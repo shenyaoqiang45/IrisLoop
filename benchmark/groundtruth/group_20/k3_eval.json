@@ -1,19 +1,19 @@
 {
   "group": 20,
-  "subject": "骑山地车下坡的人，带地面阴影",
+  "subject": "Mountain biker descending with ground shadow",
   "recognizable": true,
   "confidence": 0.85,
   "issues": [
-    "太碎",
-    "伪影干扰",
-    "对比不足"
+    "too fragmented",
+    "capture artifacts",
+    "low contrast"
   ],
   "content_actions": [
     "simplify_silhouette",
     "drop_background"
   ],
-  "summary": "山地车下坡主体清晰可辨，绿色扫描条纹为采集伪影，建议简化剪影去除细碎背景纹理。",
-  "_raw": "{\"group\": 20, \"subject\": \"骑山地车下坡的人，带地面阴影\", \"recognizable\": true, \"confidence\": 0.85, \"issues\": [\"太碎\", \"伪影干扰\", \"对比不足\"], \"content_actions\": [\"simplify_silhouette\", \"drop_background\"], \"summary\": \"山地车下坡主体清晰可辨，绿色扫描条纹为采集伪影，建议简化剪影去除细碎背景纹理。\"}",
+  "summary": "Descent silhouette is clear; green scan stripes are capture artifacts — simplify silhouette and remove busy background texture.",
+  "_raw": "{\"group\": 20, \"subject\": \"Mountain biker descending with ground shadow\", \"recognizable\": true, \"confidence\": 0.85, \"issues\": [\"too fragmented\", \"capture artifacts\", \"low contrast\"], \"content_actions\": [\"simplify_silhouette\", \"drop_background\"], \"summary\": \"Descent silhouette is clear; green scan stripes are capture artifacts — simplify silhouette and remove busy background texture.\"}",
   "_usage": {
     "prompt_tokens": 1057,
     "completion_tokens": 131,

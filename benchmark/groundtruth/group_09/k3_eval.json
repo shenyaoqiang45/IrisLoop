@@ -1,14 +1,14 @@
 {
   "group": 9,
-  "subject": "IRIS GREEN 设备连接成功界面",
+  "subject": "IRIS GREEN device connection-success UI",
   "recognizable": true,
   "confidence": 0.96,
   "issues": [],
   "content_actions": [
     "none"
   ],
-  "summary": "投影内容清晰可辨认，标志、对勾图标和“Connection successful”文字均明确。",
-  "_raw": "{\"group\":9,\"subject\":\"IRIS GREEN 设备连接成功界面\",\"recognizable\":true,\"confidence\":0.96,\"issues\":[],\"content_actions\":[\"none\"],\"summary\":\"投影内容清晰可辨认，标志、对勾图标和“Connection successful”文字均明确。\"}",
+  "summary": "Projection is clear; logo, checkmark, and Connection successful text are explicit.",
+  "_raw": "{\"group\": 9, \"subject\": \"IRIS GREEN device connection-success UI\", \"recognizable\": true, \"confidence\": 0.96, \"issues\": [], \"content_actions\": [\"none\"], \"summary\": \"Projection is clear; logo, checkmark, and Connection successful text are explicit.\"}",
   "_usage": {
     "prompt_tokens": 1061,
     "completion_tokens": 228,

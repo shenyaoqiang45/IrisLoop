@@ -5,31 +5,31 @@
   "groups": [
     {
       "group": 1,
-      "name": "开机",
+      "name": "boot",
       "still": "still_01_2.9s.jpg",
       "dir": "benchmark/groundtruth/group_01"
     },
     {
       "group": 2,
-      "name": "充电",
+      "name": "charging",
       "still": "still_01_2.9s.jpg",
       "dir": "benchmark/groundtruth/group_02"
     },
     {
       "group": 3,
-      "name": "未连接",
+      "name": "disconnected",
       "still": "still_01_2.9s.jpg",
       "dir": "benchmark/groundtruth/group_03"
     },
     {
       "group": 4,
-      "name": "连接成功",
+      "name": "connected",
       "still": "still_01_2.9s.jpg",
       "dir": "benchmark/groundtruth/group_04"
     },
     {
       "group": 5,
-      "name": "低电量",
+      "name": "low battery",
       "still": "still_01_2.9s.jpg",
       "dir": "benchmark/groundtruth/group_05"
     },
@@ -59,67 +59,67 @@
     },
     {
       "group": 10,
-      "name": "网格",
+      "name": "grid",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_10"
     },
     {
       "group": 11,
-      "name": "动画",
+      "name": "animation",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_11"
     },
     {
       "group": 12,
-      "name": "手写",
+      "name": "handwriting",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_12"
     },
     {
       "group": 13,
-      "name": "提示词",
+      "name": "prompt",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_13"
     },
     {
       "group": 14,
-      "name": "速度达成30KM",
+      "name": "speed 30 km/h",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_14"
     },
     {
       "group": 15,
-      "name": "里程素材",
+      "name": "mileage",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_15"
     },
     {
       "group": 16,
-      "name": "喝水素材",
+      "name": "hydration",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_16"
     },
     {
       "group": 17,
-      "name": "速度达成40KM",
+      "name": "speed 40 km/h",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_17"
     },
     {
       "group": 18,
-      "name": "光轮轨迹",
+      "name": "light-wheel trail",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_18"
     },
     {
       "group": 19,
-      "name": "爬坡素材",
+      "name": "climb",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_19"
     },
     {
       "group": 20,
-      "name": "下坡素材",
+      "name": "descent",
       "still": "frame_01_2.8s.jpg",
       "dir": "benchmark/groundtruth/group_20"
     }

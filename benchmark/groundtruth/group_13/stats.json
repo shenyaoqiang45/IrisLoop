@@ -1,6 +1,6 @@
 {
   "group": 13,
-  "name": "提示词",
+  "name": "prompt",
   "frames": null,
   "stills": [
     "frame_00_0.4s.jpg",
@@ -20,7 +20,7 @@
   "bright_ratio": 0.026885850694444446,
   "lap_var": 35.52516224735683,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_13",
   "ok": true

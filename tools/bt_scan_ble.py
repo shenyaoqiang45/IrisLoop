@@ -1,4 +1,4 @@
-"""BLE 扫描（bleak，独立 WinRT 后端，不依赖 PowerShell 事件泵）。"""
+"""BLE scan (bleak, standalone WinRT backend, no PowerShell event pump)."""
 
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ def _ver() -> str:
 
 async def scan(seconds: float, service_uuid: str | None = None):
     kwargs = {}
-    # bleak>=0.20 支持 return_adv；旧版本不支持
+    # bleak>=0.20 supports return_adv; older versions do not
     import inspect
 
     sig = inspect.signature(BleakScanner.discover)
@@ -47,7 +47,7 @@ async def scan(seconds: float, service_uuid: str | None = None):
     await asyncio.sleep(seconds)
     await scanner.stop()
 
-    # bleak>=0.19: 用 get_discovered_devices() 拿到 (device, adv) 元组
+    # bleak>=0.19: get_discovered_devices() returns (device, adv) tuples
     if hasattr(scanner, "get_discovered_devices"):
         try:
             return scanner.get_discovered_devices()
@@ -66,7 +66,7 @@ def _fmt(dev, adv) -> str:
     if adv is not None:
         uuids = list(getattr(adv, "service_uuids", []) or [])
 
-    # 广播里的厂商数据，常能认出芯片方案
+    # Manufacturer data in the advertisement often identifies the chip family
     mfg = {}
     if adv is not None:
         try:
@@ -99,7 +99,7 @@ async def main(seconds: float, service_uuid: str | None) -> int:
         print("  (no BLE devices found)")
         return 0
 
-    # 兼容两种返回形态：[(dev, adv)] 或 [dev]
+    # Compatible with both return shapes: [(dev, adv)] or [dev]
     rows = []
     for item in result:
         if isinstance(item, tuple) and len(item) == 2:

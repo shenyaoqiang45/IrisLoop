@@ -1,17 +1,17 @@
 {
   "group": 3,
-  "subject": "IRIS GREEN 设备连接界面，含路由器图标与 Link up 字样",
+  "subject": "IRIS GREEN device connection UI with router icon and Link up text",
   "recognizable": true,
   "confidence": 0.92,
   "issues": [
-    "对比不足",
-    "伪影干扰"
+    "low contrast",
+    "capture artifacts"
   ],
   "content_actions": [
     "none"
   ],
-  "summary": "投影内容清晰可辨，标题、图标与 Link up 状态文字均可识别，绿色扫描伪影不影响判读。",
-  "_raw": "{\n  \"group\": 3,\n  \"subject\": \"IRIS GREEN 设备连接界面，含路由器图标与 Link up 字样\",\n  \"recognizable\": true,\n  \"confidence\": 0.92,\n  \"issues\": [\"对比不足\", \"伪影干扰\"],\n  \"content_actions\": [\"none\"],\n  \"summary\": \"投影内容清晰可辨，标题、图标与 Link up 状态文字均可识别，绿色扫描伪影不影响判读。\"\n}",
+  "summary": "Projection is clear; title, icon, and Link up status text are readable; green scan artifacts do not hurt judgment.",
+  "_raw": "{\"group\": 3, \"subject\": \"IRIS GREEN device connection UI with router icon and Link up text\", \"recognizable\": true, \"confidence\": 0.92, \"issues\": [\"low contrast\", \"capture artifacts\"], \"content_actions\": [\"none\"], \"summary\": \"Projection is clear; title, icon, and Link up status text are readable; green scan artifacts do not hurt judgment.\"}",
   "_usage": {
     "prompt_tokens": 1057,
     "completion_tokens": 157,

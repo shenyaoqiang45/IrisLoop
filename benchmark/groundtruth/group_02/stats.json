@@ -1,6 +1,6 @@
 {
   "group": 2,
-  "name": "充电",
+  "name": "charging",
   "play_ok": true,
   "play_raw": "80a00102",
   "frames": 555,
@@ -22,7 +22,7 @@
   "bright_ratio": 0.03579535590277778,
   "lap_var": 17.267619625533914,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_02"
 }

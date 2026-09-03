@@ -1,6 +1,6 @@
 {
   "group": 16,
-  "name": "喝水素材",
+  "name": "hydration",
   "frames": null,
   "stills": [
     "frame_00_0.4s.jpg",
@@ -20,7 +20,7 @@
   "bright_ratio": 0.06566514756944444,
   "lap_var": 24.28220616005722,
   "verdict": [
-    "偏模糊或扫描条纹主导"
+    "Soft focus or scan-line dominated"
   ],
   "dir": "benchmark/groundtruth/group_16",
   "ok": true

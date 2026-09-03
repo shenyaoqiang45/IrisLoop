@@ -1,20 +1,20 @@
-"""IrisLoop 最小闭环主控 —— 单图迭代自校准。
+"""IrisLoop minimal closed loop — iterative self-calibration on a single image.
 
-流程（每轮）：
-    1. 把当前内容推到设备 1_1.bmp 并常亮
-    2. 摄像头拍一帧
-    3. analyzer 评估（规则或 AI）
-    4. 若不达标且有可执行的修正建议，应用修正后进入下一轮
-    5. 收敛或达到最大轮次则停止
+Per-iteration flow:
+    1. Push the current content to the device as 1_1.bmp and keep it on
+    2. Capture one camera frame
+    3. analyzer assessment (rule or AI)
+    4. If it fails and a correction is actionable, apply it and continue
+    5. Stop on convergence or max iterations
 
-用法:
-    # 规则模式（离线）：推标记图，最多迭代 3 轮
+Usage:
+    # rule mode (offline): push a marker image, up to 3 iterations
     python -m irisloop.loop data/01a_upload_alignment_h.jpg
 
-    # AI 模式（需 MOONSHOT_API_KEY）
+    # AI mode (requires MOONSHOT_API_KEY)
     python -m irisloop.loop data/01a_upload_alignment_h.jpg --mode ai
 
-    # 只拍不推（设备已显示目标内容）
+    # capture only (device already showing the target content)
     python -m irisloop.loop data/01a_upload_alignment_h.jpg --no-push
 """
 
@@ -73,14 +73,14 @@ async def push_image(cli: IrisBleClient, stream: bytes, name: str) -> None:
 
 
 def apply_correction(bw: np.ndarray, a: Assessment) -> tuple[np.ndarray, str]:
-    """根据评估结果对源图做修正，返回 (修正后图, 修正说明)。"""
+    """Apply a source-image correction from the assessment. Returns (image, note)."""
     if a.orientation == "flip_v":
-        return np.flipud(bw), "flipud(上下翻转)"
+        return np.flipud(bw), "flipud(vertical flip)"
     if a.orientation == "flip_h":
-        return np.fliplr(bw), "fliplr(左右镜像)"
+        return np.fliplr(bw), "fliplr(horizontal mirror)"
     if a.orientation == "rot180":
-        return np.flipud(np.fliplr(bw)), "rot180(180°旋转)"
-    return bw, "无修正"
+        return np.flipud(np.fliplr(bw)), "rot180(180° rotation)"
+    return bw, "no correction"
 
 
 async def run_loop(
@@ -104,69 +104,69 @@ async def run_loop(
 
     try:
         for it in range(1, max_iters + 1):
-            print(f"\n========== 第 {it}/{max_iters} 轮 ==========")
+            print(f"\n========== iteration {it}/{max_iters} ==========")
 
-            # 1. 推图
+            # 1. push image
             if cli is not None:
                 stream = build_stream(bw)
-                print(f"  推送 {len(stream)}B -> 1_1.bmp ...")
+                print(f"  pushing {len(stream)}B -> 1_1.bmp ...")
                 await push_image(cli, stream, "1_1.bmp")
-                # 常亮显示组 1
+                # keep group 1 on continuously
                 await cli.stop()
                 await asyncio.sleep(0.3)
                 r = await cli.play(group_id=1, loop=True,
                                    total_100ms=36000, interval_100ms=50)
-                print(f"  播放: {'ok' if r.ok else r.error}")
-                await asyncio.sleep(1.0)  # 等投影稳定
+                print(f"  play: {'ok' if r.ok else r.error}")
+                await asyncio.sleep(1.0)  # wait for the projection to settle
 
-            # 2. 拍摄
+            # 2. capture
             shot = os.path.join(CAPTURE_DIR, f"iter{it}_capture.png")
-            print("  拍摄中 ...")
+            print("  capturing ...")
             cam = UsbCamera(cam_index, 1280, 720, 30)
             cam.open()
             try:
-                # 手动曝光：EV=-7 平衡条纹抑制与亮度（实测最优）
+                # manual exposure: EV=-7 balances stripe suppression vs brightness (best in tests)
                 try:
                     cam.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
                     cam.cap.set(cv2.CAP_PROP_EXPOSURE, -7)
                 except Exception:
                     pass
-                await asyncio.sleep(1.0)  # 曝光稳定
+                await asyncio.sleep(1.0)  # let exposure settle
                 frame = None
                 for _ in range(10):
                     ok, f = cam.read()
                     if ok and f is not None:
                         frame = f
                 if frame is None:
-                    print("  [error] 拍摄失败")
+                    print("  [error] capture failed")
                     return 2
                 cv2.imwrite(shot, frame)
             finally:
                 cam.release()
 
-            # 3. 评估
+            # 3. assess
             if mode == "ai":
                 target_png = os.path.join(CAPTURE_DIR, "target.png")
                 cv2.imwrite(target_png, (bw * 255).astype(np.uint8))
                 a = assess_ai(target_png, shot)
             else:
                 a = assess_rule(bw * 255, load_gray(shot))
-            print("  评估:")
+            print("  assessment:")
             print(a.summary())
 
-            # 4. 收敛 or 修正
+            # 4. converge or correct
             if a.ok:
-                print(f"\n✅ 第 {it} 轮收敛，投影效果达标")
+                print(f"\n✅ iteration {it} converged; projection looks good")
                 return 0
             if it < max_iters:
                 bw2, note = apply_correction(bw, a)
-                if note != "无修正":
-                    print(f"  应用修正: {note}")
+                if note != "no correction":
+                    print(f"  applied correction: {note}")
                     bw = bw2
                 else:
-                    print("  无可自动修正的问题，继续观察")
+                    print("  no auto-correctable issue; observing again")
 
-        print(f"\n⚠️ 达到最大轮次 {max_iters}，未完全收敛")
+        print(f"\n⚠️ reached max iterations ({max_iters}); did not fully converge")
         return 1
     finally:
         if cli is not None:
@@ -175,12 +175,12 @@ async def run_loop(
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("target", help="目标图（如 data/01a_upload_alignment_h.jpg）")
+    ap.add_argument("target", help="target image (e.g. data/01a_upload_alignment_h.jpg)")
     ap.add_argument("--address", default=DEFAULT_ADDR)
     ap.add_argument("--mode", choices=["rule", "ai"], default="rule")
     ap.add_argument("--max-iters", type=int, default=3)
     ap.add_argument("--no-push", action="store_true",
-                    help="不推图，仅拍摄评估（设备需已在显示目标内容）")
+                    help="do not push an image; capture and assess only (device must already show the target)")
     ap.add_argument("--camera", type=int, default=0)
     args = ap.parse_args(argv)
 

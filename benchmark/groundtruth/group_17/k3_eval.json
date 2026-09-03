@@ -1,17 +1,17 @@
 {
   "group": 17,
-  "subject": "绿色数字“40”（速度达成40KM）",
+  "subject": "Green numeral 40 for the 40 km/h speed milestone",
   "recognizable": true,
   "confidence": 0.92,
   "issues": [
-    "伪影干扰",
-    "太碎"
+    "capture artifacts",
+    "too fragmented"
   ],
   "content_actions": [
     "none"
   ],
-  "summary": "主体数字40清晰可辨，绿色扫描碎裂和条纹属于采集伪影，不影响内容识别。",
-  "_raw": "{\"group\":17,\"subject\":\"绿色数字“40”（速度达成40KM）\",\"recognizable\":true,\"confidence\":0.92,\"issues\":[\"伪影干扰\",\"太碎\"],\"content_actions\":[\"none\"],\"summary\":\"主体数字40清晰可辨，绿色扫描碎裂和条纹属于采集伪影，不影响内容识别。\"}",
+  "summary": "Numeral 40 is clear; green scan fragmentation is a capture artifact and does not block recognition.",
+  "_raw": "{\"group\": 17, \"subject\": \"Green numeral 40 for the 40 km/h speed milestone\", \"recognizable\": true, \"confidence\": 0.92, \"issues\": [\"capture artifacts\", \"too fragmented\"], \"content_actions\": [\"none\"], \"summary\": \"Numeral 40 is clear; green scan fragmentation is a capture artifact and does not block recognition.\"}",
   "_usage": {
     "prompt_tokens": 1059,
     "completion_tokens": 210,

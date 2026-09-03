@@ -1,10 +1,10 @@
-# Hub — 开发者投稿与精选
+# Hub — developer submissions and featured work
 
-增长计划：[`docs/IrisLoop-开发者增长计划.md`](../docs/IrisLoop-开发者增长计划.md)。
+Growth plan: [`docs/developer-growth-plan.md`](../docs/developer-growth-plan.md).
 
-| 目录 | 用途 |
+| Folder | Purpose |
 | --- | --- |
-| `submissions/` | 投稿规范、模板、待审说明 |
-| `featured/` | 每周精选（链到外部 repo / demo / X 帖） |
+| `submissions/` | Submission guidelines, templates, review queue |
+| `featured/` | Weekly featured picks (links to external repos / demos / X posts) |
 
-主题标签建议：`#ProjectTheLight` — AI 生成可投影内容 / 闭环前后对比。
+Suggested tag: `#ProjectTheLight` — AI-generated projectable content / before-after closed-loop comparisons.

@@ -1,12 +1,12 @@
-"""把一组图片(JPG/PNG)推送到 IrisGreen 指定素材组（覆盖式）。
+"""Push a set of images (JPG/PNG) to an IrisGreen material group (overwrite).
 
-流程: 读取图片 -> 灰度 -> 二值化 -> image_pack 打包 38462B -> 按 <gid>_<n>.bmp 命名推送。
+Pipeline: load image -> grayscale -> binarize -> image_pack 38462B -> push as <gid>_<n>.bmp.
 
-组 1（开机）最大 10 张，敦煌素材 30 帧只取前 10。
+Group 1 (boot) holds at most 10 frames; Dunhuang material with 30 frames uses only the first 10.
 
-用法:
-    python tools/push_group.py --dir "data/敦煌_frames" --group 1 --count 10
-    python tools/push_group.py --dir "data/敦煌_frames" --group 1 --count 10 --start-index 1
+Usage:
+    python tools/push_group.py --dir data/sample_frames --group 1 --count 10
+    python tools/push_group.py --dir data/sample_frames --group 1 --count 10 --start-index 1
 """
 
 from __future__ import annotations
@@ -46,11 +46,11 @@ def build_name_packet(file_size: int, file_name: str) -> bytes:
 
 
 def load_image_as_bw(path: str) -> np.ndarray:
-    """读图 -> 灰度 -> 缩放到 640x480 -> 二值化。"""
+    """Load -> grayscale -> resize to 640x480 -> binarize."""
     buf = np.fromfile(path, dtype=np.uint8)
     img = cv2.imdecode(buf, cv2.IMREAD_GRAYSCALE)
     if img is None:
-        raise ValueError(f"无法读取 {path}")
+        raise ValueError(f"cannot read {path}")
     if img.shape != (480, 640):
         img = cv2.resize(img, (640, 480), interpolation=cv2.INTER_AREA)
     return binarize(img, threshold=127)
@@ -75,10 +75,10 @@ async def push_one(client, file_name: str, stream: bytes) -> None:
 async def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--address", default=DEFAULT_ADDR)
-    ap.add_argument("--dir", required=True, help="图片目录")
-    ap.add_argument("--group", type=int, required=True, help="目标素材组 ID")
-    ap.add_argument("--count", type=int, default=10, help="推送张数（默认 10）")
-    ap.add_argument("--start-index", type=int, default=1, help="源图起始序号（默认 1）")
+    ap.add_argument("--dir", required=True, help="image directory")
+    ap.add_argument("--group", type=int, required=True, help="target material group ID")
+    ap.add_argument("--count", type=int, default=10, help="number of images to push (default 10)")
+    ap.add_argument("--start-index", type=int, default=1, help="source image start index (default 1)")
     args = ap.parse_args()
 
     files = sorted(
@@ -87,19 +87,19 @@ async def main() -> int:
         key=lambda p: int("".join(c for c in os.path.basename(p) if c.isdigit()) or 0),
     )
     if not files:
-        print(f"[error] {args.dir} 下无 jpg/png")
+        print(f"[error] no jpg/png under {args.dir}")
         return 1
 
-    # 取 start-index 起的 count 张
+    # Take count images starting at start-index
     src = files[args.start_index - 1: args.start_index - 1 + args.count]
-    print(f"=== 准备 {len(src)} 张 -> 组 {args.group} ===")
+    print(f"=== prepare {len(src)} images -> group {args.group} ===")
 
     cli = IrisBleClient(args.address)
     print(f"=== CONNECT {args.address} ===")
     await cli.connect()
     print(f"  connected  mtu={cli.info.mtu}")
     count0 = await cli.get_picture_count()
-    print(f"  推送前图片总数 = {count0}")
+    print(f"  picture count before push = {count0}")
 
     client = cli.client
     assert client is not None
@@ -119,9 +119,9 @@ async def main() -> int:
 
         await asyncio.sleep(2.0)
         count1 = await cli.get_picture_count()
-        print(f"\n=== 推送后图片总数 = {count1} (前={count0}) ===")
-        print(f"已完成 {len(src)} 张推送 -> 组 {args.group}")
-        print(f"播放验证: python tools/play_group.py --group {args.group} "
+        print(f"\n=== picture count after push = {count1} (before={count0}) ===")
+        print(f"pushed {len(src)} images -> group {args.group}")
+        print(f"play check: python tools/play_group.py --group {args.group} "
               f"--total {len(src) * 3} --interval 3")
     finally:
         await cli.disconnect()

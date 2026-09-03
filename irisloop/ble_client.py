@@ -1,10 +1,10 @@
-"""IrisGreen BLE 客户端。
+"""IrisGreen BLE client.
 
-通道映射（来自协议文档 + 实机 GATT 枚举）：
-    adb40003 (write_indicate)  -> 控制命令，需要应答
-    adb40004 (write_no_rsp)    -> 数据流
-    adb40002 (read_notify)     -> 设备状态上报
-    adb40006-...-2/3/4         -> 文件传输：开始 / 数据 / 结束
+Channel map (protocol doc + on-device GATT enumeration):
+    adb40003 (write_indicate)  -> control commands, response required
+    adb40004 (write_no_rsp)    -> data stream
+    adb40002 (read_notify)     -> device status reports
+    adb40006-...-2/3/4         -> file transfer: start / data / end
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ class IrisBleClient:
         self._notify_buf: list[bytes] = []
         self._notify_cb: Callable[[bytes], None] | None = None
 
-    # ---------- 连接 ----------
+    # ---------- connection ----------
 
     async def connect(self) -> None:
         self.client = BleakClient(self.address, timeout=20.0)
@@ -64,7 +64,7 @@ class IrisBleClient:
     async def __aexit__(self, *exc) -> None:
         await self.disconnect()
 
-    # ---------- 命令收发 ----------
+    # ---------- command I/O ----------
 
     async def send_command(
         self,
@@ -72,9 +72,9 @@ class IrisBleClient:
         wait_response: bool = True,
         timeout: float = WRITE_TIMEOUT,
     ) -> P.Response:
-        """发命令到 adb40003（write_indicate，带应答）。"""
+        """Send a command on adb40003 (write_indicate, with response)."""
         if self.client is None:
-            raise RuntimeError("未连接")
+            raise RuntimeError("not connected")
 
         if not wait_response:
             await self.client.write_gatt_char(CHAR_MAIN_CMD, frame, response=True)
@@ -87,8 +87,8 @@ class IrisBleClient:
             if self._notify_cb:
                 self._notify_cb(bytes(data))
 
-        # 协议关键点：adb40003 是 write_indicate，响应通过同通道的
-        # indicate 回执回来（不是 adb40002 的 notify 状态帧）。
+        # Protocol note: adb40003 is write_indicate; the response arrives as an
+        # indicate on the same characteristic (not the adb40002 notify status frame).
         await self.client.start_notify(CHAR_MAIN_CMD, _cb)
         try:
             await self.client.write_gatt_char(CHAR_MAIN_CMD, frame, response=True)
@@ -108,9 +108,9 @@ class IrisBleClient:
                 last = P.parse_response(got[-1])
                 return P.Response(
                     ok=False, raw=last.raw,
-                    error=f"未匹配 cmd=0x{frame[0]:02X}，收到 {len(got)} 帧",
+                    error=f"no matching cmd=0x{frame[0]:02X}, received {len(got)} frame(s)",
                 )
-            return P.Response(ok=False, error="超时无应答")
+            return P.Response(ok=False, error="timeout, no response")
         finally:
             try:
                 await self.client.stop_notify(CHAR_MAIN_NOTIFY)
@@ -118,16 +118,16 @@ class IrisBleClient:
                 pass
 
     async def write_data(self, payload: bytes) -> None:
-        """写数据流通道 adb40004（write-no-response，无应答）。"""
+        """Write the data-stream characteristic adb40004 (write-without-response)."""
         if self.client is None:
-            raise RuntimeError("未连接")
+            raise RuntimeError("not connected")
         await self.client.write_gatt_char(CHAR_MAIN_DATA, payload, response=False)
 
-    # ---------- 设备信息 ----------
+    # ---------- device info ----------
 
     async def read_gatt_string(self, uuid: str) -> str:
         if self.client is None:
-            raise RuntimeError("未连接")
+            raise RuntimeError("not connected")
         try:
             raw = await self.client.read_gatt_char(uuid)
             return bytes(raw).decode("ascii", errors="replace")
@@ -136,7 +136,7 @@ class IrisBleClient:
 
     async def read_gatt_int(self, uuid: str) -> int | None:
         if self.client is None:
-            raise RuntimeError("未连接")
+            raise RuntimeError("not connected")
         try:
             raw = await self.client.read_gatt_char(uuid)
             b = bytes(raw)
@@ -163,7 +163,7 @@ class IrisBleClient:
         self.info.battery_raw = raw_batt
         return self.info
 
-    # ---------- 高层命令 ----------
+    # ---------- high-level commands ----------
 
     async def get_picture_count(self) -> int | None:
         resp = await self.send_command(P.build_read(P.CMD_PIC_COUNT))
