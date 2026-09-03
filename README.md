@@ -3,7 +3,7 @@
 **MEMS 激光投影自适应闭环系统** —— *生成 → 投射 → 观察 → 优化*
 
 通过 BLE 控制 **IrisGreen（AINSTEC）** MEMS 激光投影仪（绿色激光，640×480 1bpp），
-同时用 USB 摄像头实时采集物理表面上的实际投影效果，交由 AI 视觉分析迭代优化投影内容。
+同时用本机摄像头（笔记本自带或 USB）采集物理表面上的实际投影效果，交由 AI 视觉分析迭代优化投影内容。
 
 当前版本 v0.1.0：摄像头采集、BLE 协议栈、素材播放、投射+采集联动已打通；AI 闭环规划中。
 
@@ -11,7 +11,7 @@
 
 ```
 irisloop/            核心包
-  camera.py          USB 摄像头采集（MSMF 优先，MJPG，实测帧率校准）
+  camera.py          摄像头采集（MSMF 优先；MJPG 失败则回退默认格式，兼容笔记本内置）
   recorder.py        视频录制（按扩展名编码回退 mp4v/MJPG/XVID）
   capture.py/cli.py  采集主流程与命令行（python -m irisloop）
   projector.py       IrisGreen 设备档案（GATT UUID、MTU、设备识别）
@@ -33,6 +33,11 @@ pip install -r requirements.txt   # opencv-python, numpy, bleak
 ## 使用
 
 ```bash
+# 最低可玩门槛：探测本机摄像头（笔记本自带能否代替 USB cam）
+python tools/min_play_test.py
+# 真机：BLE 投射 + 本机摄像头
+python tools/min_play_test.py --ble --group 1 --seconds 5
+
 # 列出可用摄像头
 python -m irisloop --list
 

@@ -11,6 +11,8 @@ import numpy as np
 
 # Windows 下 MSMF 能正确上报 fps，DSHOW 上报 0，故先试 MSMF
 PREFERRED_BACKENDS = (cv2.CAP_MSMF, cv2.CAP_DSHOW, cv2.CAP_ANY)
+# USB 外置常用 MJPG；笔记本内置摄像头多为 YUY2/NV12，强制 MJPG 会黑屏或打不开
+FOURCC_TRIES: Tuple[Optional[str], ...] = ("MJPG", None)
 
 
 class UsbCamera:
@@ -27,6 +29,7 @@ class UsbCamera:
         self.height = height
         self.fps = fps
         self.backend = backend
+        self.fourcc: Optional[str] = None
         self.cap: Optional[cv2.VideoCapture] = None
         self.actual_size: Tuple[int, int] = (0, 0)
         self.actual_fps: float = 0.0
@@ -36,30 +39,32 @@ class UsbCamera:
         errors: List[str] = []
 
         for backend in candidates:
-            cap = cv2.VideoCapture(self.index, backend)
-            if not cap.isOpened():
-                cap.release()
-                errors.append(f"backend={backend} 打开失败")
-                continue
+            for fourcc in FOURCC_TRIES:
+                cap = cv2.VideoCapture(self.index, backend)
+                if not cap.isOpened():
+                    cap.release()
+                    errors.append(f"backend={backend} fourcc={fourcc or 'default'} 打开失败")
+                    continue
 
-            # MJPG 压缩便于 USB 带宽下跑满帧率
-            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, float(self.width))
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, float(self.height))
-            cap.set(cv2.CAP_PROP_FPS, float(self.fps))
+                if fourcc:
+                    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*fourcc))
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, float(self.width))
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, float(self.height))
+                cap.set(cv2.CAP_PROP_FPS, float(self.fps))
 
-            ok, frame = cap.read()
-            if not ok or frame is None:
-                cap.release()
-                errors.append(f"backend={backend} 读取首帧失败")
-                continue
+                ok, frame = cap.read()
+                if not ok or frame is None or frame.size < 100:
+                    cap.release()
+                    errors.append(f"backend={backend} fourcc={fourcc or 'default'} 读取首帧失败")
+                    continue
 
-            h, w = frame.shape[:2]
-            self.cap = cap
-            self.actual_size = (w, h)
-            # 后端上报值可能不可靠（DSHOW 恒为 0），稍后用 measure_fps 校准
-            self.actual_fps = float(cap.get(cv2.CAP_PROP_FPS))
-            return
+                h, w = frame.shape[:2]
+                self.cap = cap
+                self.fourcc = fourcc
+                self.actual_size = (w, h)
+                # 后端上报值可能不可靠（DSHOW 恒为 0），稍后用 measure_fps 校准
+                self.actual_fps = float(cap.get(cv2.CAP_PROP_FPS))
+                return
 
         raise RuntimeError(
             f"无法打开摄像头 index={self.index}（{'；'.join(errors) or '无可用后端'}）"
@@ -117,7 +122,11 @@ class UsbCamera:
 
     def info(self) -> str:
         w, h = self.actual_size
-        return f"cam#{self.index} {w}x{h} @{self.actual_fps:.1f}fps backend={self.backend_name()}"
+        fcc = self.fourcc or "default"
+        return (
+            f"cam#{self.index} {w}x{h} @{self.actual_fps:.1f}fps "
+            f"backend={self.backend_name()} fourcc={fcc}"
+        )
 
     def __enter__(self) -> "UsbCamera":
         self.open()

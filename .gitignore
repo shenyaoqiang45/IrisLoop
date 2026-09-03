@@ -11,6 +11,13 @@ benchmark/**/*.mp4
 benchmark/**/*.avi
 benchmark/**/*.mov
 
+# 体验官实拍原片留本地，笔记可入库
+experience/laser-log/**/*.mp4
+experience/laser-log/**/*.mov
+experience/laser-log/**/*.avi
+experience/laser-log/**/*.raw
+experience/iteration-log/private/
+
 # Office 临时锁文件
 ~$*
 
