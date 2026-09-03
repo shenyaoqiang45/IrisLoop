@@ -1,4 +1,4 @@
-"""CLI entry point: irisloop USB camera video capture."""
+"""CLI entry point: irisloop camera video capture (built-in webcam + USB camera)."""
 
 from __future__ import annotations
 
@@ -12,12 +12,15 @@ from .capture import capture
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="irisloop",
-        description="Capture a USB camera video stream and save it locally",
+        description="Capture a camera video stream and save it locally (built-in webcam or USB camera)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument("-o", "--output", default=None, help="output file path; default captures/capture_<timestamp>.mp4")
     p.add_argument("-d", "--output-dir", default="captures", help="output directory when --output is omitted")
-    p.add_argument("-i", "--camera-index", type=int, default=0, help="camera index")
+    p.add_argument(
+        "-i", "--camera-index", type=int, default=0,
+        help="camera index (0 is usually the built-in webcam; external USB cams are 1+. See --list)",
+    )
     p.add_argument("--width", type=int, default=1280, help="requested width")
     p.add_argument("--height", type=int, default=720, help="requested height")
     p.add_argument("--fps", type=int, default=30, help="requested frame rate")

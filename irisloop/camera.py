@@ -1,4 +1,4 @@
-"""USB camera capture wrapper."""
+"""Camera capture wrapper (supports both built-in laptop webcams and external USB cams)."""
 
 from __future__ import annotations
 
@@ -16,6 +16,13 @@ FOURCC_TRIES: Tuple[Optional[str], ...] = ("MJPG", None)
 
 
 class UsbCamera:
+    """Generic camera wrapper.
+
+    Open strategy: try MJPG + requested resolution first (USB-cam bandwidth friendly);
+    if that fails, fall back to the camera's native fourcc (typical for built-in webcams,
+    which are usually YUY2/NV12 and may ignore the requested resolution).
+    """
+
     def __init__(
         self,
         index: int = 0,
@@ -33,6 +40,8 @@ class UsbCamera:
         self.cap: Optional[cv2.VideoCapture] = None
         self.actual_size: Tuple[int, int] = (0, 0)
         self.actual_fps: float = 0.0
+        # True when opened via native-fourcc fallback (built-in cams may keep native resolution)
+        self.fallback_mode: bool = False
 
     def open(self) -> None:
         candidates = (self.backend,) if self.backend is not None else PREFERRED_BACKENDS
@@ -61,6 +70,7 @@ class UsbCamera:
                 h, w = frame.shape[:2]
                 self.cap = cap
                 self.fourcc = fourcc
+                self.fallback_mode = fourcc is None
                 self.actual_size = (w, h)
                 # Backend-reported fps can be unreliable (DSHOW is always 0); calibrate later with measure_fps
                 self.actual_fps = float(cap.get(cv2.CAP_PROP_FPS))
@@ -122,7 +132,7 @@ class UsbCamera:
 
     def info(self) -> str:
         w, h = self.actual_size
-        fcc = self.fourcc or "default"
+        fcc = self.fourcc or "native"
         return (
             f"cam#{self.index} {w}x{h} @{self.actual_fps:.1f}fps "
             f"backend={self.backend_name()} fourcc={fcc}"
@@ -134,6 +144,10 @@ class UsbCamera:
 
     def __exit__(self, *exc) -> None:
         self.release()
+
+
+# 通用别名：项目同时兼容内置摄像头与 USB 摄像头，新代码建议用 Camera
+Camera = UsbCamera
 
 
 @contextlib.contextmanager
@@ -151,7 +165,7 @@ def quiet_opencv() -> Iterator[None]:
 
 
 def probe_cameras(max_index: int = 8) -> List[dict]:
-    """Probe available cameras. Returned sizes are each camera's default resolution."""
+    """Probe available cameras (built-in + USB). Returned sizes are each camera's default resolution."""
     results: List[dict] = []
     with quiet_opencv():
         for index in range(max_index):

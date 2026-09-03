@@ -11,7 +11,6 @@ the AI closed loop is in progress.
 
 ## Layout
 
-```
 irisloop/            Core package
   camera.py          Camera capture (MSMF first; MJPG then native fourcc for laptop webcams)
   recorder.py        Video recording (codec fallback by extension: mp4v / MJPG / XVID)
@@ -65,6 +64,7 @@ Keys: `q` or `ESC` to stop, `p` to pause / resume.
 ## Local environment notes
 
 - Camera `Microsoft LifeCam HD-3000` tops out at **1280x720 @30fps** (1080p requests fall back)
+- Built-in laptop webcams are supported too: they usually don't accept MJPG or the requested resolution, so the opener automatically falls back to the native fourcc/resolution (info line shows `fourcc=native`). Use `-i 0` for the built-in cam, `--list` to enumerate devices
 - Working codecs: `mp4v` (.mp4), `MJPG` / `XVID` (.avi); `avc1` (H.264) unavailable without OpenH264
 - DSHOW often reports `fps=0`; startup measures real FPS for writing
 

@@ -48,6 +48,8 @@ def capture(
     cam = UsbCamera(camera_index, width, height, fps)
     cam.open()
     print(f"[camera] {cam.info()}")
+    if cam.fallback_mode and cam.actual_size != (width, height):
+        print(f"[camera] built-in / non-MJPG camera; fell back to native resolution {cam.actual_size[0]}x{cam.actual_size[1]}")
 
     if measure or cam.actual_fps <= 1.0:
         measured = cam.measure_fps(seconds=1.5)
