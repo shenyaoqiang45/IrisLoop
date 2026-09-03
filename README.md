@@ -9,6 +9,10 @@ iterate on the **projected content**.
 Current status **v0.1.0**: camera capture, BLE stack, asset playback, and project+capture are wired;
 the AI closed loop is in progress.
 
+**Buy IrisGreen:** [irisarworld.com/irisgreen](https://irisarworld.com/irisgreen/?utm_source=github&utm_medium=readme&utm_campaign=irisloop)
+
+IrisGreen is the product. **IrisLoop** is the open quickstart — generate → project → observe → improve — so developers can unbox and play the beam fast.
+
 ## Layout
 
 irisloop/            Core package

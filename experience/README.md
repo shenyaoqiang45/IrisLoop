@@ -1,8 +1,10 @@
-# Experience — IrisLoop brand experience officer
+# Experience — IrisGreen brand experience
 
 Full plan: [`docs/developer-growth-plan.md`](../docs/developer-growth-plan.md).
 
-First-player field notes: thinking, captures, iteration. Cycling retail acquisition does not live here.
+First-player field notes for **IrisGreen**: thinking, captures, iteration.
+**IrisLoop** is the open quickstart repo that makes unboxing and hacking easier.
+Cycling retail acquisition does not live here.
 
 | Folder | Purpose |
 | --- | --- |

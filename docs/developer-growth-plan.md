@@ -1,17 +1,18 @@
 # IrisLoop developer growth plan (AI + projection)
 
-Cycling retail sits with a separate sales team. IrisLoop only serves developers who want to
-**play with AI + projection**. You are the **brand experience officer**: share thinking and live
-iteration on X, land code on GitHub, and convert through the Play Kit. This is Build in Public,
-not a marketing matrix account.
+Cycling retail sits with a separate sales team. You are the **brand experience officer for IrisGreen**:
+share thinking and live iteration on X, land open code in **IrisLoop** on GitHub, and convert through
+the hardware storefront. IrisLoop is the open quickstart that helps people unbox and play — not the
+consumer brand. This is Build in Public, not a marketing matrix account.
 
 | Role | Channel | Cadence | Red line |
 | --- | --- | --- | --- |
-| Brand experience officer | X: thinking + real laser shots | Continuous iteration | Cycling ≠ IrisLoop KPI |
+| IrisGreen brand experience | X: thinking + real laser shots | Continuous iteration | Cycling retail KPI ≠ this line |
 
-**Org boundary:** IrisLoop does not own the 100k cycling-unit target. Your job is to show one person
-seriously playing with light and AI — think, build, show, revise. North stars remain Play/Dev Kit
-orders plus reproductions/submissions. Reach comes from presence, not paid media.
+**Org boundary:** This line does not own the 100k cycling-unit target. Show one person seriously
+playing with light and AI — think, build, show, revise. North stars remain IrisGreen hardware orders
+(via the live storefront for now) plus IrisLoop reproductions/submissions. Reach comes from presence,
+not paid media.
 
 ---
 
@@ -109,7 +110,7 @@ Every step serves developer purchase and creation — never optimize landing pag
 | --- | --- |
 | English README hero | 15s GIF: prompt/generate → project → camera → improve; large Buy Play Kit CTA |
 | Play without purchase | Local preview / sample streams / benchmark stills public; label “device unlocks the full loop” |
-| Play Kit SKU | Developer storefront page: unit + cables/mount + quickstart + samples; separated from cycling retail |
+| Play Kit SKU | For now use the live storefront [irisarworld.com/irisgreen](https://irisarworld.com/irisgreen/); a separate developer Play Kit page can come later |
 | Three gold demos | (1) AI silhouette projection (2) multimodal still revise (3) Hello World push one frame |
 | Attribution | End-to-end UTMs for `github` / `x` / `hub`; do not share CTAs with cycling pages |
 
