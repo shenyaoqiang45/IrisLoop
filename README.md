@@ -148,15 +148,18 @@ AI generates content → BLE project → camera observe → AI reads the result
 
 ## Roadmap (two multimodal AI checkpoints)
 
-1. **Content generation** — prompt → model generates 3–5s video → 1bpp frames → BLE project
+1. **Content generation** — Bailian Kling v3 (`DASHSCOPE_API_KEY`): **3 s min clip** (API floor) → **extract 3 frames** → 1bpp → BLE project
    - Challenge: generative complexity vs MEMS 1bpp expressive power
    - Success: projected content is recognizable and motion is readable
-2. **Visual understanding** — model watches real projection footage → scores recognizability → proposes clearer content
+2. **Visual understanding** — Kimi K3 watches real projection / stills → scores recognizability → proposes clearer content
    - Challenge: learning 1bpp recognizability (stroke weight / detail density / contrast)
    - Success: clear quality gains within 3 rounds, without oscillating
 
+Writer smoke: `python tools/kling_bailian_smoke.py "…"` (see Bailian Kling doc).
+
 ## Docs
 
+- [Kling via Bailian (writer, 3s + 3 frames)](docs/kling-via-bailian.md)
 - [Developer growth plan (AI + projection)](docs/developer-growth-plan.md)
 - [Experience / brand field notes](experience/README.md)
 - [Hub submissions](hub/README.md)
