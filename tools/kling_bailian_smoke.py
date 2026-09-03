@@ -1,7 +1,7 @@
-"""Cheapest Bailian Kling writer smoke test: min clip (3s) + 3 frames.
+"""Bailian Kling writer smoke (fallback): min clip (3s) + frames.
 
+Preferred writer: ``tools/wan_siliconflow_smoke.py`` (SiliconFlow Wan2.2).
 Bailian Kling v3 does not offer 1s clips — API floor is 3 seconds.
-We generate the minimum, then sample 3 stills for the K3 director path.
 
 Usage:
     set DASHSCOPE_API_KEY=sk-...

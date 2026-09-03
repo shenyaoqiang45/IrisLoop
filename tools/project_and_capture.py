@@ -56,8 +56,24 @@ async def run_group(
     out_dir: str | None = None,
 ) -> dict:
     cli = IrisBleClient(addr)
-    await cli.connect()
-    await cli.stop()  # stop any previous playback first
+    last_err: BaseException | None = None
+    for attempt in range(1, 4):
+        try:
+            await cli.connect()
+            await cli.stop()  # stop any previous playback first
+            last_err = None
+            break
+        except OSError as e:
+            last_err = e
+            print(f"  BLE start abort (attempt {attempt}/3): {e}", flush=True)
+            try:
+                await cli.disconnect()
+            except Exception:
+                pass
+            await asyncio.sleep(2.0 * attempt)
+            cli = IrisBleClient(addr)
+    if last_err is not None:
+        raise last_err
     await asyncio.sleep(0.3)
 
     gname = P.group_name(group)

@@ -148,18 +148,26 @@ AI generates content → BLE project → camera observe → AI reads the result
 
 ## Roadmap (two multimodal AI checkpoints)
 
-1. **Content generation** — Bailian Kling v3 (`DASHSCOPE_API_KEY`): **3 s min clip** (API floor) → **extract 3 frames** → 1bpp → BLE project
+1. **Content generation** — SiliconFlow **Wan2.2-T2V-A14B** (`SILICONFLOW_API_KEY`): ~**5 s** clip → extract frames → 1bpp → BLE project  
+   (Bailian Kling remains a fallback.)
    - Challenge: generative complexity vs MEMS 1bpp expressive power
    - Success: projected content is recognizable and motion is readable
-2. **Visual understanding** — Kimi K3 watches real projection / stills → scores recognizability → proposes clearer content
-   - Challenge: learning 1bpp recognizability (stroke weight / detail density / contrast)
-   - Success: clear quality gains within 3 rounds, without oscillating
+2. **Director loop** — Kimi K3 authors a silhouette, then watches the real beam and only `pass`es if it would sign the piece
+   - Challenge: graphic force on 1bpp (mass, gesture, drama), not just “a human can name the subject”
+   - Success: the director loves the cut within a few rounds, without oscillating
 
-Writer smoke: `python tools/kling_bailian_smoke.py "…"` (see Bailian Kling doc).
+Writer smoke (Bailian Wan 480P): `python tools/wan_bailian_smoke.py "…"`
+
+One closed-loop round (director → writer → project → capture → director):
+
+```bash
+python tools/loop_round1.py "dramatic volcanic eruption" --rounds 3
+```
 
 ## Docs
 
-- [Kling via Bailian (writer, 3s + 3 frames)](docs/kling-via-bailian.md)
+- [Wan via SiliconFlow (preferred writer)](docs/wan-via-siliconflow.md)
+- [Kling via Bailian (writer fallback)](docs/kling-via-bailian.md)
 - [Developer growth plan (AI + projection)](docs/developer-growth-plan.md)
 - [Experience / brand field notes](experience/README.md)
 - [Hub submissions](hub/README.md)

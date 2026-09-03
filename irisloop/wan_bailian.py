@@ -1,16 +1,16 @@
-"""Kling v3 video generation via Alibaba Cloud Bailian (DashScope).
+"""Wan text-to-video via Alibaba Cloud Bailian (DashScope).
 
-Fallback writer path for IrisLoop (preferred: ``wan_siliconflow`` /
-SiliconFlow Wan2.2). Open Kling on Bailian with ``DASHSCOPE_API_KEY``
-(never commit the key).
+Preferred cheap writer on Bailian:
+  model ``wan2.2-t2v-plus``, 480P size ``832*480`` (official enum).
 
-Docs: https://help.aliyun.com/zh/model-studio/kling-video-generation-api-reference/
+Docs: https://help.aliyun.com/zh/model-studio/legacy-wan-text-to-video-api-reference
 
 Env:
-    DASHSCOPE_API_KEY          required (Beijing-region Bailian key)
-    DASHSCOPE_WORKSPACE_ID     required (Bailian workspace / 业务空间 ID)
+    DASHSCOPE_API_KEY
+    DASHSCOPE_WORKSPACE_ID   Beijing workspace / 业务空间 ID
 Optional:
-    DASHSCOPE_KLING_MODEL      default kling/kling-v3-video-generation
+    DASHSCOPE_WAN_MODEL      default wan2.2-t2v-plus
+    DASHSCOPE_WAN_SIZE       default 832*480
 """
 
 from __future__ import annotations
@@ -25,20 +25,18 @@ from typing import Any
 
 from irisloop.video_frames import DEFAULT_FRAME_COUNT, extract_frames
 
-DEFAULT_MODEL = "kling/kling-v3-video-generation"
+DEFAULT_MODEL = "wan2.2-t2v-plus"
+# Official 480P 16:9 for wan2.2-t2v-plus (width*height with asterisk)
+DEFAULT_SIZE = "832*480"
+ALLOWED_SIZES_480P = ("832*480", "480*832", "624*624")
 CREATE_PATH = "/api/v1/services/aigc/video-generation/video-synthesis"
-# Bailian Kling v3 bills by second; API floor is 3s (1s is not offered).
-MIN_DURATION_S = 3
-DEFAULT_DURATION_S = MIN_DURATION_S
+NOMINAL_DURATION_S = 5
 
 
 def api_key() -> str:
     key = os.environ.get("DASHSCOPE_API_KEY")
     if not key:
-        raise RuntimeError(
-            "DASHSCOPE_API_KEY is not set. "
-            "Bailian console → API-Key → export as DASHSCOPE_API_KEY."
-        )
+        raise RuntimeError("DASHSCOPE_API_KEY is not set")
     return key
 
 
@@ -47,20 +45,20 @@ def workspace_id() -> str:
         "BAILIAN_WORKSPACE_ID"
     )
     if not wid:
-        raise RuntimeError(
-            "DASHSCOPE_WORKSPACE_ID is not set. "
-            "Bailian console → workspace / 业务空间 ID "
-            "(Beijing region, same region as the API key)."
-        )
+        raise RuntimeError("DASHSCOPE_WORKSPACE_ID is not set")
     return wid.strip()
-
-
-def default_model() -> str:
-    return os.environ.get("DASHSCOPE_KLING_MODEL", DEFAULT_MODEL)
 
 
 def base_url() -> str:
     return f"https://{workspace_id()}.cn-beijing.maas.aliyuncs.com"
+
+
+def default_model() -> str:
+    return os.environ.get("DASHSCOPE_WAN_MODEL", DEFAULT_MODEL)
+
+
+def default_size() -> str:
+    return os.environ.get("DASHSCOPE_WAN_SIZE", DEFAULT_SIZE)
 
 
 def _request(
@@ -84,41 +82,31 @@ def _request(
             return json.loads(body)
     except urllib.error.HTTPError as e:
         err = e.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"Bailian Kling HTTP {e.code}: {err}") from e
+        raise RuntimeError(f"Bailian Wan HTTP {e.code}: {err}") from e
 
 
 def create_text_video(
     prompt: str,
     *,
     model: str | None = None,
-    duration: int = 5,
-    mode: str = "std",
-    aspect_ratio: str = "16:9",
+    size: str | None = None,
     negative_prompt: str | None = None,
-    audio: bool = False,
-    watermark: bool = False,
+    prompt_extend: bool = True,
 ) -> str:
-    """Submit an async text-to-video job. Returns task_id."""
-    if duration < MIN_DURATION_S or duration > 15:
-        raise ValueError(
-            f"duration must be an integer in [{MIN_DURATION_S}, 15] "
-            "(Bailian Kling v3 minimum is 3s; use extract_frames for cheap stills)"
-        )
-    input_obj: dict[str, Any] = {"prompt": prompt}
-    if negative_prompt:
-        input_obj["negative_prompt"] = negative_prompt
-    payload = {
+    size = size or default_size()
+    payload: dict[str, Any] = {
         "model": model or default_model(),
-        "input": input_obj,
+        "input": {"prompt": prompt},
         "parameters": {
-            "mode": mode,
-            "aspect_ratio": aspect_ratio,
-            "duration": duration,
-            "audio": audio,
-            "watermark": watermark,
+            "size": size,
+            "prompt_extend": prompt_extend,
         },
     }
+    if negative_prompt:
+        payload["input"]["negative_prompt"] = negative_prompt
     url = f"{base_url()}{CREATE_PATH}"
+    print(f"  POST {url}", flush=True)
+    print(f"  model={payload['model']} size={size}", flush=True)
     resp = _request(
         "POST",
         url,
@@ -135,22 +123,22 @@ def create_text_video(
 
 
 def get_task(task_id: str) -> dict[str, Any]:
-    url = f"{base_url()}/api/v1/tasks/{task_id}"
-    return _request("GET", url)
+    return _request("GET", f"{base_url()}/api/v1/tasks/{task_id}")
 
 
 def wait_task(
     task_id: str,
     *,
-    poll_s: float = 15.0,
-    timeout_s: float = 600.0,
+    poll_s: float = 10.0,
+    timeout_s: float = 900.0,
 ) -> dict[str, Any]:
-    """Poll until SUCCEEDED / FAILED / CANCELED / UNKNOWN or timeout."""
     deadline = time.time() + timeout_s
     last: dict[str, Any] = {}
+    t0 = time.time()
     while time.time() < deadline:
         last = get_task(task_id)
         status = (last.get("output") or {}).get("task_status", "UNKNOWN")
+        print(f"  [{time.time() - t0:5.0f}s] task_status={status}", flush=True)
         if status in ("SUCCEEDED", "FAILED", "CANCELED", "UNKNOWN"):
             return last
         time.sleep(poll_s)
@@ -184,20 +172,21 @@ def generate_and_download(
     prompt: str,
     dest: str | Path,
     *,
-    duration: int = DEFAULT_DURATION_S,
-    mode: str = "std",
+    size: str | None = None,
     negative_prompt: str | None = None,
     model: str | None = None,
+    prompt_extend: bool = True,
 ) -> Path:
-    """One-shot: create → wait → download MP4 (default duration = API minimum 3s)."""
     task_id = create_text_video(
         prompt,
         model=model,
-        duration=duration,
-        mode=mode,
+        size=size,
         negative_prompt=negative_prompt,
+        prompt_extend=prompt_extend,
     )
+    print(f"  task_id={task_id}", flush=True)
     result = wait_task(task_id)
+    print("  download…", flush=True)
     return download_video(video_url_from_result(result), dest)
 
 
@@ -205,21 +194,18 @@ def generate_min_clip_and_frames(
     prompt: str,
     out_dir: str | Path,
     *,
-    duration: int = DEFAULT_DURATION_S,
     frame_count: int = DEFAULT_FRAME_COUNT,
-    mode: str = "std",
+    size: str | None = None,
     negative_prompt: str | None = None,
     model: str | None = None,
 ) -> tuple[Path, list[Path]]:
-    """Cheapest writer probe: min-length clip + a few stills for the director."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    mp4 = out_dir / "kling.mp4"
+    mp4 = out_dir / "wan.mp4"
     generate_and_download(
         prompt,
         mp4,
-        duration=duration,
-        mode=mode,
+        size=size or default_size(),
         negative_prompt=negative_prompt,
         model=model,
     )

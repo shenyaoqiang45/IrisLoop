@@ -1,6 +1,8 @@
-# Kling writer via Alibaba Cloud Bailian
+# Kling writer via Alibaba Cloud Bailian (fallback)
 
-Preferred path for the IrisLoop **writer** seat: call Kling through
+**Preferred writer is now SiliconFlow Wan2.2** — see [`wan-via-siliconflow.md`](wan-via-siliconflow.md).
+
+This doc keeps the Bailian Kling path as a fallback: call Kling through
 [Bailian / Model Studio](https://help.aliyun.com/zh/model-studio/kling-video-generation-api-reference/),
 not the consumer Kling web plan.
 
