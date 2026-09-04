@@ -1,0 +1,80 @@
+{
+  "wish": "an elephant walking on the grassland",
+  "round": 1,
+  "out": "captures/loop_rounds/20260904_154423/r01",
+  "model_writer": "wan2.2-t2v-plus",
+  "model_director": "kimi-k3",
+  "size": "832*480",
+  "style": "halftone",
+  "pack_mode": "dither",
+  "brief": {
+    "concept": "A lone elephant lumbering across golden-hour savanna, its massive bulk rendered in dithered photographic tone as it sways through tall grass.",
+    "subject": "walking elephant on grassland",
+    "style": "halftone",
+    "wan_prompt": "1-bit monochrome animation, pure black background, single elephant in profile walking left to right across a grassland, rendered entirely in coarse halftone dot dithering — large bright green dot clusters on the lit flank, shoulder and top of the head, dots thinning to sparse specks and pure black on the shadowed belly, legs and far ear, thick bold forms with no fine lines, short dithered grass tufts along the bottom edge, the elephant's legs cycle through a slow heavy walking gait, trunk swinging gently, ears flapping once per loop, big readable silhouette preserved inside the dithered tone, seamless loop, high contrast green-on-black, no grayscale, no text",
+    "negative_prompt": "color, grayscale gradients, thin lines, fine fur texture, text, watermark, multiple animals, busy background, photorealistic render, flicker, camera movement",
+    "notes": "Silhouette would flatten the elephant into pure shape; halftone keeps the iconic bulk readable while adding dramatic savanna light raking across the body, giving the slow walk weight and atmosphere. Dithered tone is stable per-frame in 1bpp and the coarse dot field survives the medium's no-fine-texture rule.",
+    "_usage": {
+      "prompt_tokens": 490,
+      "completion_tokens": 440,
+      "total_tokens": 930,
+      "completion_tokens_details": {
+        "reasoning_tokens": 112
+      }
+    }
+  },
+  "writer": {
+    "mp4": "captures/loop_rounds/20260904_154423/r01/writer/wan.mp4",
+    "frames": [
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_00.jpg",
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_01.jpg",
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_02.jpg",
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_03.jpg",
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_04.jpg",
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_05.jpg",
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_06.jpg",
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_07.jpg",
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_08.jpg",
+      "captures/loop_rounds/20260904_154423/r01/writer/frames/frame_09.jpg"
+    ]
+  },
+  "capture": {
+    "group": 1,
+    "frames": 241,
+    "mean": 117.58400113279448,
+    "max_mean": 120.29798394097222,
+    "bright_ratio": 0.15799262152777777,
+    "lap_var": 38.23868464627256,
+    "dir": "captures\\loop_rounds\\20260904_154423\\r01\\capture"
+  },
+  "review": {
+    "subject_seen": "a large elephant in profile walking across a bright green field, its body dark with grainy dithered texture along the back and head, legs mid-stride, trunk and tusks visible",
+    "recognizable": true,
+    "confidence": 0.9,
+    "loved": true,
+    "issues": [
+      "idiom broken"
+    ],
+    "content_actions": [
+      "none"
+    ],
+    "pass": true,
+    "summary": "I love it — the elephant is massive, readable, and full of heavy walking weight, and though the palette inverted to dark-on-green instead of green-on-black halftone, the dithered grain along the back still sings as tone and the graphic force carries the piece.",
+    "next_intent": "",
+    "next_style": "halftone",
+    "next_wan_prompt": "1-bit monochrome animation, pure black background, single elephant in profile walking left to right across a grassland, rendered entirely in coarse halftone dot dithering — large bright green dot clusters on the lit flank, shoulder and top of the head, dots thinning to sparse specks and pure black on the shadowed belly, legs and far ear, thick bold forms with no fine lines, short dithered grass tufts along the bottom edge, the elephant's legs cycle through a slow heavy walking gait, trunk swinging gently, ears flapping once per loop, big readable silhouette preserved inside the dithered tone, seamless loop, high contrast green-on-black, no grayscale, no text",
+    "_usage": {
+      "prompt_tokens": 2848,
+      "completion_tokens": 448,
+      "total_tokens": 3296,
+      "completion_tokens_details": {
+        "reasoning_tokens": 114
+      }
+    },
+    "_stills": [
+      "captures/loop_rounds/20260904_154423/r01/capture/frame_00_0.4s.jpg",
+      "captures/loop_rounds/20260904_154423/r01/capture/frame_04_4.6s.jpg",
+      "captures/loop_rounds/20260904_154423/r01/capture/frame_07_7.8s.jpg"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "concept": "Make the hanging parachutist a clearly readable figure with legs and arms, emphasizing the sway and the knee-bend landing moment.",
+  "subject": "person landing with a parachute",
+  "style": "neon",
+  "wan_prompt": "1bpp monochrome animation, pure bright green lines on pure black background, neon sign aesthetic: a parachutist descending, drawn as thick double-stroke glowing tube contours. A large domed parachute canopy with bold parallel outline arcs and radial suspension lines converging down to a clearly readable hanging human figure with visible head, torso, arms spread to the risers, and bent legs. The figure swings gently side to side as it descends, then knees bend deeply on a clear touchdown crouch, springing back up, then loops to descending. Figure is large enough to read, occupying a third of frame height. Chunky glowing neon tube lines, uniform thickness, no grayscale, no shading, black void background, no text, 640x480 retro laser display look.",
+  "negative_prompt": "grayscale, gray tones, color, filled solid shapes, photorealism, texture, thin wobbly sketchy lines, text, watermark, multiple subjects, clouds, landscape detail",
+  "notes": "iteration: director next_wan_prompt from previous review",
+  "_from_review": true
+}

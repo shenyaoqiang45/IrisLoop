@@ -21,7 +21,7 @@ Never commit keys.
 
 ```bash
 python tools/loop_round1.py "dramatic volcanic eruption"
-python tools/loop_round1.py "dramatic volcanic eruption" --rounds 3
+python tools/loop_round1.py "dramatic volcanic eruption" --rounds 2
 ```
 
 Useful flags:
@@ -31,7 +31,7 @@ Useful flags:
 | `--frames 10` | extract/push count (group 1 max 10) |
 | `--size 832*480` | Wan 480P 16:9 (default) |
 | `--exposure -7` | camera exposure for laser |
-| `--rounds 3` | max cycles; stop if director loves the cut |
+| `--rounds 2` | max cycles (capped at 2); stop if director loves the cut |
 
 ## Outputs
 

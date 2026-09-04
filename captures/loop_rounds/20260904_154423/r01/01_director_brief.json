@@ -1,0 +1,16 @@
+{
+  "concept": "A lone elephant lumbering across golden-hour savanna, its massive bulk rendered in dithered photographic tone as it sways through tall grass.",
+  "subject": "walking elephant on grassland",
+  "style": "halftone",
+  "wan_prompt": "1-bit monochrome animation, pure black background, single elephant in profile walking left to right across a grassland, rendered entirely in coarse halftone dot dithering — large bright green dot clusters on the lit flank, shoulder and top of the head, dots thinning to sparse specks and pure black on the shadowed belly, legs and far ear, thick bold forms with no fine lines, short dithered grass tufts along the bottom edge, the elephant's legs cycle through a slow heavy walking gait, trunk swinging gently, ears flapping once per loop, big readable silhouette preserved inside the dithered tone, seamless loop, high contrast green-on-black, no grayscale, no text",
+  "negative_prompt": "color, grayscale gradients, thin lines, fine fur texture, text, watermark, multiple animals, busy background, photorealistic render, flicker, camera movement",
+  "notes": "Silhouette would flatten the elephant into pure shape; halftone keeps the iconic bulk readable while adding dramatic savanna light raking across the body, giving the slow walk weight and atmosphere. Dithered tone is stable per-frame in 1bpp and the coarse dot field survives the medium's no-fine-texture rule.",
+  "_usage": {
+    "prompt_tokens": 490,
+    "completion_tokens": 440,
+    "total_tokens": 930,
+    "completion_tokens_details": {
+      "reasoning_tokens": 112
+    }
+  }
+}

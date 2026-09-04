@@ -1,0 +1,16 @@
+{
+  "concept": "A lone parachutist glides down through the dark like a glowing sign in the sky, canopy arcing bright as they flare, touch down, and rise again in an endless landing loop.",
+  "subject": "person landing with a parachute",
+  "style": "neon",
+  "wan_prompt": "1bpp monochrome animation, pure bright green lines on pure black background, neon sign aesthetic: a parachutist descending, drawn as thick double-stroke glowing contours. A big domed parachute canopy with bold parallel outline arcs and radial suspension lines down to a small hanging human figure with bent knees. The figure gently sways, descends, knees bend on touchdown, then loops back up to descending. Chunky glowing neon tube lines, uniform thickness, no grayscale, no shading, black void background, 640x480 retro laser display look.",
+  "negative_prompt": "grayscale, gray tones, color, filled solid shapes, photorealism, texture, thin wobbly sketchy lines, text, watermark, multiple subjects, clouds, landscape detail",
+  "notes": "The parachute's radial lines and domed canopy are inherently a line-driven form — neon's double-stroke glow makes the canopy geometry sing against the black void while keeping the figure crisp, and the gentle sway-and-touchdown motion reads perfectly as a marquee-style loop.",
+  "_usage": {
+    "prompt_tokens": 490,
+    "completion_tokens": 333,
+    "total_tokens": 823,
+    "completion_tokens_details": {
+      "reasoning_tokens": 34
+    }
+  }
+}

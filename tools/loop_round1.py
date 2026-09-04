@@ -12,7 +12,7 @@ Requires env (never commit keys):
 
 Usage:
     python tools/loop_round1.py "dramatic volcanic eruption"
-    python tools/loop_round1.py "dramatic volcanic eruption" --rounds 3
+    python tools/loop_round1.py "dramatic volcanic eruption" --rounds 2
     python tools/loop_round1.py "…" --skip-project   # stop after Wan frames (no BLE)
 """
 
@@ -34,7 +34,7 @@ from irisloop import kimi_client as K
 from irisloop import protocol as P
 from irisloop import wan_bailian as W
 from irisloop.ble_client import IrisBleClient
-from irisloop.image_pack import binarize, build_stream, describe
+from irisloop.image_pack import build_stream, describe, to_1bpp
 from irisloop.projector import CHAR_FILE_DATA, CHAR_FILE_END, CHAR_FILE_START
 from irisloop.video_frames import extract_frames
 
@@ -46,39 +46,62 @@ START_DELAY_S = 0.1
 PACKET_DELAY_S = 0.03
 INTER_FILE_DELAY_S = 1.0
 
+# Visual idioms the director may choose from, and the 1bpp conversion each needs.
+# Silhouette was the original (and only) idiom; it is now one of six.
+STYLE_PACK_MODES = {
+    "silhouette": "threshold",
+    "lineart": "edges",
+    "neon": "edges",
+    "pixel": "otsu",
+    "halftone": "dither",
+    "negative": "threshold_inv",
+}
+
 DIRECTOR_BRIEF_SYSTEM = (
-    "You are IrisLoop's director: a silhouette master and a creative master. "
-    "The medium is a green MEMS laser (640x480, 1bpp). You do not merely sanitize "
-    "the user's wish — you invent a graphic idea: one iconic cut-paper / shadow-play "
-    "figure, a readable gesture, a beat of motion that feels authored. "
-    "Craft is non-negotiable (thick masses, black void, no texture, no text) because "
-    "that is how silhouettes sing, not because you are a QA bot. "
+    "You are IrisLoop's director: a master of the 1bpp green MEMS laser medium "
+    "(640x480, pure green on black, no grayscale). You are NOT locked into "
+    "silhouette — you command a repertoire of 1bpp visual idioms and pick the "
+    "one that makes the user's wish hit hardest:\n"
+    "- silhouette: solid cut-paper mass, bold gesture, thick shapes\n"
+    "- lineart: white-on-black contour drawing, thick confident outlines\n"
+    "- neon: glowing-sign aesthetic, double-stroke contours, marquee energy\n"
+    "- pixel: chunky 8-bit sprite, big blocky forms, retro game iconography\n"
+    "- halftone: dithered photographic tone, dramatic light and shadow\n"
+    "- negative: black figure carved out of a full green field\n"
+    "Medium rules that never bend: no fine texture, no text, no thin wobbly "
+    "detail, one subject, motion readable as a loop. "
     "Reply JSON only. wan_prompt must be English for Wan2.2."
 )
 
 DIRECTOR_BRIEF_USER = """User wish (raw intent, not the artwork): {wish}
 
-Author a silhouette piece. Return JSON:
+Choose the 1bpp idiom that serves this wish best — do not default to silhouette.
+Return JSON:
 {{
   "concept": "one-sentence creative idea (what this piece is about)",
   "subject": "short English subject",
-  "wan_prompt": "English T2V prompt: bold 1bpp silhouette, black void, thick masses, authored motion",
+  "style": "silhouette|lineart|neon|pixel|halftone|negative",
+  "wan_prompt": "English T2V prompt that FORCES the chosen idiom: describe exactly what the frame looks like in that idiom",
   "negative_prompt": "English negative prompt",
-  "notes": "why this cut will feel like a finished graphic, not a stock clip"
+  "notes": "why this idiom is the strongest vehicle for the wish"
 }}"""
 
 DIRECTOR_REVIEW_SYSTEM = (
-    "You are IrisLoop's director: silhouette master + creative master. "
-    "The images are USB-camera photos of your piece on a green MEMS laser. "
-    "Green scan stripes and mild underexposure are capture artifacts, not content failure. "
-    "Do not suggest changing focus, FOV, or hardware. "
-    "recognizable is a factual check. pass is whether you love this silhouette "
-    "as a work you would sign — graphic force, gesture, mass, drama. "
+    "You are IrisLoop's director reviewing USB-camera photos of your piece on a "
+    "green MEMS laser (640x480, 1bpp). Green scan stripes and mild underexposure "
+    "are capture artifacts, not content failure. Do not suggest changing focus, "
+    "FOV, or hardware. Judge the piece BY THE STANDARDS OF ITS CHOSEN IDIOM: "
+    "halftone grain is tone on purpose, lineart contours are meant to be lines, "
+    "pixel chunks are meant to be blocky — never demand silhouette mass from a "
+    "piece that was not authored as a silhouette. "
+    "recognizable is a factual check. pass is whether you love it as a finished "
+    "work in its own idiom — graphic force, gesture, drama. "
     "If you would only say 'a human can tell what it is', pass must be false. "
     "JSON only."
 )
 
 DIRECTOR_REVIEW_USER = """User wish: {wish}
+Chosen idiom: {style}
 Writer prompt used: {wan_prompt}
 
 Look at the projection still(s) as the author of this piece. Return JSON:
@@ -87,11 +110,12 @@ Look at the projection still(s) as the author of this piece. Return JSON:
   "recognizable": true/false,
   "confidence": 0.0-1.0,
   "loved": true/false,
-  "issues": ["too thin|too fragmented|low contrast|subject unclear|gesture weak|generic|artifact interference|other"],
-  "content_actions": ["thicken_strokes|simplify_silhouette|drop_background|recenter|slow_motion|bolder_gesture|none"],
+  "issues": ["too thin|too fragmented|low contrast|subject unclear|gesture weak|generic|artifact interference|idiom broken|other"],
+  "content_actions": ["thicken_strokes|simplify_silhouette|drop_background|recenter|slow_motion|bolder_gesture|switch_idiom|none"],
   "pass": true/false,
   "summary": "one English sentence: do you love it, and why or why not",
   "next_intent": "round-2 creative goal in one sentence, or empty if pass",
+  "next_style": "silhouette|lineart|neon|pixel|halftone|negative — only if content_actions includes switch_idiom, else repeat the chosen idiom",
   "next_wan_prompt": "new English T2V prompt that pursues next_intent; use same only if pass is true"
 }}"""
 
@@ -111,13 +135,29 @@ def _next_writer_prompt(review: dict) -> str | None:
     return raw
 
 
+def pack_mode_for(brief: dict) -> str:
+    """Resolve the 1bpp conversion mode from a brief's chosen style."""
+    style = (brief.get("style") or "silhouette").strip().lower()
+    return STYLE_PACK_MODES.get(style, "threshold")
+
+
+def resolve_pack_mode(args: argparse.Namespace, brief: dict) -> str:
+    """CLI --pack-mode overrides the style-derived mode; 'auto' follows the style."""
+    override = getattr(args, "pack_mode", "auto")
+    if override and override != "auto":
+        return override
+    return pack_mode_for(brief)
+
+
 def brief_from_review(prev_brief: dict, review: dict) -> dict | None:
     nxt = _next_writer_prompt(review)
     if not nxt:
         return None
+    style = (review.get("next_style") or prev_brief.get("style") or "silhouette")
     return {
         "concept": review.get("next_intent") or prev_brief.get("concept"),
         "subject": prev_brief.get("subject"),
+        "style": style.strip().lower(),
         "wan_prompt": nxt,
         "negative_prompt": prev_brief.get("negative_prompt"),
         "notes": "iteration: director next_wan_prompt from previous review",
@@ -148,6 +188,7 @@ def director_brief(wish: str, *, effort: str = "low") -> dict:
     if data.get("concept"):
         print(f"  concept : {data.get('concept')}", flush=True)
     print(f"  subject : {data.get('subject')}", flush=True)
+    print(f"  style   : {data.get('style')} -> pack_mode={pack_mode_for(data)}", flush=True)
     print(f"  prompt  : {data.get('wan_prompt')}", flush=True)
     return data
 
@@ -181,7 +222,7 @@ def build_name_packet(file_size: int, file_name: str) -> bytes:
     return file_size.to_bytes(4, "big") + nb.ljust(field, b"\x00")
 
 
-def load_bw(path: Path):
+def load_bw(path: Path, mode: str = "threshold"):
     import cv2
     import numpy as np
 
@@ -191,7 +232,7 @@ def load_bw(path: Path):
         raise ValueError(f"cannot read {path}")
     if img.shape != (480, 640):
         img = cv2.resize(img, (640, 480), interpolation=cv2.INTER_AREA)
-    return binarize(img, threshold=127)
+    return to_1bpp(img, mode)
 
 
 async def push_one(client, file_name: str, stream: bytes) -> None:
@@ -220,8 +261,9 @@ async def project_and_capture(
     exposure: float | None,
     interval_100ms: int,
     n_stills: int,
+    pack_mode: str = "threshold",
 ) -> dict:
-    print("\n=== [3/5] PROJECT push group + play ===", flush=True)
+    print(f"\n=== [3/5] PROJECT push group + play (pack_mode={pack_mode}) ===", flush=True)
     import importlib.util
 
     _pac = Path(__file__).resolve().parent / "project_and_capture.py"
@@ -242,7 +284,7 @@ async def project_and_capture(
         client = cli.client
         assert client is not None
         for i, path in enumerate(frame_paths, 1):
-            bw = load_bw(path)
+            bw = load_bw(path, pack_mode)
             stream = build_stream(bw)
             name = f"{group}_{i}.bmp"
             print(f"  [{i}/{len(frame_paths)}] {path.name} -> {name}  {describe(bw)}", flush=True)
@@ -285,6 +327,7 @@ def director_review(
     stills: list[Path],
     *,
     effort: str = "low",
+    style: str = "silhouette",
 ) -> dict:
     print("\n=== [5/5] DIRECTOR review (Kimi K3 on capture) ===", flush=True)
     if not stills:
@@ -295,7 +338,9 @@ def director_review(
             "error": "no_stills",
         }
     content: list = [
-        {"type": "text", "text": DIRECTOR_REVIEW_USER.format(wish=wish, wan_prompt=wan_prompt)}
+        {"type": "text", "text": DIRECTOR_REVIEW_USER.format(
+            wish=wish, wan_prompt=wan_prompt, style=style
+        )}
     ]
     for p in stills:
         content.append(
@@ -344,6 +389,8 @@ async def run_one_round(
         "model_writer": W.default_model(),
         "model_director": K.DEFAULT_MODEL,
         "size": args.size,
+        "style": brief.get("style"),
+        "pack_mode": resolve_pack_mode(args, brief),
         "brief": brief,
     }
     _write_json(out / "01_director_brief.json", brief)
@@ -372,9 +419,25 @@ async def run_one_round(
         exposure=args.exposure,
         interval_100ms=args.interval,
         n_stills=args.n_stills,
+        pack_mode=report["pack_mode"],
     )
     report["capture"] = cap
     _write_json(out / "03_capture.json", cap)
+
+    # keep playing after capture so user can watch the loop
+    if not args.skip_project:
+        cli = IrisBleClient(args.address)
+        await cli.connect()
+        try:
+            await cli.stop()
+            await asyncio.sleep(0.3)
+            r = await cli.play(
+                group_id=args.group, loop=True,
+                total_100ms=600, interval_100ms=args.interval,
+            )
+            print(f"\n=== KEEP PLAYING: {'ok' if r.ok else r.error} (loop 60s) ===", flush=True)
+        finally:
+            await cli.disconnect()
 
     stills = pick_review_stills(capture_dir, limit=args.review_stills)
     review = director_review(
@@ -382,6 +445,7 @@ async def run_one_round(
         brief.get("wan_prompt", ""),
         stills,
         effort=args.effort,
+        style=brief.get("style") or "silhouette",
     )
     report["review"] = review
     _write_json(out / "04_director_review.json", review)
@@ -488,6 +552,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--n-stills", type=int, default=8)
     ap.add_argument("--review-stills", type=int, default=3)
     ap.add_argument("--effort", choices=["low", "high", "max"], default="low")
+    ap.add_argument(
+        "--pack-mode",
+        choices=["auto", "threshold", "threshold_inv", "otsu", "dither", "dither_flat", "edges"],
+        default="auto",
+        help="1bpp conversion override; auto follows the director's chosen style",
+    )
     ap.add_argument("--out", default=None)
     ap.add_argument(
         "--skip-project",
@@ -502,12 +572,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument(
         "--rounds",
         type=int,
-        default=1,
-        help="max director→writer→project cycles; stop early if pass",
+        default=2,
+        help="max director→writer→project cycles; capped at 2, more is noise",
     )
     args = ap.parse_args(argv)
     args.frames = max(1, min(10, args.frames))
-    args.rounds = max(1, min(8, args.rounds))
+    args.rounds = max(1, min(2, args.rounds))
     return asyncio.run(async_main(args))
 
 

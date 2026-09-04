@@ -37,6 +37,117 @@ def binarize(gray: np.ndarray, threshold: int = 127) -> np.ndarray:
     return (np.asarray(gray) > threshold).astype(np.uint8)
 
 
+def binarize_otsu(gray: np.ndarray) -> np.ndarray:
+    """Otsu adaptive threshold with guard rails.
+
+    Fixed 127 dies on colored/gradient T2V output (e.g. a pink-and-white
+    cartoon cat shatters into highlight fragments). Otsu picks the split
+    from the actual histogram, so mid-tone figures keep their mass.
+    """
+    g = np.asarray(gray)
+    t, _ = cv2.threshold(g, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    t = float(np.clip(t, 40, 220))  # near-uniform frames give degenerate t
+    return (g > t).astype(np.uint8)
+
+
+def dither_fs(
+    gray: np.ndarray,
+    gamma: float = 0.65,
+    black_floor: float = 32.0,
+) -> np.ndarray:
+    """Floyd-Steinberg dithering — fake grayscale on 1bpp.
+
+    gamma < 1 pre-brightens the source before dithering. The MEMS laser
+    spreads each lit pixel into its dark neighbours, so a 50% dot field
+    reads far dimmer than a solid block; boosting mid-tones (128 -> ~170
+    at gamma 0.65) compensates and lifts perceived brightness while
+    keeping the halftone texture. gamma=1.0 disables the boost.
+
+    black_floor clamps everything below it to true black BEFORE the gamma
+    boost. T2V "black" backgrounds are really 5~30 gray with codec noise;
+    gamma would lift that noise into the dither band and pepper the void
+    with stray dots. The floor re-normalizes [black_floor, 255] onto the
+    full range so content tones are preserved.
+
+    A hard clip also amputates the dark-end tonal transitions of the
+    subject itself (e.g. where the ash plume fades into the sky around
+    gray 30~60), so the floor is applied as a soft knee: full cut below
+    floor/2, smooth quadratic blend from floor/2 up to floor*1.5.
+    """
+    g = np.asarray(gray, dtype=np.float32)
+    if black_floor > 0:
+        lo = black_floor * 0.5
+        hi = black_floor * 1.5
+        span = hi - lo
+        # soft knee: 0 below lo, quadratic blend lo..hi, linear above hi
+        knee = np.clip((g - lo) / span, 0.0, 1.0)
+        knee = knee * knee  # quadratic ease-in
+        g = g * knee
+    if gamma != 1.0:
+        g = 255.0 * np.power(np.clip(g / 255.0, 0.0, 1.0), gamma)
+    g = g.copy()
+    h, w = g.shape
+    out = np.zeros((h, w), dtype=np.uint8)
+    for y in range(h):
+        for x in range(w):
+            old = g[y, x]
+            new = 255.0 if old > 127 else 0.0
+            out[y, x] = 1 if new > 0 else 0
+            err = old - new
+            if x + 1 < w:
+                g[y, x + 1] += err * 7.0 / 16
+            if y + 1 < h:
+                if x > 0:
+                    g[y + 1, x - 1] += err * 3.0 / 16
+                g[y + 1, x] += err * 5.0 / 16
+                if x + 1 < w:
+                    g[y + 1, x + 1] += err * 1.0 / 16
+    return out
+
+
+def edge_lines(gray: np.ndarray, *, dilate_px: int = 2) -> np.ndarray:
+    """Line-art mode: smoothed Canny edges, dilated to survive MEMS scanning.
+
+    bilateralFilter first so fur/texture noise doesn't become a thicket of
+    hair-thin edges; dilation makes the surviving contours thick enough for
+    the laser and the camera.
+    """
+    g = np.asarray(gray)
+    sm = cv2.bilateralFilter(g, 7, 50, 50)
+    edges = cv2.Canny(sm, 60, 160)
+    if dilate_px > 0:
+        k = cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE, (dilate_px * 2 + 1, dilate_px * 2 + 1)
+        )
+        edges = cv2.dilate(edges, k)
+    return (edges > 0).astype(np.uint8)
+
+
+def to_1bpp(gray: np.ndarray, mode: str = "threshold") -> np.ndarray:
+    """Unified gray -> 1bpp conversion. Modes:
+
+    threshold     fixed 127 (device-verified default, silhouette idiom)
+    threshold_inv inverted fixed 127 (negative idiom: black figure in green field)
+    otsu          adaptive threshold (rescues colored/gradient input)
+    dither        Floyd-Steinberg halftone, gamma-boosted (pseudo-tone idiom)
+    dither_flat   Floyd-Steinberg without gamma boost (1:1 tone mapping)
+    edges         dilated Canny line art (lineart / neon idiom)
+    """
+    if mode == "threshold":
+        return binarize(gray)
+    if mode == "threshold_inv":
+        return 1 - binarize(gray)
+    if mode == "otsu":
+        return binarize_otsu(gray)
+    if mode == "dither":
+        return dither_fs(gray)
+    if mode == "dither_flat":
+        return dither_fs(gray, gamma=1.0)
+    if mode == "edges":
+        return edge_lines(gray)
+    raise ValueError(f"unknown pack mode: {mode}")
+
+
 def pack(bw: np.ndarray) -> bytes:
     """Binary image -> 38400-byte device payload.
 

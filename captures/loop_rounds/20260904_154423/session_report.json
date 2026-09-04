@@ -1,0 +1,16 @@
+{
+  "wish": "an elephant walking on the grassland",
+  "started": "20260904_154423",
+  "out": "captures/loop_rounds/20260904_154423",
+  "max_rounds": 2,
+  "rounds": [
+    {
+      "round": 1,
+      "out": "captures/loop_rounds/20260904_154423/r01",
+      "pass": true,
+      "loved": true,
+      "next_intent": ""
+    }
+  ],
+  "stopped": "director_loved"
+}

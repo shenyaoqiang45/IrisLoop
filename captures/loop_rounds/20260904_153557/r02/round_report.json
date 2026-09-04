@@ -1,0 +1,76 @@
+{
+  "wish": "a person landing with a parachute",
+  "round": 2,
+  "out": "captures/loop_rounds/20260904_153557/r02",
+  "model_writer": "wan2.2-t2v-plus",
+  "model_director": "kimi-k3",
+  "size": "832*480",
+  "style": "neon",
+  "pack_mode": "edges",
+  "brief": {
+    "concept": "Make the hanging parachutist a clearly readable figure with legs and arms, emphasizing the sway and the knee-bend landing moment.",
+    "subject": "person landing with a parachute",
+    "style": "neon",
+    "wan_prompt": "1bpp monochrome animation, pure bright green lines on pure black background, neon sign aesthetic: a parachutist descending, drawn as thick double-stroke glowing tube contours. A large domed parachute canopy with bold parallel outline arcs and radial suspension lines converging down to a clearly readable hanging human figure with visible head, torso, arms spread to the risers, and bent legs. The figure swings gently side to side as it descends, then knees bend deeply on a clear touchdown crouch, springing back up, then loops to descending. Figure is large enough to read, occupying a third of frame height. Chunky glowing neon tube lines, uniform thickness, no grayscale, no shading, black void background, no text, 640x480 retro laser display look.",
+    "negative_prompt": "grayscale, gray tones, color, filled solid shapes, photorealism, texture, thin wobbly sketchy lines, text, watermark, multiple subjects, clouds, landscape detail",
+    "notes": "iteration: director next_wan_prompt from previous review",
+    "_from_review": true
+  },
+  "writer": {
+    "mp4": "captures/loop_rounds/20260904_153557/r02/writer/wan.mp4",
+    "frames": [
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_00.jpg",
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_01.jpg",
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_02.jpg",
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_03.jpg",
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_04.jpg",
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_05.jpg",
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_06.jpg",
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_07.jpg",
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_08.jpg",
+      "captures/loop_rounds/20260904_153557/r02/writer/frames/frame_09.jpg"
+    ]
+  },
+  "capture": {
+    "group": 1,
+    "frames": 240,
+    "mean": 110.83977036313657,
+    "max_mean": 111.75719618055555,
+    "bright_ratio": 0.07726453993055556,
+    "lap_var": 31.90049679249565,
+    "dir": "captures\\loop_rounds\\20260904_153557\\r02\\capture"
+  },
+  "review": {
+    "subject_seen": "a neon green line-art parachute with a small hanging human figure beneath it, on black",
+    "recognizable": true,
+    "confidence": 0.9,
+    "loved": false,
+    "issues": [
+      "gesture weak",
+      "too thin"
+    ],
+    "content_actions": [
+      "recenter",
+      "bolder_gesture",
+      "thicken_strokes"
+    ],
+    "pass": false,
+    "summary": "The parachute reads instantly and the radial canopy lines are charming, but the figure is a tiny dangling blob with no readable head, arms, or landing crouch, so the piece stays at 'a human can tell what it is' rather than a neon sign I'd love.",
+    "next_intent": "Make the parachutist large enough to dominate the frame with a readable body and a dramatic touchdown-crouch gesture in chunky double-stroke neon tubing.",
+    "next_style": "neon",
+    "next_wan_prompt": "1bpp monochrome animation, pure bright green thick neon tube lines on pure black background, retro laser display look: a large parachutist filling at least half the frame height, domed parachute canopy drawn with bold double-stroke glowing arcs, strong radial suspension lines converging to a clearly readable human figure with round head, torso, arms spread wide gripping the risers, and bent legs. The figure sways side to side while descending, then bends knees deeply into an exaggerated touchdown crouch, springs back up, and loops. Chunky uniform-thickness glowing neon outlines, figure large and central, high graphic contrast, no grayscale, no shading, no text, 640x480.",
+    "_usage": {
+      "prompt_tokens": 2862,
+      "completion_tokens": 474,
+      "total_tokens": 3336,
+      "completion_tokens_details": {
+        "reasoning_tokens": 117
+      }
+    },
+    "_stills": [
+      "captures/loop_rounds/20260904_153557/r02/capture/frame_00_0.4s.jpg",
+      "captures/loop_rounds/20260904_153557/r02/capture/frame_04_4.6s.jpg",
+      "captures/loop_rounds/20260904_153557/r02/capture/frame_07_7.8s.jpg"
+    ]
+  }
+}
