@@ -24,9 +24,11 @@ experience/iteration-log/private/
 # Office lock files
 ~$*
 
-# Protocol workbook internals; keep X / social post PNGs in doc/ tracked
+# Protocol workbook internals; keep X / social post images in doc/ tracked
 doc/*
 !doc/*.png
+!doc/*.jpg
+!doc/*.JPG
 
 # Raw vendor protocol dump (Chinese source workbook extract)
 tools/ble_protocol_dump.txt
