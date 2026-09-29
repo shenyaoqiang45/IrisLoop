@@ -101,6 +101,12 @@ async def run_loop(
     if cli is not None:
         print(f"=== CONNECT {addr} ===")
         await cli.connect()
+        # Clear group 1 so leftover frames from earlier sessions (e.g. the
+        # elephant slideshow in 1_2..1_10) can't appear: the device auto-plays
+        # the boot group when stopped, and play loops ALL frames in the group
+        r = await cli.send_command(P.cmd_delete_group(1))
+        print(f"  clear group 1: {'ok' if r.ok else r.error}")
+        await asyncio.sleep(0.5)
 
     try:
         for it in range(1, max_iters + 1):
@@ -111,7 +117,10 @@ async def run_loop(
                 stream = build_stream(bw)
                 print(f"  pushing {len(stream)}B -> 1_1.bmp ...")
                 await push_image(cli, stream, "1_1.bmp")
-                # keep group 1 on continuously
+                # keep group 1 on continuously. stop is required — a re-issued
+                # play does NOT restart playback while already playing. With a
+                # clean group 1 (only our 1_1.bmp), the stop fallback and the
+                # play both show our own frame, so no elephant flash.
                 await cli.stop()
                 await asyncio.sleep(0.3)
                 r = await cli.play(group_id=1, loop=True,
