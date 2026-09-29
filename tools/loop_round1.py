@@ -34,6 +34,8 @@ from irisloop import kimi_client as K
 from irisloop import protocol as P
 from irisloop import wan_bailian as W
 from irisloop.ble_client import IrisBleClient
+from irisloop.calibrate import DEFAULT_OUT as DEFAULT_CALIBRATION
+from irisloop.calibrate import Calibration, place_in_camera_rect
 from irisloop.image_pack import build_stream, describe, to_1bpp
 from irisloop.projector import CHAR_FILE_DATA, CHAR_FILE_END, CHAR_FILE_START
 from irisloop.video_frames import extract_frames
@@ -222,7 +224,7 @@ def build_name_packet(file_size: int, file_name: str) -> bytes:
     return file_size.to_bytes(4, "big") + nb.ljust(field, b"\x00")
 
 
-def load_bw(path: Path, mode: str = "threshold"):
+def load_bw(path: Path, mode: str = "threshold", *, resize: bool = True):
     import cv2
     import numpy as np
 
@@ -230,7 +232,7 @@ def load_bw(path: Path, mode: str = "threshold"):
     img = cv2.imdecode(buf, cv2.IMREAD_GRAYSCALE)
     if img is None:
         raise ValueError(f"cannot read {path}")
-    if img.shape != (480, 640):
+    if resize and img.shape != (480, 640):
         img = cv2.resize(img, (640, 480), interpolation=cv2.INTER_AREA)
     return to_1bpp(img, mode)
 
@@ -262,9 +264,13 @@ async def project_and_capture(
     interval_100ms: int,
     n_stills: int,
     pack_mode: str = "threshold",
+    target_rect: tuple[float, float, float, float] | None = None,
+    calibration_path: str = DEFAULT_CALIBRATION,
+    spatial_padding: float = 0.05,
 ) -> dict:
     print(f"\n=== [3/5] PROJECT push group + play (pack_mode={pack_mode}) ===", flush=True)
     import importlib.util
+    import cv2
 
     _pac = Path(__file__).resolve().parent / "project_and_capture.py"
     _spec = importlib.util.spec_from_file_location("project_and_capture", _pac)
@@ -272,6 +278,15 @@ async def project_and_capture(
     _mod = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(_mod)
     run_group = _mod.run_group
+
+    calibration = Calibration.load(calibration_path) if target_rect else None
+    preview_dir = capture_dir.parent / "projected_frames"
+    if calibration is not None:
+        preview_dir.mkdir(parents=True, exist_ok=True)
+        print(
+            f"  spatial : camera rect={target_rect} padding={spatial_padding:.0%}",
+            flush=True,
+        )
 
     cli = IrisBleClient(address)
     await cli.connect()
@@ -284,7 +299,20 @@ async def project_and_capture(
         client = cli.client
         assert client is not None
         for i, path in enumerate(frame_paths, 1):
-            bw = load_bw(path, pack_mode)
+            bw = load_bw(path, pack_mode, resize=calibration is None)
+            if calibration is not None:
+                bw, projector_quad = place_in_camera_rect(
+                    bw, calibration, target_rect, padding=spatial_padding
+                )
+                cv2.imwrite(
+                    str(preview_dir / f"frame_{i:02d}.png"),
+                    bw * 255,
+                )
+                if i == 1:
+                    print(
+                        f"  proj quad: {projector_quad.round(1).tolist()}",
+                        flush=True,
+                    )
             stream = build_stream(bw)
             name = f"{group}_{i}.bmp"
             print(f"  [{i}/{len(frame_paths)}] {path.name} -> {name}  {describe(bw)}", flush=True)
@@ -393,6 +421,13 @@ async def run_one_round(
         "pack_mode": resolve_pack_mode(args, brief),
         "brief": brief,
     }
+    if args.target_rect:
+        report["spatial"] = {
+            "camera_rect": args.target_rect,
+            "calibration": args.calibration,
+            "padding": args.spatial_padding,
+            "projected_frames": str(out / "projected_frames").replace("\\", "/"),
+        }
     _write_json(out / "01_director_brief.json", brief)
 
     mp4, frames = writer_wan(brief, out, frames=args.frames, size=args.size)
@@ -420,6 +455,9 @@ async def run_one_round(
         interval_100ms=args.interval,
         n_stills=args.n_stills,
         pack_mode=report["pack_mode"],
+        target_rect=tuple(args.target_rect) if args.target_rect else None,
+        calibration_path=args.calibration,
+        spatial_padding=args.spatial_padding,
     )
     report["capture"] = cap
     _write_json(out / "03_capture.json", cap)
@@ -570,6 +608,24 @@ def main(argv: list[str] | None = None) -> int:
         help="reuse an existing 01_director_brief.json (skip K3 brief call)",
     )
     ap.add_argument(
+        "--target-rect",
+        type=float,
+        nargs=4,
+        metavar=("X0", "Y0", "X1", "Y1"),
+        help="place generated content inside this rectangle in camera pixels",
+    )
+    ap.add_argument(
+        "--calibration",
+        default=DEFAULT_CALIBRATION,
+        help="camera-projector homography used by --target-rect",
+    )
+    ap.add_argument(
+        "--spatial-padding",
+        type=float,
+        default=0.05,
+        help="fractional inset inside --target-rect (default: 0.05)",
+    )
+    ap.add_argument(
         "--rounds",
         type=int,
         default=2,
@@ -578,6 +634,14 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     args.frames = max(1, min(10, args.frames))
     args.rounds = max(1, min(2, args.rounds))
+    if args.target_rect:
+        x0, y0, x1, y1 = args.target_rect
+        if x1 <= x0 or y1 <= y0:
+            ap.error("--target-rect requires X1 > X0 and Y1 > Y0")
+        if not Path(args.calibration).is_file():
+            ap.error(f"calibration file does not exist: {args.calibration}")
+    if not 0 <= args.spatial_padding < 0.5:
+        ap.error("--spatial-padding must be in [0, 0.5)")
     return asyncio.run(async_main(args))
 
 

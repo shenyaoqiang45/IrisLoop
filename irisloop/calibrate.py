@@ -310,6 +310,70 @@ class Calibration:
         return cls(H=d["H"].astype(np.float64))
 
 
+def place_in_camera_rect(
+    bw: np.ndarray,
+    calib: Calibration,
+    rect: tuple[float, float, float, float],
+    padding: float = 0.05,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Place 1bpp content inside a camera-view rectangle.
+
+    The source aspect ratio is preserved (contain fit), then the fitted camera
+    rectangle is mapped back into projector coordinates with the calibration.
+    Returns the 640x480 projector bitmap and its projector-space quad.
+    """
+    source = np.asarray(bw, dtype=np.uint8)
+    if source.ndim != 2 or source.shape[0] < 2 or source.shape[1] < 2:
+        raise ValueError(f"expected a 2D image at least 2x2, got {source.shape}")
+    x0, y0, x1, y1 = (float(v) for v in rect)
+    if x1 <= x0 or y1 <= y0:
+        raise ValueError(f"invalid camera rectangle: {rect}")
+    if not 0.0 <= padding < 0.5:
+        raise ValueError(f"padding must be in [0, 0.5), got {padding}")
+
+    inset_x = (x1 - x0) * padding
+    inset_y = (y1 - y0) * padding
+    x0, x1 = x0 + inset_x, x1 - inset_x
+    y0, y1 = y0 + inset_y, y1 - inset_y
+    target_w, target_h = x1 - x0, y1 - y0
+    source_aspect = source.shape[1] / source.shape[0]
+    if target_w / target_h > source_aspect:
+        fitted_w = target_h * source_aspect
+        x0 += (target_w - fitted_w) / 2
+        x1 = x0 + fitted_w
+    else:
+        fitted_h = target_w / source_aspect
+        y0 += (target_h - fitted_h) / 2
+        y1 = y0 + fitted_h
+
+    camera_quad = np.array(
+        [[x0, y0], [x1, y0], [x1, y1], [x0, y1]], dtype=np.float64
+    )
+    projector_quad = calib.cam_to_proj(camera_quad)
+    if not np.isfinite(projector_quad).all():
+        raise ValueError("camera rectangle maps to non-finite projector coordinates")
+    if not all(0 <= x < WIDTH and 0 <= y < HEIGHT for x, y in projector_quad):
+        raise ValueError(
+            "camera rectangle extends outside the calibrated projection field: "
+            f"{projector_quad.round(1).tolist()}"
+        )
+
+    source_quad = np.float32(
+        [[0, 0], [source.shape[1] - 1, 0],
+         [source.shape[1] - 1, source.shape[0] - 1], [0, source.shape[0] - 1]]
+    )
+    transform = cv2.getPerspectiveTransform(source_quad, projector_quad.astype(np.float32))
+    placed = cv2.warpPerspective(
+        source,
+        transform,
+        (WIDTH, HEIGHT),
+        flags=cv2.INTER_NEAREST,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=0,
+    )
+    return (placed > 0).astype(np.uint8), projector_quad
+
+
 # ---------------- verify ----------------
 
 

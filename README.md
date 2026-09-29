@@ -37,12 +37,19 @@ IrisLoop is not the consumer brand. It is how the brand shows up in public: thin
 
 ```bash
 pip install -r requirements.txt
-python tools/loop_round1.py "viral dancing kitten" --rounds 3
+python tools/loop_round1.py "viral dancing kitten" --rounds 2
 ```
 
 Wish → director (Kimi K3) → writer (Wan) → IrisGreen group 1 → camera → director again.
 
-Pass means the director **loves the silhouette**, not that a human can merely name the subject.
+Pass means the director **loves the piece in its chosen 1bpp idiom**, not that a human can merely name the subject.
+
+Place the generated piece into a real region seen by the fixed camera:
+
+```bash
+python -m irisloop.calibrate run
+python tools/loop_round1.py "a butterfly opening its wings" --target-rect 500 240 760 430
+```
 
 ---
 
