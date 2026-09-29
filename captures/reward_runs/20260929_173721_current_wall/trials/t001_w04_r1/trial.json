@@ -1,0 +1,74 @@
+{
+  "schema": "irisloop.reward_trial/1",
+  "trial_id": "t001_w04_r1",
+  "variant_id": "w04",
+  "requested_width_px": 4,
+  "repeat": 1,
+  "captured": "2026-09-29T17:37:33+0800",
+  "target_pixels": 5656,
+  "metrics": {
+    "reward": 0.9674925760166635,
+    "strict": {
+      "iou": 0.5532622517851903,
+      "precision": 0.5532622517851903,
+      "recall": 1.0,
+      "target_pixels": 5656,
+      "observed_pixels": 10223,
+      "intersection_pixels": 5656,
+      "spill_pixels": 4567
+    },
+    "tolerant": [
+      {
+        "radius_px": 0,
+        "precision": 0.5532622517851903,
+        "recall": 1.0,
+        "f1": 0.7123874299389131,
+        "halo_pixels": 4567,
+        "halo_ratio": 0.8074611032531824
+      },
+      {
+        "radius_px": 2,
+        "precision": 0.8211875183409958,
+        "recall": 1.0,
+        "f1": 0.9018154474164787,
+        "halo_pixels": 1828,
+        "halo_ratio": 0.3231966053748232
+      },
+      {
+        "radius_px": 4,
+        "precision": 0.9661547490951775,
+        "recall": 1.0,
+        "f1": 0.9827860696517413,
+        "halo_pixels": 346,
+        "halo_ratio": 0.06117397454031118
+      },
+      {
+        "radius_px": 8,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "halo_pixels": 0,
+        "halo_ratio": 0.0
+      }
+    ],
+    "selected_tolerance_px": 4,
+    "halo_penalty": 0.25,
+    "centroid_error_px": 3.2066090671953447,
+    "observed_width_median_px": 14.0,
+    "threshold": 40,
+    "threshold_sweep": {
+      "30": 0.926384111930969,
+      "40": 0.9655639851037633,
+      "50": 0.9847636850667273,
+      "60": 0.992299419859113
+    }
+  },
+  "artifacts": {
+    "directory": "trials/t001_w04_r1",
+    "target": "trials/t001_w04_r1/target_mask.png",
+    "background": "trials/t001_w04_r1/background.png",
+    "capture": "trials/t001_w04_r1/capture.png",
+    "observed": "trials/t001_w04_r1/observed_mask.png",
+    "overlay": "trials/t001_w04_r1/overlay.png"
+  }
+}

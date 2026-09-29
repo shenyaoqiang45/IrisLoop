@@ -48,6 +48,7 @@ from irisloop.calibrate import (
 )
 from irisloop.image_pack import HEIGHT, WIDTH, build_stream, to_1bpp
 from irisloop.loop import DEFAULT_ADDR, push_image
+from irisloop.target_path import TargetPath, render_target
 
 MAX_GROUP_FRAMES = 10
 
@@ -197,6 +198,121 @@ async def pick_region(frame: np.ndarray, title: str, prompt: str,
     return picker.rect
 
 
+class _LassoPicker:
+    def __init__(self):
+        self.drawing = False
+        self.points = []
+        self.polygon = None
+
+    def on_mouse(self, event, x, y, _flags, _param):
+        point = (x, y)
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.drawing = True
+            self.points = [point]
+            self.polygon = None
+        elif event == cv2.EVENT_MOUSEMOVE and self.drawing:
+            if not self.points or np.hypot(
+                    x - self.points[-1][0], y - self.points[-1][1]) >= 3:
+                self.points.append(point)
+        elif event == cv2.EVENT_LBUTTONUP and self.drawing:
+            self.drawing = False
+            if not self.points or self.points[-1] != point:
+                self.points.append(point)
+            contour = np.asarray(self.points, dtype=np.int32)
+            if len(contour) >= 3 and abs(cv2.contourArea(contour)) >= 100:
+                # Simplify dense mouse samples while retaining the hand-drawn shape.
+                epsilon = max(1.0, 0.003 * cv2.arcLength(contour, True))
+                self.polygon = cv2.approxPolyDP(
+                    contour, epsilon, True).reshape(-1, 2)
+            else:
+                self.points = []
+
+
+async def pick_lasso(frame: np.ndarray, title: str,
+                     prompt: str) -> np.ndarray | None:
+    """Let the user trace an arbitrary closed target shape in camera pixels."""
+    picker = _LassoPicker()
+    cv2.namedWindow(title, cv2.WINDOW_NORMAL)
+    cv2.setMouseCallback(title, picker.on_mouse)
+    h, w = frame.shape[:2]
+    cv2.resizeWindow(title, w, h)
+    print(f"window '{title}': {prompt}")
+    try:
+        while picker.polygon is None:
+            disp = frame.copy()
+            if len(picker.points) >= 2:
+                pts = np.asarray(picker.points, dtype=np.int32)
+                cv2.polylines(disp, [pts], False, (0, 255, 255), 2)
+            cv2.putText(disp, prompt, (20, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            cv2.imshow(title, disp)
+            if (cv2.waitKey(20) & 0xFF) == 27:
+                return None
+            await asyncio.sleep(0.01)
+    finally:
+        cv2.destroyAllWindows()
+    return picker.polygon.astype(np.float64)
+
+
+class _StrokePicker:
+    def __init__(self):
+        self.drawing = False
+        self.current = []
+        self.strokes = []
+
+    def on_mouse(self, event, x, y, _flags, _param):
+        point = (x, y)
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.drawing = True
+            self.current = [point]
+        elif event == cv2.EVENT_MOUSEMOVE and self.drawing:
+            if not self.current or np.hypot(
+                    x - self.current[-1][0], y - self.current[-1][1]) >= 2:
+                self.current.append(point)
+        elif event == cv2.EVENT_LBUTTONUP and self.drawing:
+            self.drawing = False
+            if not self.current or self.current[-1] != point:
+                self.current.append(point)
+            if len(self.current) >= 2:
+                self.strokes.append(np.asarray(self.current, dtype=np.float64))
+            self.current = []
+
+
+async def pick_strokes(frame: np.ndarray, title: str, prompt: str,
+                       thickness: int) -> list[np.ndarray] | None:
+    """Draw one or more open freehand target lines in camera pixels."""
+    picker = _StrokePicker()
+    cv2.namedWindow(title, cv2.WINDOW_NORMAL)
+    cv2.setMouseCallback(title, picker.on_mouse)
+    h, w = frame.shape[:2]
+    cv2.resizeWindow(title, w, h)
+    print(f"window '{title}': {prompt}")
+    try:
+        while True:
+            disp = frame.copy()
+            for stroke in picker.strokes:
+                cv2.polylines(disp, [stroke.astype(np.int32)], False,
+                              (0, 255, 255), thickness)
+            if len(picker.current) >= 2:
+                cv2.polylines(
+                    disp, [np.asarray(picker.current, dtype=np.int32)],
+                    False, (0, 255, 255), thickness)
+            cv2.putText(disp, prompt, (20, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.62, (0, 255, 255), 2)
+            cv2.imshow(title, disp)
+            key = cv2.waitKey(20) & 0xFF
+            if key == 27:
+                return None
+            if key in (ord("r"), ord("R")):
+                picker.strokes = []
+                picker.current = []
+            if key in (10, 13) and picker.strokes:
+                return picker.strokes
+            await asyncio.sleep(0.01)
+    finally:
+        cv2.destroyAllWindows()
+
+
 # ---------------- interactive region picking end ----------------
 
 
@@ -217,7 +333,7 @@ async def run(args) -> int:
     interactive = args.at is None and args.width is None
 
     crop = tuple(args.crop) if args.crop else None
-    if interactive and crop is None:
+    if interactive and crop is None and not args.fill_target:
         # stage 1: pick WHAT to project (a subject inside the video frame)
         preview = read_preview_frame(args.video)
         picked = await pick_region(preview, "pick content",
@@ -227,8 +343,13 @@ async def run(args) -> int:
             crop = picked
         print(f"  content crop (video px): {crop or 'full frame'}")
     quad_cam = None if interactive else target_quad_cam(calib, args.at, args.width)
+    target_mask = None
+    target_polygon_cam = None
+    saved_target = None
 
-    if crop:
+    if args.fill_target:
+        content_aspect = WIDTH / HEIGHT
+    elif crop:
         content_aspect = (crop[2] - crop[0]) / (crop[3] - crop[1])
     else:
         cap = cv2.VideoCapture(args.video)
@@ -252,24 +373,45 @@ async def run(args) -> int:
         bg = await _capture_background(cli, cam, CAL_DIR)
 
         if interactive:
-            # stage 2: pick WHERE to project it (on the clean wall frame,
-            # with the reachable projection field outlined; retry until it fits)
+            # stage 2: draw WHERE to project it. The camera-space selection is
+            # mapped through the homography into a projector-space clip mask.
             wall = field_overlay(calib, bg)
             while True:
-                rect = await pick_region(wall, "pick target",
-                                         "drag inside the orange field outline, Esc = cancel")
-                if rect is None:
+                if args.target_mode == "stroke":
+                    selection = await pick_strokes(
+                        wall, "pick target",
+                        "draw lines; Enter=confirm, R=clear, Esc=cancel",
+                        args.brush_width)
+                else:
+                    selection = await pick_lasso(
+                        wall, "pick target",
+                        "trace target outline; release to close; Esc=cancel")
+                if selection is None:
                     print("  cancelled")
                     await _project(cli, _black_image(), settle=0.3)
                     return 1
-                x0, y0, x1, y1 = rect
-                quad_cam = aspect_fit([(x0, y0), (x1, y0), (x1, y1), (x0, y1)],
-                                      content_aspect)
                 try:
-                    quad_cam, quad_proj = fit_quad(calib, quad_cam)
+                    paths = selection if args.target_mode == "stroke" else [selection]
+                    saved_target = TargetPath.create(
+                        paths,
+                        scene=args.scene,
+                        mode=args.target_mode,
+                        camera_size=(wall.shape[1], wall.shape[0]),
+                        calibration_path=args.calibration,
+                    )
+                    rendered = render_target(
+                        saved_target,
+                        calib,
+                        args.brush_width,
+                        content_aspect=content_aspect,
+                    )
+                    target_polygon_cam = np.concatenate(saved_target.arrays())
+                    quad_cam = rendered.camera_quad
+                    quad_proj = rendered.projector_quad
+                    target_mask = rendered.mask
                     break
-                except ValueError:
-                    print("  region outside the projection field — pick again")
+                except ValueError as e:
+                    print(f"  {e} — draw again inside the orange field")
         else:
             quad_cam = aspect_fit(quad_cam, content_aspect)
             try:
@@ -279,9 +421,20 @@ async def run(args) -> int:
                 await _project(cli, _black_image(), settle=0.3)
                 return 2
         print(f"  target cam rect: {[tuple(round(v) for v in p) for p in quad_cam]}")
+        if target_polygon_cam is not None:
+            print(f"  target {args.target_mode}: {len(target_polygon_cam)} sampled points")
+            cv2.imwrite(os.path.join(CAL_DIR, "target_mask.png"),
+                        target_mask * 255)
+            saved_target.save(args.path_out)
+            print(f"  reusable target path -> {args.path_out}")
 
         for i, gray in enumerate(frames, 1):
-            bw = warp_to_quad(to_1bpp(gray, mode=args.mode), quad_proj)
+            if args.fill_target and target_mask is not None:
+                bw = target_mask.copy()
+            else:
+                bw = warp_to_quad(to_1bpp(gray, mode=args.mode), quad_proj)
+                if target_mask is not None:
+                    bw = bw * target_mask
             name = f"1_{i}.bmp"
             print(f"  pushing frame {i}/{len(frames)} -> {name} ({bw.sum()} lit px)")
             await push_image(cli, build_stream(bw), name)
@@ -359,7 +512,20 @@ def main(argv=None) -> int:
     ap.add_argument("--mode", default="threshold",
                     choices=["threshold", "otsu", "dither", "dither_flat", "edges"],
                     help="1bpp conversion mode")
+    ap.add_argument("--fill-target", action="store_true",
+                    help="project the hand-drawn target as a solid shape")
+    ap.add_argument("--target-mode", choices=["stroke", "shape"], default="stroke",
+                    help="interactive target selection: open brush lines or closed shape")
+    ap.add_argument("--brush-width", type=int, default=16,
+                    help="camera-pixel width of freehand target lines")
+    ap.add_argument("--scene", default="current_wall",
+                    help="scene id stored with the reusable target path")
+    ap.add_argument("--path-out",
+                    default=os.path.join(CAL_DIR, "target_path.json"),
+                    help="where to save the reusable camera-space target")
     args = ap.parse_args(argv)
+    if args.brush_width < 1:
+        ap.error("--brush-width must be >= 1")
     if args.frames > MAX_GROUP_FRAMES:
         print(f"[warn] group 1 holds at most {MAX_GROUP_FRAMES} frames; clamping")
         args.frames = MAX_GROUP_FRAMES

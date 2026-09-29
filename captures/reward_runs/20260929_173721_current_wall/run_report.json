@@ -1,0 +1,697 @@
+{
+  "schema": "irisloop.reward_run/1",
+  "scene": "current_wall",
+  "completed": "2026-09-29T17:38:55+0800",
+  "config": {
+    "widths_px": [
+      4,
+      8,
+      12,
+      16
+    ],
+    "repeats": 2,
+    "trial_order": [
+      [
+        4,
+        1
+      ],
+      [
+        8,
+        1
+      ],
+      [
+        12,
+        1
+      ],
+      [
+        16,
+        1
+      ],
+      [
+        12,
+        2
+      ],
+      [
+        8,
+        2
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        16,
+        2
+      ]
+    ],
+    "threshold": 40,
+    "threshold_sweep": [
+      30,
+      40,
+      50,
+      60
+    ],
+    "tolerance_px": [
+      0,
+      2,
+      4,
+      8
+    ],
+    "selected_tolerance_px": 4,
+    "halo_penalty": 0.25,
+    "seed": 20260929,
+    "camera": "cam#0 1280x720 @30.0fps backend=MSMF fourcc=MJPG",
+    "camera_index": 0,
+    "exposure": -7,
+    "ble_mtu": 512
+  },
+  "trials": [
+    {
+      "trial_id": "t001_w04_r1",
+      "variant_id": "w04",
+      "requested_width_px": 4,
+      "repeat": 1,
+      "captured": "2026-09-29T17:37:33+0800",
+      "target_pixels": 5656,
+      "metrics": {
+        "reward": 0.9674925760166635,
+        "strict": {
+          "iou": 0.5532622517851903,
+          "precision": 0.5532622517851903,
+          "recall": 1.0,
+          "target_pixels": 5656,
+          "observed_pixels": 10223,
+          "intersection_pixels": 5656,
+          "spill_pixels": 4567
+        },
+        "tolerant": [
+          {
+            "radius_px": 0,
+            "precision": 0.5532622517851903,
+            "recall": 1.0,
+            "f1": 0.7123874299389131,
+            "halo_pixels": 4567,
+            "halo_ratio": 0.8074611032531824
+          },
+          {
+            "radius_px": 2,
+            "precision": 0.8211875183409958,
+            "recall": 1.0,
+            "f1": 0.9018154474164787,
+            "halo_pixels": 1828,
+            "halo_ratio": 0.3231966053748232
+          },
+          {
+            "radius_px": 4,
+            "precision": 0.9661547490951775,
+            "recall": 1.0,
+            "f1": 0.9827860696517413,
+            "halo_pixels": 346,
+            "halo_ratio": 0.06117397454031118
+          },
+          {
+            "radius_px": 8,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "halo_pixels": 0,
+            "halo_ratio": 0.0
+          }
+        ],
+        "selected_tolerance_px": 4,
+        "halo_penalty": 0.25,
+        "centroid_error_px": 3.2066090671953447,
+        "observed_width_median_px": 14.0,
+        "threshold": 40,
+        "threshold_sweep": {
+          "30": 0.926384111930969,
+          "40": 0.9655639851037633,
+          "50": 0.9847636850667273,
+          "60": 0.992299419859113
+        }
+      },
+      "artifacts": {
+        "directory": "trials/t001_w04_r1",
+        "target": "trials/t001_w04_r1/target_mask.png",
+        "background": "trials/t001_w04_r1/background.png",
+        "capture": "trials/t001_w04_r1/capture.png",
+        "observed": "trials/t001_w04_r1/observed_mask.png",
+        "overlay": "trials/t001_w04_r1/overlay.png"
+      }
+    },
+    {
+      "trial_id": "t002_w08_r1",
+      "variant_id": "w08",
+      "requested_width_px": 8,
+      "repeat": 1,
+      "captured": "2026-09-29T17:37:45+0800",
+      "target_pixels": 10291,
+      "metrics": {
+        "reward": 0.952074696742699,
+        "strict": {
+          "iou": 0.6575718849840255,
+          "precision": 0.6575718849840255,
+          "recall": 1.0,
+          "target_pixels": 10291,
+          "observed_pixels": 15650,
+          "intersection_pixels": 10291,
+          "spill_pixels": 5359
+        },
+        "tolerant": [
+          {
+            "radius_px": 0,
+            "precision": 0.6575718849840255,
+            "recall": 1.0,
+            "f1": 0.7934158282255888,
+            "halo_pixels": 5359,
+            "halo_ratio": 0.5207462831600428
+          },
+          {
+            "radius_px": 2,
+            "precision": 0.8424281150159745,
+            "recall": 1.0,
+            "f1": 0.9144759658736215,
+            "halo_pixels": 2466,
+            "halo_ratio": 0.23962685841997863
+          },
+          {
+            "radius_px": 4,
+            "precision": 0.9463897763578275,
+            "recall": 1.0,
+            "f1": 0.9724565838285021,
+            "halo_pixels": 839,
+            "halo_ratio": 0.08152754834321252
+          },
+          {
+            "radius_px": 8,
+            "precision": 0.9756549520766773,
+            "recall": 1.0,
+            "f1": 0.9876774798667486,
+            "halo_pixels": 381,
+            "halo_ratio": 0.03702264114274609
+          }
+        ],
+        "selected_tolerance_px": 4,
+        "halo_penalty": 0.25,
+        "centroid_error_px": 4.525542217323603,
+        "observed_width_median_px": 18.0,
+        "threshold": 40,
+        "threshold_sweep": {
+          "30": 0.8579001118462435,
+          "40": 0.9435684954699113,
+          "50": 0.972926784966751,
+          "60": 0.986382023600879
+        }
+      },
+      "artifacts": {
+        "directory": "trials/t002_w08_r1",
+        "target": "trials/t002_w08_r1/target_mask.png",
+        "background": "trials/t002_w08_r1/background.png",
+        "capture": "trials/t002_w08_r1/capture.png",
+        "observed": "trials/t002_w08_r1/observed_mask.png",
+        "overlay": "trials/t002_w08_r1/overlay.png"
+      }
+    },
+    {
+      "trial_id": "t003_w12_r1",
+      "variant_id": "w12",
+      "requested_width_px": 12,
+      "repeat": 1,
+      "captured": "2026-09-29T17:37:56+0800",
+      "target_pixels": 14868,
+      "metrics": {
+        "reward": 0.9712405512251598,
+        "strict": {
+          "iou": 0.7269349239720334,
+          "precision": 0.7269349239720334,
+          "recall": 1.0,
+          "target_pixels": 14868,
+          "observed_pixels": 20453,
+          "intersection_pixels": 14868,
+          "spill_pixels": 5585
+        },
+        "tolerant": [
+          {
+            "radius_px": 0,
+            "precision": 0.7269349239720334,
+            "recall": 1.0,
+            "f1": 0.841878769004275,
+            "halo_pixels": 5585,
+            "halo_ratio": 0.3756389561474307
+          },
+          {
+            "radius_px": 2,
+            "precision": 0.8726837138806043,
+            "recall": 1.0,
+            "f1": 0.9320139940473082,
+            "halo_pixels": 2604,
+            "halo_ratio": 0.1751412429378531
+          },
+          {
+            "radius_px": 4,
+            "precision": 0.9662641177333399,
+            "recall": 1.0,
+            "f1": 0.9828426496916651,
+            "halo_pixels": 690,
+            "halo_ratio": 0.04640839386602098
+          },
+          {
+            "radius_px": 8,
+            "precision": 0.9995599667530436,
+            "recall": 1.0,
+            "f1": 0.9997799349585544,
+            "halo_pixels": 9,
+            "halo_ratio": 0.0006053268765133172
+          }
+        ],
+        "selected_tolerance_px": 4,
+        "halo_penalty": 0.25,
+        "centroid_error_px": 2.8752501123076892,
+        "observed_width_median_px": 26.0,
+        "threshold": 40,
+        "threshold_sweep": {
+          "30": 0.9217929488533984,
+          "40": 0.9698843012579104,
+          "50": 0.9856339569551967,
+          "60": 0.9919949830668761
+        }
+      },
+      "artifacts": {
+        "directory": "trials/t003_w12_r1",
+        "target": "trials/t003_w12_r1/target_mask.png",
+        "background": "trials/t003_w12_r1/background.png",
+        "capture": "trials/t003_w12_r1/capture.png",
+        "observed": "trials/t003_w12_r1/observed_mask.png",
+        "overlay": "trials/t003_w12_r1/overlay.png"
+      }
+    },
+    {
+      "trial_id": "t004_w16_r1",
+      "variant_id": "w16",
+      "requested_width_px": 16,
+      "repeat": 1,
+      "captured": "2026-09-29T17:38:08+0800",
+      "target_pixels": 19819,
+      "metrics": {
+        "reward": 0.9700447090512516,
+        "strict": {
+          "iou": 0.790057010724395,
+          "precision": 0.7901200111638292,
+          "recall": 0.9998990867349513,
+          "target_pixels": 19819,
+          "observed_pixels": 25081,
+          "intersection_pixels": 19817,
+          "spill_pixels": 5264
+        },
+        "tolerant": [
+          {
+            "radius_px": 0,
+            "precision": 0.7901200111638292,
+            "recall": 0.9998990867349513,
+            "f1": 0.8827171492204899,
+            "halo_pixels": 5264,
+            "halo_ratio": 0.26560371360815377
+          },
+          {
+            "radius_px": 2,
+            "precision": 0.8949802639448188,
+            "recall": 1.0,
+            "f1": 0.9445800370308028,
+            "halo_pixels": 2634,
+            "halo_ratio": 0.1329027700691256
+          },
+          {
+            "radius_px": 4,
+            "precision": 0.9637175551214067,
+            "recall": 1.0,
+            "f1": 0.9815235929505401,
+            "halo_pixels": 910,
+            "halo_ratio": 0.04591553559715424
+          },
+          {
+            "radius_px": 8,
+            "precision": 0.992863123479925,
+            "recall": 1.0,
+            "f1": 0.9964187823860112,
+            "halo_pixels": 179,
+            "halo_ratio": 0.009031737221857813
+          }
+        ],
+        "selected_tolerance_px": 4,
+        "halo_penalty": 0.25,
+        "centroid_error_px": 0.8813888055629944,
+        "observed_width_median_px": 30.0,
+        "threshold": 40,
+        "threshold_sweep": {
+          "30": 0.9167065053603103,
+          "40": 0.9655333601526355,
+          "50": 0.983890845526967,
+          "60": 0.9924129287061768
+        }
+      },
+      "artifacts": {
+        "directory": "trials/t004_w16_r1",
+        "target": "trials/t004_w16_r1/target_mask.png",
+        "background": "trials/t004_w16_r1/background.png",
+        "capture": "trials/t004_w16_r1/capture.png",
+        "observed": "trials/t004_w16_r1/observed_mask.png",
+        "overlay": "trials/t004_w16_r1/overlay.png"
+      }
+    },
+    {
+      "trial_id": "t005_w12_r2",
+      "variant_id": "w12",
+      "requested_width_px": 12,
+      "repeat": 2,
+      "captured": "2026-09-29T17:38:20+0800",
+      "target_pixels": 14868,
+      "metrics": {
+        "reward": 0.9159147582611217,
+        "strict": {
+          "iou": 0.6935024954522132,
+          "precision": 0.6935024954522132,
+          "recall": 1.0,
+          "target_pixels": 14868,
+          "observed_pixels": 21439,
+          "intersection_pixels": 14868,
+          "spill_pixels": 6571
+        },
+        "tolerant": [
+          {
+            "radius_px": 0,
+            "precision": 0.6935024954522132,
+            "recall": 1.0,
+            "f1": 0.8190156168232021,
+            "halo_pixels": 6571,
+            "halo_ratio": 0.44195587839655637
+          },
+          {
+            "radius_px": 2,
+            "precision": 0.8277904753020197,
+            "recall": 1.0,
+            "f1": 0.9057826774868575,
+            "halo_pixels": 3692,
+            "halo_ratio": 0.24831853645412968
+          },
+          {
+            "radius_px": 4,
+            "precision": 0.9050328839964551,
+            "recall": 1.0,
+            "f1": 0.9501493560550415,
+            "halo_pixels": 2036,
+            "halo_ratio": 0.13693839117567932
+          },
+          {
+            "radius_px": 8,
+            "precision": 0.9369373571528523,
+            "recall": 1.0,
+            "f1": 0.967442084477195,
+            "halo_pixels": 1352,
+            "halo_ratio": 0.09093354856066721
+          }
+        ],
+        "selected_tolerance_px": 4,
+        "halo_penalty": 0.25,
+        "centroid_error_px": 6.830007237199483,
+        "observed_width_median_px": 6.0,
+        "threshold": 40,
+        "threshold_sweep": {
+          "30": 0.8182950143026537,
+          "40": 0.8984578674554426,
+          "50": 0.9505196795081369,
+          "60": 0.9779834020795491
+        }
+      },
+      "artifacts": {
+        "directory": "trials/t005_w12_r2",
+        "target": "trials/t005_w12_r2/target_mask.png",
+        "background": "trials/t005_w12_r2/background.png",
+        "capture": "trials/t005_w12_r2/capture.png",
+        "observed": "trials/t005_w12_r2/observed_mask.png",
+        "overlay": "trials/t005_w12_r2/overlay.png"
+      }
+    },
+    {
+      "trial_id": "t006_w08_r2",
+      "variant_id": "w08",
+      "requested_width_px": 8,
+      "repeat": 2,
+      "captured": "2026-09-29T17:38:31+0800",
+      "target_pixels": 10291,
+      "metrics": {
+        "reward": 0.971476164722737,
+        "strict": {
+          "iou": 0.6677915503926277,
+          "precision": 0.6678348909657321,
+          "recall": 0.9999028277135361,
+          "target_pixels": 10291,
+          "observed_pixels": 15408,
+          "intersection_pixels": 10290,
+          "spill_pixels": 5118
+        },
+        "tolerant": [
+          {
+            "radius_px": 0,
+            "precision": 0.6678348909657321,
+            "recall": 0.9999028277135361,
+            "f1": 0.8008093700143974,
+            "halo_pixels": 5118,
+            "halo_ratio": 0.4973277621222427
+          },
+          {
+            "radius_px": 2,
+            "precision": 0.8557242990654206,
+            "recall": 1.0,
+            "f1": 0.9222536984576645,
+            "halo_pixels": 2223,
+            "halo_ratio": 0.2160139928092508
+          },
+          {
+            "radius_px": 4,
+            "precision": 0.9676791277258567,
+            "recall": 1.0,
+            "f1": 0.9835741143874926,
+            "halo_pixels": 498,
+            "halo_ratio": 0.04839179865902245
+          },
+          {
+            "radius_px": 8,
+            "precision": 0.9999350986500519,
+            "recall": 1.0,
+            "f1": 0.9999675482719455,
+            "halo_pixels": 1,
+            "halo_ratio": 9.717228646390049e-05
+          }
+        ],
+        "selected_tolerance_px": 4,
+        "halo_penalty": 0.25,
+        "centroid_error_px": 5.150316142117842,
+        "observed_width_median_px": 20.0,
+        "threshold": 40,
+        "threshold_sweep": {
+          "30": 0.9197534066777928,
+          "40": 0.9675222403997373,
+          "50": 0.9847705343246528,
+          "60": 0.9911955530981058
+        }
+      },
+      "artifacts": {
+        "directory": "trials/t006_w08_r2",
+        "target": "trials/t006_w08_r2/target_mask.png",
+        "background": "trials/t006_w08_r2/background.png",
+        "capture": "trials/t006_w08_r2/capture.png",
+        "observed": "trials/t006_w08_r2/observed_mask.png",
+        "overlay": "trials/t006_w08_r2/overlay.png"
+      }
+    },
+    {
+      "trial_id": "t007_w04_r2",
+      "variant_id": "w04",
+      "requested_width_px": 4,
+      "repeat": 2,
+      "captured": "2026-09-29T17:38:43+0800",
+      "target_pixels": 5656,
+      "metrics": {
+        "reward": 0.6916661054807445,
+        "strict": {
+          "iou": 0.431512149822009,
+          "precision": 0.43420028033016667,
+          "recall": 0.9858557284299858,
+          "target_pixels": 5656,
+          "observed_pixels": 12842,
+          "intersection_pixels": 5576,
+          "spill_pixels": 7266
+        },
+        "tolerant": [
+          {
+            "radius_px": 0,
+            "precision": 0.43420028033016667,
+            "recall": 0.9858557284299858,
+            "f1": 0.6028759865931452,
+            "halo_pixels": 7266,
+            "halo_ratio": 1.2846534653465347
+          },
+          {
+            "radius_px": 2,
+            "precision": 0.6083943311010745,
+            "recall": 0.9996463932107497,
+            "f1": 0.7564226322630375,
+            "halo_pixels": 5029,
+            "halo_ratio": 0.8891442715700142
+          },
+          {
+            "radius_px": 4,
+            "precision": 0.7308051705341847,
+            "recall": 1.0,
+            "f1": 0.8444684392855536,
+            "halo_pixels": 3457,
+            "halo_ratio": 0.6112093352192363
+          },
+          {
+            "radius_px": 8,
+            "precision": 0.8004983647406946,
+            "recall": 1.0,
+            "f1": 0.8891964362944381,
+            "halo_pixels": 2562,
+            "halo_ratio": 0.452970297029703
+          }
+        ],
+        "selected_tolerance_px": 4,
+        "halo_penalty": 0.25,
+        "centroid_error_px": 21.211916687842766,
+        "observed_width_median_px": 4.393799781799316,
+        "threshold": 40,
+        "threshold_sweep": {
+          "30": 0.49848084614185556,
+          "40": 0.6648148510683848,
+          "50": 0.8191727950932974,
+          "60": 0.9056803773897588
+        }
+      },
+      "artifacts": {
+        "directory": "trials/t007_w04_r2",
+        "target": "trials/t007_w04_r2/target_mask.png",
+        "background": "trials/t007_w04_r2/background.png",
+        "capture": "trials/t007_w04_r2/capture.png",
+        "observed": "trials/t007_w04_r2/observed_mask.png",
+        "overlay": "trials/t007_w04_r2/overlay.png"
+      }
+    },
+    {
+      "trial_id": "t008_w16_r2",
+      "variant_id": "w16",
+      "requested_width_px": 16,
+      "repeat": 2,
+      "captured": "2026-09-29T17:38:55+0800",
+      "target_pixels": 19819,
+      "metrics": {
+        "reward": 0.8756760958870607,
+        "strict": {
+          "iou": 0.6994776593491918,
+          "precision": 0.6994776593491918,
+          "recall": 1.0,
+          "target_pixels": 19819,
+          "observed_pixels": 28334,
+          "intersection_pixels": 19819,
+          "spill_pixels": 8515
+        },
+        "tolerant": [
+          {
+            "radius_px": 0,
+            "precision": 0.6994776593491918,
+            "recall": 1.0,
+            "f1": 0.8231678192428302,
+            "halo_pixels": 8515,
+            "halo_ratio": 0.42963822594480044
+          },
+          {
+            "radius_px": 2,
+            "precision": 0.7994282487470883,
+            "recall": 1.0,
+            "f1": 0.8885358438756497,
+            "halo_pixels": 5683,
+            "halo_ratio": 0.2867450426358545
+          },
+          {
+            "radius_px": 4,
+            "precision": 0.8610503282275711,
+            "recall": 1.0,
+            "f1": 0.9253380364491476,
+            "halo_pixels": 3937,
+            "halo_ratio": 0.19864776224834754
+          },
+          {
+            "radius_px": 8,
+            "precision": 0.8984612126773488,
+            "recall": 1.0,
+            "f1": 0.9465152163001246,
+            "halo_pixels": 2877,
+            "halo_ratio": 0.1451637317725415
+          }
+        ],
+        "selected_tolerance_px": 4,
+        "halo_penalty": 0.25,
+        "centroid_error_px": 7.302247887956053,
+        "observed_width_median_px": 4.0,
+        "threshold": 40,
+        "threshold_sweep": {
+          "30": 0.7988819191777078,
+          "40": 0.8667920620583416,
+          "50": 0.9123699328453835,
+          "60": 0.9454139192540039
+        }
+      },
+      "artifacts": {
+        "directory": "trials/t008_w16_r2",
+        "target": "trials/t008_w16_r2/target_mask.png",
+        "background": "trials/t008_w16_r2/background.png",
+        "capture": "trials/t008_w16_r2/capture.png",
+        "observed": "trials/t008_w16_r2/observed_mask.png",
+        "overlay": "trials/t008_w16_r2/overlay.png"
+      }
+    }
+  ],
+  "summary": [
+    {
+      "variant_id": "w04",
+      "requested_width_px": 4,
+      "n": 2,
+      "reward_mean": 0.829579340748704,
+      "reward_std": 0.1379132352679595,
+      "strict_iou_mean": 0.49238720080359966,
+      "halo_ratio_mean": 0.3361916548797737
+    },
+    {
+      "variant_id": "w08",
+      "requested_width_px": 8,
+      "n": 2,
+      "reward_mean": 0.961775430732718,
+      "reward_std": 0.009700733990019028,
+      "strict_iou_mean": 0.6626817176883266,
+      "halo_ratio_mean": 0.06495967350111748
+    },
+    {
+      "variant_id": "w12",
+      "requested_width_px": 12,
+      "n": 2,
+      "reward_mean": 0.9435776547431407,
+      "reward_std": 0.027662896482019084,
+      "strict_iou_mean": 0.7102187097121233,
+      "halo_ratio_mean": 0.09167339252085016
+    },
+    {
+      "variant_id": "w16",
+      "requested_width_px": 16,
+      "n": 2,
+      "reward_mean": 0.9228604024691562,
+      "reward_std": 0.04718430658209544,
+      "strict_iou_mean": 0.7447673350367934,
+      "halo_ratio_mean": 0.1222816489227509
+    }
+  ],
+  "winner": {
+    "variant_id": "w08",
+    "requested_width_px": 8,
+    "margin": 0.01819777598957728
+  }
+}

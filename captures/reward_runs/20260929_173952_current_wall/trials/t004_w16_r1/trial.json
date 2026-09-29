@@ -1,0 +1,74 @@
+{
+  "schema": "irisloop.reward_trial/1",
+  "trial_id": "t004_w16_r1",
+  "variant_id": "w16",
+  "requested_width_px": 16,
+  "repeat": 1,
+  "captured": "2026-09-29T17:40:38+0800",
+  "target_pixels": 19819,
+  "metrics": {
+    "reward": 0.9804341725472524,
+    "strict": {
+      "iou": 0.7938714199879832,
+      "precision": 0.7938714199879832,
+      "recall": 1.0,
+      "target_pixels": 19819,
+      "observed_pixels": 24965,
+      "intersection_pixels": 19819,
+      "spill_pixels": 5146
+    },
+    "tolerant": [
+      {
+        "radius_px": 0,
+        "precision": 0.7938714199879832,
+        "recall": 1.0,
+        "f1": 0.8850928903179707,
+        "halo_pixels": 5146,
+        "halo_ratio": 0.25964983097028105
+      },
+      {
+        "radius_px": 2,
+        "precision": 0.9062687762868015,
+        "recall": 1.0,
+        "f1": 0.9508300063038454,
+        "halo_pixels": 2340,
+        "halo_ratio": 0.11806852010696806
+      },
+      {
+        "radius_px": 4,
+        "precision": 0.9761666332866012,
+        "recall": 1.0,
+        "f1": 0.9879395966352488,
+        "halo_pixels": 595,
+        "halo_ratio": 0.03002169635198547
+      },
+      {
+        "radius_px": 8,
+        "precision": 0.9992789905868216,
+        "recall": 1.0,
+        "f1": 0.9996393652828979,
+        "halo_pixels": 18,
+        "halo_ratio": 0.0009082193854382159
+      }
+    ],
+    "selected_tolerance_px": 4,
+    "halo_penalty": 0.25,
+    "centroid_error_px": 1.0420867221311194,
+    "observed_width_median_px": 34.77519607543945,
+    "threshold": 40,
+    "threshold_sweep": {
+      "30": 0.926565597503561,
+      "40": 0.9759093294966065,
+      "50": 0.9905518724130593,
+      "60": 0.9953654386291019
+    }
+  },
+  "artifacts": {
+    "directory": "trials/t004_w16_r1",
+    "target": "trials/t004_w16_r1/target_mask.png",
+    "background": "trials/t004_w16_r1/background.png",
+    "capture": "trials/t004_w16_r1/capture.png",
+    "observed": "trials/t004_w16_r1/observed_mask.png",
+    "overlay": "trials/t004_w16_r1/overlay.png"
+  }
+}

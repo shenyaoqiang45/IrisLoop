@@ -1,0 +1,108 @@
+{
+  "pairs_total": 12,
+  "votes_total": 12,
+  "valid_non_tie": 12,
+  "agreements": 10,
+  "agreement": 0.8333333333333334,
+  "human_ties": 0,
+  "human_tie_rate": 0.0,
+  "reward_ties": 0,
+  "details": [
+    {
+      "pair_id": "p012",
+      "human": "right",
+      "reward": "right",
+      "match": true,
+      "left_reward": 0.8315123569176243,
+      "right_reward": 0.9844326911533203
+    },
+    {
+      "pair_id": "p011",
+      "human": "right",
+      "reward": "right",
+      "match": true,
+      "left_reward": 0.9241848201143402,
+      "right_reward": 0.9844326911533203
+    },
+    {
+      "pair_id": "p006",
+      "human": "right",
+      "reward": "right",
+      "match": true,
+      "left_reward": 0.9676802208069049,
+      "right_reward": 0.9804341725472524
+    },
+    {
+      "pair_id": "p005",
+      "human": "right",
+      "reward": "right",
+      "match": true,
+      "left_reward": 0.9280533285443014,
+      "right_reward": 0.9804341725472524
+    },
+    {
+      "pair_id": "p002",
+      "human": "left",
+      "reward": "left",
+      "match": true,
+      "left_reward": 0.9676802208069049,
+      "right_reward": 0.9657404298874868
+    },
+    {
+      "pair_id": "p007",
+      "human": "left",
+      "reward": "right",
+      "match": false,
+      "left_reward": 0.9241848201143402,
+      "right_reward": 0.9693441364148946
+    },
+    {
+      "pair_id": "p004",
+      "human": "right",
+      "reward": "right",
+      "match": true,
+      "left_reward": 0.9280533285443014,
+      "right_reward": 0.9676802208069049
+    },
+    {
+      "pair_id": "p010",
+      "human": "right",
+      "reward": "right",
+      "match": true,
+      "left_reward": 0.8315123569176243,
+      "right_reward": 0.9241848201143402
+    },
+    {
+      "pair_id": "p001",
+      "human": "right",
+      "reward": "left",
+      "match": false,
+      "left_reward": 0.9657404298874868,
+      "right_reward": 0.9280533285443014
+    },
+    {
+      "pair_id": "p003",
+      "human": "left",
+      "reward": "left",
+      "match": true,
+      "left_reward": 0.9804341725472524,
+      "right_reward": 0.9657404298874868
+    },
+    {
+      "pair_id": "p008",
+      "human": "right",
+      "reward": "right",
+      "match": true,
+      "left_reward": 0.8315123569176243,
+      "right_reward": 0.9693441364148946
+    },
+    {
+      "pair_id": "p009",
+      "human": "right",
+      "reward": "right",
+      "match": true,
+      "left_reward": 0.9693441364148946,
+      "right_reward": 0.9844326911533203
+    }
+  ]
+}

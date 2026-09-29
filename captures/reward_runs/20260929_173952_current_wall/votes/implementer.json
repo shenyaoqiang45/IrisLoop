@@ -1,0 +1,68 @@
+{
+  "schema": "irisloop.reward_votes/1",
+  "annotator": "implementer",
+  "created": "2026-09-29T17:41:51+0800",
+  "note": "Blind visual votes from capture/overlay: prefer complete aligned strokes; penalize t005 misalignment.",
+  "votes": [
+    {
+      "pair_id": "p012",
+      "winner": "right",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p011",
+      "winner": "right",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p006",
+      "winner": "right",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p005",
+      "winner": "right",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p002",
+      "winner": "left",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p007",
+      "winner": "left",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p004",
+      "winner": "right",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p010",
+      "winner": "right",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p001",
+      "winner": "right",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p003",
+      "winner": "left",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p008",
+      "winner": "right",
+      "labeled": "2026-09-29T17:41:51+0800"
+    },
+    {
+      "pair_id": "p009",
+      "winner": "right",
+      "labeled": "2026-09-29T17:41:51+0800"
+    }
+  ]
+}

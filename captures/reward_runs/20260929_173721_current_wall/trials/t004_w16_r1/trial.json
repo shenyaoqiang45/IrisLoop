@@ -1,0 +1,74 @@
+{
+  "schema": "irisloop.reward_trial/1",
+  "trial_id": "t004_w16_r1",
+  "variant_id": "w16",
+  "requested_width_px": 16,
+  "repeat": 1,
+  "captured": "2026-09-29T17:38:08+0800",
+  "target_pixels": 19819,
+  "metrics": {
+    "reward": 0.9700447090512516,
+    "strict": {
+      "iou": 0.790057010724395,
+      "precision": 0.7901200111638292,
+      "recall": 0.9998990867349513,
+      "target_pixels": 19819,
+      "observed_pixels": 25081,
+      "intersection_pixels": 19817,
+      "spill_pixels": 5264
+    },
+    "tolerant": [
+      {
+        "radius_px": 0,
+        "precision": 0.7901200111638292,
+        "recall": 0.9998990867349513,
+        "f1": 0.8827171492204899,
+        "halo_pixels": 5264,
+        "halo_ratio": 0.26560371360815377
+      },
+      {
+        "radius_px": 2,
+        "precision": 0.8949802639448188,
+        "recall": 1.0,
+        "f1": 0.9445800370308028,
+        "halo_pixels": 2634,
+        "halo_ratio": 0.1329027700691256
+      },
+      {
+        "radius_px": 4,
+        "precision": 0.9637175551214067,
+        "recall": 1.0,
+        "f1": 0.9815235929505401,
+        "halo_pixels": 910,
+        "halo_ratio": 0.04591553559715424
+      },
+      {
+        "radius_px": 8,
+        "precision": 0.992863123479925,
+        "recall": 1.0,
+        "f1": 0.9964187823860112,
+        "halo_pixels": 179,
+        "halo_ratio": 0.009031737221857813
+      }
+    ],
+    "selected_tolerance_px": 4,
+    "halo_penalty": 0.25,
+    "centroid_error_px": 0.8813888055629944,
+    "observed_width_median_px": 30.0,
+    "threshold": 40,
+    "threshold_sweep": {
+      "30": 0.9167065053603103,
+      "40": 0.9655333601526355,
+      "50": 0.983890845526967,
+      "60": 0.9924129287061768
+    }
+  },
+  "artifacts": {
+    "directory": "trials/t004_w16_r1",
+    "target": "trials/t004_w16_r1/target_mask.png",
+    "background": "trials/t004_w16_r1/background.png",
+    "capture": "trials/t004_w16_r1/capture.png",
+    "observed": "trials/t004_w16_r1/observed_mask.png",
+    "overlay": "trials/t004_w16_r1/overlay.png"
+  }
+}

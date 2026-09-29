@@ -82,6 +82,7 @@ def detect_dot(
     bg: np.ndarray | None = None,
     threshold: int = 40,
     min_area: int = 6,
+    border: int = 24,
 ) -> tuple[tuple[float, float] | None, int]:
     """Locate the laser spot.
 
@@ -101,14 +102,33 @@ def detect_dot(
     else:
         score = _greenness(frame)
     mask = (score > threshold).astype(np.uint8)
+    # Camera-edge exposure drift can create a large horizontal component that
+    # wins "largest blob" despite not being projected light. Calibration dots
+    # are intentionally inset, so this border cannot contain a valid sample.
+    if border > 0:
+        mask[:border, :] = 0
+        mask[-border:, :] = 0
+        mask[:, :border] = 0
+        mask[:, -border:] = 0
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
     n, labels, stats, cents = cv2.connectedComponentsWithStats(mask, connectivity=8)
     if n < 2:
         return None, 0
-    idx = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
-    area = int(stats[idx, cv2.CC_STAT_AREA])
-    if area < min_area:
-        return None, area
+    largest_area = int(stats[1:, cv2.CC_STAT_AREA].max())
+    candidates = []
+    for i in range(1, n):
+        area = int(stats[i, cv2.CC_STAT_AREA])
+        width = int(stats[i, cv2.CC_STAT_WIDTH])
+        height = int(stats[i, cv2.CC_STAT_HEIGHT])
+        fill = area / max(1, width * height)
+        elongation = max(width, height) / max(1, min(width, height))
+        # A projected calibration dot remains compact. Reflections from the
+        # glossy target and camera-edge drift form long strips or sparse blobs.
+        if area >= min_area and fill >= 0.35 and elongation <= 3.0:
+            candidates.append((area, i))
+    if not candidates:
+        return None, largest_area
+    area, idx = max(candidates)
     comp = labels == idx
     w = np.clip(score, 0, None).astype(np.float64) * comp
     total = float(w.sum())

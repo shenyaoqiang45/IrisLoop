@@ -7,6 +7,11 @@ venv/
 captures/*
 !captures/loop_rounds/
 !captures/loop_rounds/**
+!captures/reward_runs/
+!captures/reward_runs/**
+captures/reward_runs/**/*.png
+captures/reward_runs/**/*.npz
+captures/reward_runs/**/*.jpg
 *.log
 
 # Benchmark: track still JPGs + JSON; keep videos local

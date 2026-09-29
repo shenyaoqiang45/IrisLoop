@@ -1,0 +1,22 @@
+{
+  "schema": "irisloop.reward_acceptance/1",
+  "scene": "current_wall",
+  "run": "captures/reward_runs/20260929_173952_current_wall",
+  "calibration_verify_px": {"mean": 0.8, "max": 2.1},
+  "path": "scenes/current_wall/path.json",
+  "same_path_widths_px": [4, 8, 12, 16],
+  "repeats": 2,
+  "winner_px": 16,
+  "reward_margin": 0.0149,
+  "summary": [
+    {"width_px": 4, "reward_mean": 0.9675, "strict_iou_mean": 0.5559, "halo_ratio_mean": 0.0609},
+    {"width_px": 8, "reward_mean": 0.9261, "strict_iou_mean": 0.6457, "halo_ratio_mean": 0.1259},
+    {"width_px": 12, "reward_mean": 0.8996, "strict_iou_mean": 0.6836, "halo_ratio_mean": 0.1670, "note": "r2 centroid 15.4px outlier"},
+    {"width_px": 16, "reward_mean": 0.9824, "strict_iou_mean": 0.7968, "halo_ratio_mean": 0.0269}
+  ],
+  "offline_tests": "11 passed",
+  "preference_agreement": 0.833,
+  "preference_disagreements": ["p001 4 vs 8", "p007 8 vs 4"],
+  "interpretation": "16px wins on both tolerant reward and visual completeness. Strict IoU also rises with width. 4px scores high on tolerant F1 because bloom stays near the stroke, but looks thinner. 8px lost two human votes because reward over-rewards 4px halo-tolerant coverage. w12 r2 is a capture outlier, not a path change.",
+  "future_multi_scene": "Move the projector/camera, run python -m irisloop.calibrate run, then tools/register_scene.py <new_scene> --target-path ... and tools/reward_ab.py --scene <new_scene> --redraw. Do not reuse current_wall homography."
+}

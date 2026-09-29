@@ -1,0 +1,36 @@
+{
+  "schema": "irisloop.scene_manifest/1",
+  "updated": "2026-09-29T17:41:25+0800",
+  "scenes": [
+    {
+      "scene": "current_wall",
+      "surface": "wall poster",
+      "distance_m": null,
+      "ambient": "indoor",
+      "camera": "cam#0 1280x720 @30.0fps backend=MSMF fourcc=MJPG",
+      "calibration": "current_wall/homography.npz",
+      "target_path": "current_wall/path.json",
+      "calibration_meta": {
+        "sha256": "e8a023abd9e41f09a5b2796702ec051df8dfae1ad75c8133ee90ad8e6fb36d50",
+        "created": "2026-09-29 17:06:09",
+        "stats": {
+          "total": 20,
+          "inliers": 17,
+          "outliers": [
+            15,
+            16,
+            17
+          ],
+          "err_mean": 1.0800853510742403,
+          "err_max": 2.313686359088928,
+          "err_all_mean": 1.3057598349977737
+        }
+      },
+      "status": "collected",
+      "runs": [
+        "captures/reward_runs/20260929_173721_current_wall",
+        "captures/reward_runs/20260929_173952_current_wall"
+      ]
+    }
+  ]
+}
