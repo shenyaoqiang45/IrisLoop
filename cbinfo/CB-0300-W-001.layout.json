@@ -1,0 +1,29 @@
+{
+  "board": "CB-0300-W-001",
+  "cols": 11,
+  "rows": 9,
+  "pitch_mm": 25.0,
+  "fiducials": [
+    {
+      "col": 2,
+      "row": 4
+    },
+    {
+      "col": 5,
+      "row": 2
+    },
+    {
+      "col": 5,
+      "row": 6
+    },
+    {
+      "col": 6,
+      "row": 2
+    },
+    {
+      "col": 8,
+      "row": 4
+    }
+  ],
+  "note": "canonical frame fixed by fiducial pattern; see tmp/cb_layout.png"
+}
