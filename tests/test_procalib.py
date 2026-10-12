@@ -173,7 +173,9 @@ def test_assign_grid_indices_empty():
 # ---------------- ray field ----------------
 
 from irisloop.procalib import (  # noqa: E402
-    fit_ray_field, ray_field_lookup, triangulate_rayfield,
+    fit_ray_field, plane_homography_from_rays, point_on_camera_ray,
+    proj_pixel_for_camera, proj_pixel_for_point, ray_field_lookup,
+    shape_light_mask, triangulate_rayfield,
 )
 
 
@@ -249,3 +251,54 @@ def test_ray_field_lookup_and_triangulation():
     X_tri = triangulate_rayfield(cam_xy, proj_xy, K_C, DIST_C, field)
     err = np.linalg.norm(X_tri - X_cam_true, axis=1)
     assert np.nanmean(err) < 3.0  # mm, dominated by camera-pixel noise at ~600mm
+
+
+def test_proj_pixel_for_point_recovers_source_pixel():
+    records, _grid_pts = _synthetic_records()
+    field = fit_ray_field(records)
+    rec = records[0]
+    idx = len(rec["pairs"]) // 2
+    rvec = np.array(rec["rvec"], dtype=np.float64)
+    tvec = np.array(rec["tvec"], dtype=np.float64)
+    X = cv2.Rodrigues(rvec)[0] @ np.array(rec["X_board"][idx]) + tvec
+    got = proj_pixel_for_point(X, field)
+    assert got is not None
+    src = rec["pairs"][idx]["proj"]
+    assert math.hypot(got[0] - src[0], got[1] - src[1]) < 8.0
+
+    cam, _ = cv2.projectPoints(X.reshape(1, 1, 3), np.zeros(3), np.zeros(3), K_C, DIST_C)
+    back = point_on_camera_ray(cam.reshape(2), K_C, DIST_C, float(X[2]))
+    assert np.linalg.norm(back - X) < 1.0
+    aimed = proj_pixel_for_camera(tuple(cam.reshape(2)), K_C, DIST_C, field, z=float(X[2]))
+    assert aimed is not None
+    assert math.hypot(aimed[0] - src[0], aimed[1] - src[1]) < 8.0
+
+
+def test_shape_mask_warps_through_rayfield_homography():
+    records, _grid_pts = _synthetic_records()
+    field = fit_ray_field(records)
+    z = float(np.median(field["origins"][:, 2]))
+    H = plane_homography_from_rays(K_C, DIST_C, field, z)
+    # the filled camera blob is the ray's intersection with the reference plane,
+    # so its warp must land on that projector pixel
+    idx = len(field["grid_pts"]) // 2
+    src = field["grid_pts"][idx]
+    cam = proj_pixel_for_camera  # keep the open-loop aim as the reference
+    X = field["origins"][idx].copy()
+    d = field["dirs"][idx].copy()
+    if d[2] < 0:
+        d = -d
+    X = X + ((z - X[2]) / d[2]) * d
+    cx, cy = cv2.projectPoints(
+        X.reshape(1, 1, 3), np.zeros(3), np.zeros(3), K_C, DIST_C)[0].reshape(2)
+    aimed = cam((float(cx), float(cy)), K_C, DIST_C, field, z=z)
+    assert aimed is not None
+    poly = np.array([
+        [cx - 18, cy - 14], [cx + 16, cy - 12], [cx + 10, cy + 20], [cx - 14, cy + 12],
+    ])
+    mask = shape_light_mask(poly, (1280, 1024), H)
+    assert mask.sum() > 0
+    ys, xs = np.nonzero(mask)
+    center = (float(xs.mean()), float(ys.mean()))
+    assert math.hypot(center[0] - src[0], center[1] - src[1]) < 20.0
+    assert math.hypot(center[0] - aimed[0], center[1] - aimed[1]) < 20.0

@@ -366,6 +366,51 @@ def detect_grid_dots(
     return out
 
 
+def bright_on_board(
+    frame: np.ndarray,
+    board: BoardModel,
+    block: int,
+    c: int,
+    raw_thresh: int = 200,
+    margin: float = 40.0,
+    min_board: int = 30,
+) -> tuple[dict | None, list[tuple[float, float]]]:
+    """Laser-dot centroids that fall inside the detected calibration board.
+
+    Ceiling lamps and monitor LEDs saturate the same way a laser dot does.
+    Restricting to the board bounding box keeps anchor/black/grid checks
+    from treating those fixtures as projected content.
+    """
+    matched = match_lattice(detect_board_dots(frame, block, c), board)
+    cts = detect_grid_dots(frame, None, raw_thresh=raw_thresh)
+    if not matched or len(matched) < min_board:
+        return None, []
+    pts = np.array(list(matched.values()), dtype=np.float64)
+    x0, y0 = pts.min(axis=0) - margin
+    x1, y1 = pts.max(axis=0) + margin
+    kept = [p for p in cts if x0 <= p[0] <= x1 and y0 <= p[1] <= y1]
+    return matched, kept
+
+
+def board_roi(matched: dict, margin: float = 40.0) -> tuple[float, float, float, float]:
+    pts = np.array(list(matched.values()), dtype=np.float64)
+    x0, y0 = pts.min(axis=0) - margin
+    x1, y1 = pts.max(axis=0) + margin
+    return float(x0), float(y0), float(x1), float(y1)
+
+
+def dots_in_roi(
+    frame: np.ndarray,
+    roi: tuple[float, float, float, float] | None,
+    raw_thresh: int = 200,
+) -> list[tuple[float, float]]:
+    cts = detect_grid_dots(frame, None, raw_thresh=raw_thresh)
+    if roi is None:
+        return cts
+    x0, y0, x1, y1 = roi
+    return [p for p in cts if x0 <= p[0] <= x1 and y0 <= p[1] <= y1]
+
+
 def assign_grid_indices(
     centroids: list[tuple[float, float]],
     H_boot: np.ndarray,
@@ -557,18 +602,28 @@ async def _project_verified(
     cam: HikCamera,
     bw: np.ndarray,
     kind: str,
+    board: BoardModel,
+    block: int,
+    c: int,
     settle: float = 0.8,
     timeout: float = 30.0,
+    raw_thresh: int = 200,
+    roi: tuple[float, float, float, float] | None = None,
+    bg: np.ndarray | None = None,
 ) -> None:
     """Push+play, then verify via the camera that the display really shows it.
 
     The IrisGreen has an opaque UI state machine (connection-status screens can
     overlay or swallow playback for seconds) — never trust that play took
-    effect. kind: "black" (almost no bright dots) or "grid" (many bright dots,
-    position-stable across two consecutive frames).
+    effect. kind: "black" (no bright dots on the board) or "grid" (many bright
+    dots on the board, position-stable across two consecutive frames).
+    Grid checks use the board extent measured on the black frame (`roi`):
+    laser dots wash out the black-dot detector, so the board cannot be
+    re-found on the grid frame itself.
     """
     t0 = time.time()
     attempt = 0
+    n1 = -1
     while True:
         attempt += 1
         await _project(cli, bw, settle=settle)
@@ -576,21 +631,87 @@ async def _project_verified(
         ok1, f1 = cam.read(1000)
         if not ok1 or f1 is None:
             continue
-        c1 = detect_grid_dots(f1, None, raw_thresh=200)
-        if kind == "black":
-            if len(c1) <= 3:
+        if kind == "black" and bg is not None:
+            # Specular highlights of room lights sit on the board and look like
+            # laser dots in absolute threshold. Subtract the pre-capture black
+            # frame so only content that newly appeared (the grid) counts.
+            gained = detect_grid_dots(f1, bg, thresh=50)
+            if roi is not None:
+                x0, y0, x1, y1 = roi
+                gained = [p for p in gained if x0 <= p[0] <= x1 and y0 <= p[1] <= y1]
+            n1 = len(gained)
+            if n1 <= 2:
                 return
-        elif len(c1) >= 40:
-            ok2, f2 = cam.read(1000)
-            c2 = detect_grid_dots(f2, None, raw_thresh=200) if ok2 else []
-            if len(c2) >= 40:
-                a, b = np.array(c1), np.array(c2)
-                d = np.linalg.norm(a[None] - b[:, None], axis=-1).min(axis=1)
-                if float(np.median(d)) < 1.5:
-                    return
+        elif kind == "grid" and roi is not None:
+            c1 = dots_in_roi(f1, roi, raw_thresh)
+            n1 = len(c1)
+            ok_frame = n1 >= 40
+            if ok_frame:
+                ok2, f2 = cam.read(1000)
+                c2 = dots_in_roi(f2, roi, raw_thresh) if ok2 and f2 is not None else []
+                ok_frame = len(c2) >= 40
+                if ok_frame:
+                    a, b = np.array(c1), np.array(c2)
+                    d = np.linalg.norm(a[None] - b[:, None], axis=-1).min(axis=1)
+                    ok_frame = float(np.median(d)) < 1.5
+            if ok_frame:
+                return
+        else:
+            matched_b, c1 = bright_on_board(f1, board, block, c, raw_thresh=raw_thresh)
+            n1 = len(c1) if matched_b is not None else -1
+            if kind == "black" and matched_b is not None and n1 <= 12:
+                return
+            if kind == "grid" and matched_b is not None and n1 >= 40:
+                ok2, f2 = cam.read(1000)
+                matched2, c2 = (
+                    bright_on_board(f2, board, block, c, raw_thresh=raw_thresh)
+                    if ok2 and f2 is not None else (None, [])
+                )
+                if matched2 is not None and len(c2) >= 40:
+                    a, b = np.array(c1), np.array(c2)
+                    d = np.linalg.norm(a[None] - b[:, None], axis=-1).min(axis=1)
+                    if float(np.median(d)) < 1.5:
+                        return
         if time.time() - t0 > timeout:
-            raise RuntimeError(f"投影状态验证超时 kind={kind} (dots={len(c1)})")
-        print(f"  [verify] 投影未就绪 kind={kind} dots={len(c1)}，重试 ({attempt})")
+            raise RuntimeError(f"投影状态验证超时 kind={kind} (dots={n1})")
+        print(f"  [verify] 投影未就绪 kind={kind} dots={n1}，重试 ({attempt})")
+
+
+async def _project_one_dot(
+    cli: IrisBleClient,
+    cam: HikCamera,
+    bw: np.ndarray,
+    board: BoardModel,
+    block: int,
+    c: int,
+    settle: float = 0.8,
+    timeout: float = 30.0,
+    raw_thresh: int = 200,
+) -> tuple[float, float] | None:
+    """Re-push a single-dot frame until the board shows exactly one bright dot.
+
+    A one-shot play is not enough: the connection-status screen can overlay or
+    swallow the first playback for many seconds. Room lights outside the board
+    are ignored.
+    """
+    t0 = time.time()
+    attempt = 0
+    last_n = -1
+    while time.time() - t0 < timeout:
+        attempt += 1
+        await _project(cli, bw, settle=settle)
+        deadline = time.time() + 4.0
+        while time.time() < deadline and time.time() - t0 < timeout:
+            cam.flush(1)
+            ok, frame = cam.read(1000)
+            if not ok or frame is None:
+                continue
+            _, cts = bright_on_board(frame, board, block, c, raw_thresh=raw_thresh)
+            last_n = len(cts)
+            if last_n == 1:
+                return cts[0]
+        print(f"  [anchor] 未见到单点 dots={last_n}，重试 ({attempt})")
+    return None
 
 
 def _open_hik(args) -> HikCamera:
@@ -703,17 +824,26 @@ async def _capture_pose(
         return None
     rvec, tvec = board_pose(matched, board, K, dist)
     cv2.imwrite(os.path.join(pose_dir, "board.png"), board_frame)
+    roi = board_roi(matched)
 
-    await _project_verified(cli, cam, grid_img, "grid", settle=args.settle)
+    await _project_verified(
+        cli, cam, grid_img, "grid", board, args.board_block, args.board_c,
+        settle=args.settle, raw_thresh=args.dot_raw_thresh, roi=roi)
     cam.flush(2)
     ok, laser_frame = cam.read(1500)
     if not ok or laser_frame is None:
         print("  laser frame capture failed")
         return None
     cv2.imwrite(os.path.join(pose_dir, "grid.png"), laser_frame)
-    await _project_verified(cli, cam, _black_image(), "black", settle=0.4)
+    try:
+        await _project_verified(
+            cli, cam, _black_image(), "black", board, args.board_block, args.board_c,
+            settle=0.4, raw_thresh=args.dot_raw_thresh, roi=roi, bg=board_frame)
+    except RuntimeError as e:
+        print(f"  [warn] 恢复全黑未确认：{e}")
+        await _project(cli, _black_image(), settle=0.3)
 
-    centroids = detect_grid_dots(laser_frame, None, raw_thresh=args.dot_raw_thresh)
+    centroids = dots_in_roi(laser_frame, roi, args.dot_raw_thresh)
     if H_boot is None:
         print("  no bootstrap homography yet")
         return None
@@ -752,49 +882,74 @@ async def run_collect(args) -> int:
     _cam_params(cam, args.exp_board, args.gain_board)
     grid_img, grid_pts = make_grid_image(args.grid_cols, args.grid_rows, args.grid_margin, args.grid_radius)
 
+    saved: list[dict] = []
+    poses_root = os.path.join(args.dir, "poses")
+    if os.path.isdir(poses_root):
+        for name in sorted(os.listdir(poses_root)):
+            rec_path = os.path.join(poses_root, name, "record.json")
+            if not os.path.isfile(rec_path):
+                continue
+            with open(rec_path, encoding="utf-8") as f:
+                saved.append(json.load(f))
+
     H_boot = None
     try:
-        # bootstrap: 5 anchor dots, each camera-verified (device UI state
-        # machine can overlay/swallow playback — poll until exactly 1 dot)
-        print("=== BOOTSTRAP (5 anchor dots, camera-verified) ===")
-        await _project(cli, _black_image(), settle=0.6)
-        anchors = [(WIDTH * 0.2, HEIGHT * 0.2), (WIDTH * 0.8, HEIGHT * 0.2),
-                   (WIDTH * 0.5, HEIGHT * 0.5), (WIDTH * 0.2, HEIGHT * 0.8),
-                   (WIDTH * 0.8, HEIGHT * 0.8)]
-        ap, ac = [], []
-        for i, (px, py) in enumerate(anchors, 1):
-            img = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
-            cv2.circle(img, (int(px), int(py)), 12, 1, -1)
-            await _project(cli, img, settle=args.settle)
-            found = None
-            t0 = time.time()
-            while time.time() - t0 < 12:
-                cam.flush(1)
-                ok, frame = cam.read(1000)
-                if not ok or frame is None:
-                    continue
-                cts = detect_grid_dots(frame, None, raw_thresh=args.dot_raw_thresh)
-                if len(cts) == 1:
-                    found = cts[0]
-                    break
-            if found is not None:
-                ap.append((px, py))
-                ac.append(found)
-                print(f"  anchor {i}: proj=({px:.0f},{py:.0f}) -> cam=({found[0]:.1f},{found[1]:.1f})")
+        if saved:
+            proj = np.array([p["proj"] for p in saved[-1]["pairs"]], dtype=np.float64)
+            cam_xy = np.array([p["cam"] for p in saved[-1]["pairs"]], dtype=np.float64)
+            if len(proj) >= 8:
+                H_boot, _ = cv2.findHomography(
+                    proj.reshape(-1, 1, 2), cam_xy.reshape(-1, 1, 2), cv2.RANSAC, 5.0)
+            if H_boot is not None:
+                print(f"=== RESUME: H_boot from last saved pose ({len(proj)} pairs) ===")
+        if H_boot is None:
+            # bootstrap: 5 anchor dots, each camera-verified (device UI state
+            # machine can overlay/swallow playback — poll until exactly 1 dot)
+            print("=== BOOTSTRAP (5 anchor dots, camera-verified) ===")
+            await _project(cli, _black_image(), settle=0.6)
+            anchors = [(WIDTH * 0.2, HEIGHT * 0.2), (WIDTH * 0.8, HEIGHT * 0.2),
+                       (WIDTH * 0.5, HEIGHT * 0.5), (WIDTH * 0.2, HEIGHT * 0.8),
+                       (WIDTH * 0.8, HEIGHT * 0.8)]
+            ap, ac = [], []
+            for i, (px, py) in enumerate(anchors, 1):
+                img = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
+                cv2.circle(img, (int(px), int(py)), 12, 1, -1)
+                found = await _project_one_dot(
+                    cli, cam, img, board, args.board_block, args.board_c,
+                    settle=args.settle, raw_thresh=args.dot_raw_thresh)
+                if found is not None:
+                    ap.append((px, py))
+                    ac.append(found)
+                    print(f"  anchor {i}: proj=({px:.0f},{py:.0f}) -> cam=({found[0]:.1f},{found[1]:.1f})")
+                else:
+                    print(f"  anchor {i}: no single dot within 30s")
+            if len(ap) >= 4:
+                H_boot, _ = cv2.findHomography(
+                    np.array(ap).reshape(-1, 1, 2), np.array(ac).reshape(-1, 1, 2), 0)
+                print(f"  H_boot from {len(ap)} anchors")
             else:
-                print(f"  anchor {i}: no single dot within 12s")
-        if len(ap) >= 4:
-            H_boot, _ = cv2.findHomography(
-                np.array(ap).reshape(-1, 1, 2), np.array(ac).reshape(-1, 1, 2), 0)
-            print(f"  H_boot from {len(ap)} anchors")
-        else:
-            print("[error] 锚点不足，检查投影后重试")
-            return 2
+                print("[error] 锚点不足，检查投影后重试")
+                return 2
 
         print("=== COLLECT: 空格=采集当前姿态 / r=清空重采 / Esc=结束 ===")
-        await _project_verified(cli, cam, _black_image(), "black", settle=0.4)
+        try:
+            await _project_verified(
+                cli, cam, _black_image(), "black", board, args.board_block, args.board_c,
+                settle=0.4, raw_thresh=args.dot_raw_thresh, timeout=12)
+        except RuntimeError as e:
+            print(f"  [warn] {e}，进入预览")
+            await _project(cli, _black_image(), settle=0.3)
         n_done = 0
         ref_X: dict[tuple[float, float], list[np.ndarray]] = {}
+        for prev in saved:
+            Rb, _ = cv2.Rodrigues(np.array(prev["rvec"], dtype=np.float64))
+            tvec = np.array(prev["tvec"], dtype=np.float64)
+            X_cam = (Rb @ np.array(prev["X_board"]).T).T + tvec
+            for p, X in zip(prev["pairs"], X_cam):
+                ref_X.setdefault(tuple(p["proj"]), []).append(X)
+            n_done += 1
+        if n_done:
+            print(f"  resume from {n_done} saved poses")
 
         def _line_check(rec: dict) -> float | None:
             """Median distance of the new pose's 3D points to per-pixel rays
@@ -851,6 +1006,7 @@ async def run_collect(args) -> int:
                                               H_boot, grid_img, grid_pts, pose_dir, frame)
                 except RuntimeError as e:
                     print(f"  [error] 采集异常：{e} —— 调整后可继续按空格重试")
+                    await _project(cli, _black_image(), settle=0.3)
                     continue
                 if rec is None:
                     print("  本姿态无效，调整板后重试")
@@ -1023,6 +1179,158 @@ def triangulate_rayfield(
     return out
 
 
+def _dirs_toward_scene(dirs: np.ndarray) -> np.ndarray:
+    """Flip ray directions so they point away from the camera (+Z)."""
+    d = np.array(dirs, dtype=np.float64, copy=True)
+    if d.ndim == 1:
+        return -d if d[2] < 0 else d
+    d[d[:, 2] < 0] *= -1
+    return d
+
+
+def camera_rays(cam_xy: np.ndarray, K: np.ndarray, dist: np.ndarray) -> np.ndarray:
+    """Unit rays in the camera frame for image points. Camera center is the origin."""
+    nc = cv2.undistortPoints(
+        np.asarray(cam_xy, dtype=np.float64).reshape(-1, 1, 2), K, dist
+    ).reshape(-1, 2)
+    d = np.hstack([nc, np.ones((len(nc), 1))])
+    return d / np.linalg.norm(d, axis=1, keepdims=True)
+
+
+def point_on_camera_ray(
+    cam_xy: tuple[float, float] | np.ndarray,
+    K: np.ndarray,
+    dist: np.ndarray,
+    z: float,
+) -> np.ndarray:
+    """3D point on the camera ray at camera-frame depth z (mm)."""
+    d = camera_rays(np.asarray(cam_xy, dtype=np.float64).reshape(1, 2), K, dist)[0]
+    return d * (float(z) / d[2])
+
+
+def reference_depth(field: dict) -> float:
+    """Typical surface depth (mm) from the ray samples used to fit the field."""
+    return float(np.median(field["origins"][:, 2]))
+
+
+def _point_ray_distance(origins: np.ndarray, dirs: np.ndarray, X: np.ndarray) -> np.ndarray:
+    w = np.asarray(X, dtype=np.float64).reshape(1, 3) - origins
+    along = np.sum(w * dirs, axis=1, keepdims=True)
+    return np.linalg.norm(w - along * dirs, axis=1)
+
+
+def proj_pixel_for_point(X: np.ndarray, field: dict) -> tuple[float, float] | None:
+    """Projector pixel whose ray passes closest to a camera-frame 3D point.
+
+    Searches the fitted grid, then refines inside the cell. Returns None when
+    the point is far from every ray (outside the calibrated bundle).
+    """
+    dirs = _dirs_toward_scene(field["dirs"])
+    dist = _point_ray_distance(field["origins"], dirs, X)
+    i = int(np.argmin(dist))
+    if float(dist[i]) > 40.0:
+        return None
+    p = field["grid_pts"][i].astype(np.float64).copy()
+    xs = np.sort(np.unique(field["grid_pts"][:, 0]))
+    ys = np.sort(np.unique(field["grid_pts"][:, 1]))
+    step = float(min(np.diff(xs).min(), np.diff(ys).min()))
+    x0, x1 = float(xs[0]), float(xs[-1])
+    y0, y1 = float(ys[0]), float(ys[-1])
+
+    def score(uv: np.ndarray) -> float:
+        o, d = ray_field_lookup(field, uv.reshape(1, 2))
+        if np.isnan(d).any():
+            return 1e9
+        d = _dirs_toward_scene(d)
+        d = d / np.linalg.norm(d, axis=1, keepdims=True)
+        return float(_point_ray_distance(o, d, X)[0])
+
+    best = score(p)
+    offsets = ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
+    for _ in range(12):
+        improved = False
+        for du, dv in offsets:
+            q = np.array([
+                float(np.clip(p[0] + du * step, x0, x1)),
+                float(np.clip(p[1] + dv * step, y0, y1)),
+            ])
+            s = score(q)
+            if s + 1e-6 < best:
+                best, p, improved = s, q, True
+        if not improved:
+            step *= 0.5
+            if step < 0.25:
+                break
+    return float(p[0]), float(p[1])
+
+
+def proj_pixel_for_camera(
+    cam_xy: tuple[float, float],
+    K: np.ndarray,
+    dist: np.ndarray,
+    field: dict,
+    z: float | None = None,
+) -> tuple[float, float] | None:
+    """Open-loop aim: camera pixel -> projector pixel at a reference depth."""
+    if z is None:
+        z = reference_depth(field)
+    X = point_on_camera_ray(cam_xy, K, dist, z)
+    return proj_pixel_for_point(X, field)
+
+
+def plane_homography_from_rays(
+    K: np.ndarray,
+    dist: np.ndarray,
+    field: dict,
+    z: float,
+) -> np.ndarray:
+    """Camera-pixel -> projector-pixel homography on the plane at depth z.
+
+    Same role as the old wall homography: draw a mask in the camera image and
+    warp it into the projector frame. The correspondences come from intersecting
+    the calibrated ray field with that plane.
+    """
+    dirs = _dirs_toward_scene(field["dirs"])
+    denom = dirs[:, 2].copy()
+    denom[np.abs(denom) < 1e-8] = np.nan
+    t = (float(z) - field["origins"][:, 2]) / denom
+    ok = np.isfinite(t) & (t * dirs[:, 2] + field["origins"][:, 2] > 50)
+    Q = field["origins"][ok] + t[ok, None] * dirs[ok]
+    cam, _ = cv2.projectPoints(
+        Q.reshape(-1, 1, 3), np.zeros(3), np.zeros(3), K, dist)
+    cam = cam.reshape(-1, 2)
+    proj = field["grid_pts"][ok]
+    finite = np.isfinite(cam).all(axis=1)
+    if int(finite.sum()) < 8:
+        raise RuntimeError("ray field does not cover the reference plane")
+    H, _ = cv2.findHomography(cam[finite], proj[finite], cv2.RANSAC, 3.0)
+    if H is None:
+        raise RuntimeError("could not fit a camera-to-projector homography")
+    return H
+
+
+def shape_light_mask(
+    polygon: np.ndarray,
+    camera_size: tuple[int, int],
+    H_cam_to_proj: np.ndarray,
+) -> np.ndarray:
+    """Fill a freehand camera polygon and warp it to a 640x480 projector mask.
+
+    Matches the old 2D shape mode (fillPoly + warpPerspective), with H taken
+    from the ray field instead of the flat-wall calibration.
+    """
+    width, height = camera_size
+    camera_mask = np.zeros((height, width), dtype=np.uint8)
+    cv2.fillPoly(camera_mask, [np.rint(polygon).astype(np.int32)], 1)
+    warped = cv2.warpPerspective(
+        camera_mask, H_cam_to_proj, (WIDTH, HEIGHT),
+        flags=cv2.INTER_NEAREST,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=0,
+    )
+    return (warped > 0).astype(np.uint8)
+
+
 # ---------------- solve / verify ----------------
 
 
@@ -1152,39 +1460,52 @@ async def run_verify(args) -> int:
     _cam_params(cam, args.exp_board, args.gain_board)  # one exposure throughout
     grid_img, grid_pts = make_grid_image(args.grid_cols, args.grid_rows, args.grid_margin, args.grid_radius)
 
-    # bootstrap H from 5 camera-verified anchors
-    await _project(cli, _black_image(), settle=0.6)
-    anchors = [(WIDTH * 0.2, HEIGHT * 0.2), (WIDTH * 0.8, HEIGHT * 0.2),
-               (WIDTH * 0.5, HEIGHT * 0.5), (WIDTH * 0.2, HEIGHT * 0.8),
-               (WIDTH * 0.8, HEIGHT * 0.8)]
-    ap, ac = [], []
-    for px, py in anchors:
-        img = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
-        cv2.circle(img, (int(px), int(py)), 12, 1, -1)
-        await _project(cli, img, settle=args.settle)
-        found = None
-        t0 = time.time()
-        while time.time() - t0 < 12:
-            cam.flush(1)
-            ok, frame = cam.read(1000)
-            if not ok or frame is None:
-                continue
-            cts = detect_grid_dots(frame, None, raw_thresh=args.dot_raw_thresh)
-            if len(cts) == 1:
-                found = cts[0]
-                break
-        if found is not None:
-            ap.append((px, py))
-            ac.append(found)
-    if len(ap) < 4:
-        print("[error] verify 锚点检测失败")
-        return 2
-    H_boot, _ = cv2.findHomography(
-        np.array(ap).reshape(-1, 1, 2), np.array(ac).reshape(-1, 1, 2), 0)
+    H_boot = None
+    poses_root = os.path.join(args.dir, "poses")
+    if os.path.isdir(poses_root):
+        recs = []
+        for name in sorted(os.listdir(poses_root)):
+            rec_path = os.path.join(poses_root, name, "record.json")
+            if os.path.isfile(rec_path):
+                with open(rec_path, encoding="utf-8") as f:
+                    recs.append(json.load(f))
+        if recs and len(recs[-1]["pairs"]) >= 8:
+            proj = np.array([p["proj"] for p in recs[-1]["pairs"]], dtype=np.float64)
+            cam_xy = np.array([p["cam"] for p in recs[-1]["pairs"]], dtype=np.float64)
+            H_boot, _ = cv2.findHomography(
+                proj.reshape(-1, 1, 2), cam_xy.reshape(-1, 1, 2), cv2.RANSAC, 5.0)
+            if H_boot is not None:
+                print(f"  H_boot from last pose ({len(proj)} pairs)")
+    if H_boot is None:
+        await _project(cli, _black_image(), settle=0.6)
+        anchors = [(WIDTH * 0.2, HEIGHT * 0.2), (WIDTH * 0.8, HEIGHT * 0.2),
+                   (WIDTH * 0.5, HEIGHT * 0.5), (WIDTH * 0.2, HEIGHT * 0.8),
+                   (WIDTH * 0.8, HEIGHT * 0.8)]
+        ap, ac = [], []
+        for px, py in anchors:
+            img = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
+            cv2.circle(img, (int(px), int(py)), 12, 1, -1)
+            found = await _project_one_dot(
+                cli, cam, img, board, args.board_block, args.board_c,
+                settle=args.settle, raw_thresh=args.dot_raw_thresh)
+            if found is not None:
+                ap.append((px, py))
+                ac.append(found)
+        if len(ap) < 4:
+            print("[error] verify 锚点检测失败")
+            return 2
+        H_boot, _ = cv2.findHomography(
+            np.array(ap).reshape(-1, 1, 2), np.array(ac).reshape(-1, 1, 2), 0)
 
     try:
         print("=== VERIFY: 空格=验证当前姿态 / Esc=结束 ===")
-        await _project_verified(cli, cam, _black_image(), "black", settle=0.4)
+        try:
+            await _project_verified(
+                cli, cam, _black_image(), "black", board, args.board_block, args.board_c,
+                settle=0.4, raw_thresh=args.dot_raw_thresh, timeout=12)
+        except RuntimeError as e:
+            print(f"  [warn] {e}，进入预览")
+            await _project(cli, _black_image(), settle=0.3)
         v = 0
         while v < args.poses:
             ok, frame = cam.read(1000)
@@ -1206,13 +1527,18 @@ async def run_verify(args) -> int:
                 continue
 
             rvec, tvec = board_pose(matched, board, K_c, dist_c)
-            await _project_verified(cli, cam, grid_img, "grid", settle=args.settle)
+            roi = board_roi(matched)
+            await _project_verified(
+                cli, cam, grid_img, "grid", board, args.board_block, args.board_c,
+                settle=args.settle, raw_thresh=args.dot_raw_thresh, roi=roi)
             cam.flush(2)
             ok, laser = cam.read(1500)
             if not ok or laser is None:
                 continue
-            await _project_verified(cli, cam, _black_image(), "black", settle=0.4)
-            centroids = detect_grid_dots(laser, None, raw_thresh=args.dot_raw_thresh)
+            await _project_verified(
+                cli, cam, _black_image(), "black", board, args.board_block, args.board_c,
+                settle=0.4, raw_thresh=args.dot_raw_thresh)
+            centroids = dots_in_roi(laser, roi, args.dot_raw_thresh)
             pairs = assign_grid_indices(centroids, H_boot, grid_pts, tol_px=args.assign_tol)
             if len(pairs) < 8:
                 print(f"  匹配点太少 ({len(pairs)})")
