@@ -17,10 +17,10 @@ averaging (suppresses laser scan stripes). The board must stay fixed during
 each pose's two captures (use the vice), reposition between poses.
 
 Usage:
-    python -m irisloop.procalib camint --dir captures/procalib/run1
-    python -m irisloop.procalib collect --dir captures/procalib/run1 --poses 10
-    python -m irisloop.procalib solve --dir captures/procalib/run1
-    python -m irisloop.procalib verify --dir captures/procalib/run1 --poses 2
+    python -m irisloop.procalib camint --dir captures/procalib/run
+    python -m irisloop.procalib collect --dir captures/procalib/run --poses 10
+    python -m irisloop.procalib solve --dir captures/procalib/run
+    python -m irisloop.procalib verify --dir captures/procalib/run --poses 2
 """
 
 from __future__ import annotations

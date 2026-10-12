@@ -46,7 +46,7 @@ from irisloop.procalib import (
 )
 
 ADDR = "20:6E:F1:81:71:62"
-CALIB = os.path.join("captures", "procalib", "run2", "procalib.npz")
+CALIB = os.path.join("captures", "procalib", "run", "procalib.npz")
 DOT_RADIUS = 14
 SCALE = 0.75
 

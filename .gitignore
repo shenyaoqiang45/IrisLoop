@@ -12,6 +12,8 @@ captures/*
 captures/reward_runs/**/*.png
 captures/reward_runs/**/*.npz
 captures/reward_runs/**/*.jpg
+!captures/procalib/
+!captures/procalib/**
 *.log
 
 # Benchmark: track still JPGs + JSON; keep videos local
