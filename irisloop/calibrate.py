@@ -36,19 +36,15 @@ from dataclasses import dataclass
 import cv2
 import numpy as np
 
-from irisloop import protocol as P
 from irisloop.ble_client import IrisBleClient
 from irisloop.camera import UsbCamera
-from irisloop.image_pack import HEIGHT, WIDTH, build_stream
-from irisloop.loop import DEFAULT_ADDR, push_image
+from irisloop.image_pack import HEIGHT, WIDTH
 
 CAL_DIR = "captures/calibration"
 DEFAULT_OUT = os.path.join(CAL_DIR, "homography.npz")
 POINTS_JSON = os.path.join(CAL_DIR, "calib_points.json")
 
 # keep the group on continuously while capturing (same params as irisloop.loop)
-PLAY_TOTAL_100MS = 36000
-PLAY_INTERVAL_100MS = 50
 
 
 # ---------------- point grid & dot image ----------------
@@ -168,22 +164,15 @@ def _grab_frame(cam: UsbCamera, flush: int = 8) -> np.ndarray | None:
 
 
 async def _project(cli: IrisBleClient, bw: np.ndarray, settle: float) -> None:
-    """Push a 1bpp image as 1_1.bmp and keep group 1 playing.
+    """Overwrite 1_1.bmp and keep group 1 playing. Does not delete the group.
 
     stop is required before play: a re-issued play does NOT restart playback
-    while already playing. Safe against the elephant fallback only because
-    run() clears group 1 first — the stop fallback then shows our own frame.
+    while already playing. Safe against the boot fallback only because run()
+    clears group 1 first — the stop fallback then shows our own frame.
     """
-    await push_image(cli, build_stream(bw), "1_1.bmp")
-    await cli.stop()
-    await asyncio.sleep(0.3)
-    r = await cli.play(
-        group_id=1, loop=True,
-        total_100ms=PLAY_TOTAL_100MS, interval_100ms=PLAY_INTERVAL_100MS,
-    )
-    if not r.ok:
-        raise RuntimeError(f"play failed: {r.error}")
-    await asyncio.sleep(settle)
+    from irisloop.session import deliver_mask
+
+    await deliver_mask(cli, bw, settle=settle)
 
 
 # ---------------- collect ----------------
@@ -452,15 +441,11 @@ def _print_stats(stats: dict) -> None:
 
 async def run(args: argparse.Namespace) -> int:
     os.makedirs(CAL_DIR, exist_ok=True)
-    cli = IrisBleClient(args.address)
-    print(f"=== CONNECT {args.address} ===")
-    await cli.connect()
-    # Clear group 1 so leftover frames (e.g. the elephant slideshow in
-    # 1_2..1_10) can't appear: play loops ALL frames in the group, and the
-    # device auto-plays the boot group when stopped
-    r = await cli.send_command(P.cmd_delete_group(1))
-    print(f"  clear group 1: {'ok' if r.ok else r.error}")
-    await asyncio.sleep(0.5)
+    from irisloop.session import open_slot
+
+    opened = await open_slot(args.address)
+    cli = opened.client
+    print(f"=== CONNECT {opened.address} ===")
     cam = _open_camera(args.camera, args.cam_width, args.cam_height)
     print(f"  camera: {cam.info()}")
     await asyncio.sleep(1.0)  # exposure settle
@@ -507,7 +492,8 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     pr = sub.add_parser("run", help="full pipeline: collect -> solve -> save -> verify")
-    pr.add_argument("--address", default=DEFAULT_ADDR)
+    pr.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     pr.add_argument("--camera", type=int, default=0)
     pr.add_argument("--cam-width", type=int, default=1280)
     pr.add_argument("--cam-height", type=int, default=720)

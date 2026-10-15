@@ -32,14 +32,12 @@ sys.path.insert(0, "..")
 import cv2
 import numpy as np
 
-from irisloop import protocol as P
 from irisloop.analyzer import Assessment, assess_ai, assess_rule, load_gray
 from irisloop.ble_client import IrisBleClient
 from irisloop.camera import UsbCamera
-from irisloop.image_pack import binarize, build_stream
+from irisloop.image_pack import binarize
 from irisloop.projector import CHAR_FILE_DATA, CHAR_FILE_END, CHAR_FILE_START
 
-DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
 CAPTURE_DIR = "captures/loop"
 
 ATT_HEADER_BYTES = 3
@@ -97,16 +95,14 @@ async def run_loop(
         target_gray = cv2.resize(target_gray, (640, 480))
     bw = binarize(target_gray)
 
-    cli = IrisBleClient(addr) if push else None
-    if cli is not None:
+    cli = None
+    if push:
+        from irisloop.session import deliver_mask, open_slot
+
+        opened = await open_slot(addr)
+        cli = opened.client
+        addr = opened.address
         print(f"=== CONNECT {addr} ===")
-        await cli.connect()
-        # Clear group 1 so leftover frames from earlier sessions (e.g. the
-        # elephant slideshow in 1_2..1_10) can't appear: the device auto-plays
-        # the boot group when stopped, and play loops ALL frames in the group
-        r = await cli.send_command(P.cmd_delete_group(1))
-        print(f"  clear group 1: {'ok' if r.ok else r.error}")
-        await asyncio.sleep(0.5)
 
     try:
         for it in range(1, max_iters + 1):
@@ -114,19 +110,8 @@ async def run_loop(
 
             # 1. push image
             if cli is not None:
-                stream = build_stream(bw)
-                print(f"  pushing {len(stream)}B -> 1_1.bmp ...")
-                await push_image(cli, stream, "1_1.bmp")
-                # keep group 1 on continuously. stop is required — a re-issued
-                # play does NOT restart playback while already playing. With a
-                # clean group 1 (only our 1_1.bmp), the stop fallback and the
-                # play both show our own frame, so no elephant flash.
-                await cli.stop()
-                await asyncio.sleep(0.3)
-                r = await cli.play(group_id=1, loop=True,
-                                   total_100ms=36000, interval_100ms=50)
-                print(f"  play: {'ok' if r.ok else r.error}")
-                await asyncio.sleep(1.0)  # wait for the projection to settle
+                print("  pushing 1_1.bmp ...")
+                await deliver_mask(cli, bw, settle=1.0)
 
             # 2. capture
             shot = os.path.join(CAPTURE_DIR, f"iter{it}_capture.png")
@@ -185,7 +170,8 @@ async def run_loop(
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("target", help="target image (e.g. data/01a_upload_alignment_h.jpg)")
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--mode", choices=["rule", "ai"], default="rule")
     ap.add_argument("--max-iters", type=int, default=3)
     ap.add_argument("--no-push", action="store_true",

@@ -33,8 +33,6 @@ if sys.platform == "win32":
 import cv2
 import numpy as np
 
-from irisloop import protocol as P
-from irisloop.ble_client import IrisBleClient
 from irisloop.calibrate import (
     CAL_DIR,
     DEFAULT_OUT,
@@ -46,8 +44,7 @@ from irisloop.calibrate import (
     _open_camera,
     _project,
 )
-from irisloop.image_pack import HEIGHT, WIDTH, build_stream, to_1bpp
-from irisloop.loop import DEFAULT_ADDR, push_image
+from irisloop.image_pack import HEIGHT, WIDTH, to_1bpp
 from irisloop.target_path import TargetPath, render_target
 
 MAX_GROUP_FRAMES = 10
@@ -360,16 +357,15 @@ async def run(args) -> int:
     frames = extract_frames(args.video, args.frames, crop)
     print(f"  got {len(frames)} frames, mode={args.mode}")
 
-    cli = IrisBleClient(args.address)
-    print(f"=== CONNECT {args.address} ===")
-    await cli.connect()
+    from irisloop.session import open_slot
+
+    opened = await open_slot(args.address)
+    cli = opened.client
+    print(f"=== CONNECT {opened.address} ===")
     cam = _open_camera(args.camera, args.cam_width, args.cam_height)
     print(f"  camera: {cam.info()}")
     await asyncio.sleep(1.0)
     try:
-        r = await cli.send_command(P.cmd_delete_group(1))
-        print(f"  clear group 1: {'ok' if r.ok else r.error}")
-        await asyncio.sleep(0.5)
         bg = await _capture_background(cli, cam, CAL_DIR)
 
         if interactive:
@@ -428,6 +424,7 @@ async def run(args) -> int:
             saved_target.save(args.path_out)
             print(f"  reusable target path -> {args.path_out}")
 
+        masks = []
         for i, gray in enumerate(frames, 1):
             if args.fill_target and target_mask is not None:
                 bw = target_mask.copy()
@@ -435,20 +432,15 @@ async def run(args) -> int:
                 bw = warp_to_quad(to_1bpp(gray, mode=args.mode), quad_proj)
                 if target_mask is not None:
                     bw = bw * target_mask
-            name = f"1_{i}.bmp"
-            print(f"  pushing frame {i}/{len(frames)} -> {name} ({bw.sum()} lit px)")
-            await push_image(cli, build_stream(bw), name)
-            await asyncio.sleep(0.2)
+            masks.append(bw)
+            print(f"  frame {i}/{len(frames)} ({int(bw.sum())} lit px)")
             if i == 1:
                 cv2.imwrite(os.path.join(CAL_DIR, "video_frame1.png"),
                             (bw * 255).astype(np.uint8))
 
-        interval = max(1, round(10 / args.fps))
-        await cli.stop()
-        await asyncio.sleep(0.3)
-        r = await cli.play(group_id=1, loop=True, total_100ms=36000, interval_100ms=interval)
-        print(f"=== PLAY group 1, {len(frames)} frames @ {args.fps}fps: "
-              f"{'ok' if r.ok else r.error} ===")
+        frame_ms = max(100, int(round(1000 / args.fps)))
+        shown = await opened.show_animation(masks, frame_ms=frame_ms, seconds=3600)
+        print(f"=== PLAY {shown.frames} frames @ {shown.frame_ms}ms, replaced {shown.replaced} ===")
         await asyncio.sleep(1.2)
 
         frame = _grab_frame(cam)
@@ -489,13 +481,14 @@ async def run(args) -> int:
         return 0
     finally:
         cam.release()
-        await cli.disconnect()
+        await opened.close()
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="play_video_at")
     ap.add_argument("video", help="source video path")
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--camera", type=int, default=0)
     ap.add_argument("--cam-width", type=int, default=1280)
     ap.add_argument("--cam-height", type=int, default=720)

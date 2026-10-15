@@ -15,6 +15,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import os
 import subprocess
@@ -29,8 +30,8 @@ import cv2
 import numpy as np
 
 from irisloop import protocol as P
+from irisloop.session import resolve_address
 
-DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
 OUT_ROOT = Path("captures")
 SETTLE_S = 3.0
 
@@ -150,7 +151,8 @@ def run_one_group(
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument(
         "--groups",
         type=lambda x: int(x, 0),
@@ -186,6 +188,7 @@ def main() -> int:
         except Exception:
             pass
 
+    args.address = asyncio.run(resolve_address(args.address))
     print("=== IrisLoop video-understanding test-set capture (subprocess mode) ===")
     print(f"  output {root}")
     print(f"  groups {args.groups}")

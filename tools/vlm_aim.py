@@ -23,9 +23,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import cv2
 import numpy as np
 
-from irisloop import protocol as P
 from irisloop import qwen_client as qwen
-from irisloop.ble_client import IrisBleClient
 from irisloop.calibrate import (
     CAL_DIR,
     DEFAULT_OUT,
@@ -35,8 +33,7 @@ from irisloop.calibrate import (
     _greenness,
     _open_camera,
 )
-from irisloop.image_pack import HEIGHT, WIDTH, build_stream
-from irisloop.loop import DEFAULT_ADDR, push_image
+from irisloop.image_pack import HEIGHT, WIDTH
 from irisloop.target_path import TargetPath, render_target
 from irisloop.vlm_ground import GROUND_PROMPT, refine_outline, regions_from_reply
 from play_video_at import field_overlay
@@ -92,16 +89,15 @@ def _field_limited_mask(calib: Calibration, frame, bg) -> np.ndarray:
 
 async def run(args) -> int:
     calib = Calibration.load(args.calibration)
-    cli = IrisBleClient(args.address)
-    print(f"=== CONNECT {args.address} ===")
-    await cli.connect()
+    from irisloop.session import open_slot
+
+    opened = await open_slot(args.address)
+    cli = opened.client
+    print(f"=== CONNECT {opened.address} ===")
     cam = _open_camera(args.camera, args.cam_width, args.cam_height)
     print(f"  camera: {cam.info()}")
     await asyncio.sleep(1.0)
     try:
-        r = await cli.send_command(P.cmd_delete_group(1))
-        print(f"  clear group 1: {'ok' if r.ok else r.error}")
-        await asyncio.sleep(0.5)
         bg = await _capture_background(cli, cam, CAL_DIR)
         wall = field_overlay(calib, bg)
         cv2.imwrite(os.path.join(CAL_DIR, "vlm_query.png"), wall)
@@ -168,19 +164,10 @@ async def run(args) -> int:
             frames = [pattern if i % 2 == 0 else black for i in range(MAX_GROUP_FRAMES)]
         else:
             frames = [pattern] * MAX_GROUP_FRAMES
-        for i, bw in enumerate(frames, 1):
-            print(f"  pushing frame {i}/{len(frames)} -> 1_{i}.bmp ({bw.sum()} lit px)")
-            await push_image(cli, build_stream(bw), f"1_{i}.bmp")
-            await asyncio.sleep(0.2)
-        await cli.stop()
-        await asyncio.sleep(0.3)
-        interval = args.interval if args.blink else 50
-        r = await cli.play(group_id=1, loop=True,
-                           total_100ms=36000, interval_100ms=interval)
-        print(f"=== PLAY {'blink ' if args.blink else ''}group 1 "
-              f"@ {interval * 100}ms/frame: {'ok' if r.ok else r.error} ===")
-        if not r.ok:
-            return 2
+        frame_ms = (args.interval if args.blink else 50) * 100
+        shown = await opened.show_animation(frames, frame_ms=frame_ms, seconds=3600)
+        print(f"=== PLAY {'blink ' if args.blink else ''}{shown.frames} frames "
+              f"@ {shown.frame_ms}ms, replaced {shown.replaced} ===")
 
         # verification capture; with blink, sample twice and keep the lit frame
         await asyncio.sleep(1.2)
@@ -226,13 +213,14 @@ async def run(args) -> int:
         return 0
     finally:
         cam.release()
-        await cli.disconnect()
+        await opened.close()
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="vlm_aim")
     ap.add_argument("intent", help="natural-language target, e.g. '把光投到海报人物的头显上'")
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--camera", type=int, default=0)
     ap.add_argument("--cam-width", type=int, default=1280)
     ap.add_argument("--cam-height", type=int, default=720)

@@ -125,17 +125,12 @@ def test_interactive_loop_updates_light_and_blanks_on_loss(monkeypatch, static):
         def close(self):
             pass
 
-    class Client:
-        def __init__(self, address):
-            pass
+    class Opened:
+        def __init__(self):
+            self.client = object()
+            self.address = "unused"
 
-        async def connect(self):
-            pass
-
-        async def send_command(self, command):
-            pass
-
-        async def disconnect(self):
+        async def close(self):
             pass
 
     async def project(cli, mask, settle):
@@ -156,7 +151,10 @@ def test_interactive_loop_updates_light_and_blanks_on_loss(monkeypatch, static):
         return ord("q") if ticks == 6 else -1
 
     monkeypatch.setattr(aim3d, "HikCamera", Camera)
-    monkeypatch.setattr(aim3d, "IrisBleClient", Client)
+    async def open_projector(address):
+        return Opened()
+
+    monkeypatch.setattr(aim3d, "open_projector", open_projector)
     monkeypatch.setattr(aim3d, "_project", project)
     monkeypatch.setattr(aim3d, "load_calib", lambda path: (
         np.eye(3), np.zeros(5), {"grid_pts": np.zeros((10, 2))}, 1000.0,

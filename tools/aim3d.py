@@ -31,7 +31,6 @@ if sys.platform == "win32":
 import cv2
 import numpy as np
 
-from irisloop import protocol as P
 from irisloop.ble_client import IrisBleClient
 from irisloop.hik_camera import HikCamera
 from irisloop.image_pack import HEIGHT, WIDTH
@@ -49,7 +48,13 @@ from irisloop.procalib import (
     triangulate_rayfield,
 )
 
-ADDR = "20:6E:F1:81:71:62"
+async def open_projector(address: str | None):
+    """Connect through the session layer and clear the boot slot once."""
+    from irisloop.session import open_slot
+
+    return await open_slot(address)
+
+
 CALIB = os.path.join("captures", "procalib", "run", "procalib.npz")
 DOT_RADIUS = 14
 SCALE = 0.75
@@ -245,10 +250,9 @@ async def run(args) -> int:
     K, dist, field, z_ref = load_calib(args.calib)
     H = plane_homography_from_rays(K, dist, field, z_ref)
     print(f"  rays={len(field['grid_pts'])}  depth_ref={z_ref:.0f}mm", flush=True)
-    cli = IrisBleClient(args.address)
-    print(f"=== CONNECT {args.address} ===", flush=True)
-    await cli.connect()
-    await cli.send_command(P.cmd_delete_group(1))
+    opened = await open_projector(args.address)
+    cli = opened.client
+    print(f"=== CONNECT {opened.address} ===", flush=True)
     cam = HikCamera(args.mvs_dir)
     cam.enumerate()
     cam.open(serial=args.serial)
@@ -361,13 +365,14 @@ async def run(args) -> int:
             finally:
                 await _project(cli, _black_image(), settle=0.2)
         finally:
-            await cli.disconnect()
+            await opened.close()
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="aim3d")
     ap.add_argument("--calib", default=CALIB)
-    ap.add_argument("--address", default=ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--serial", default="K65564865")
     ap.add_argument("--mvs-dir", default=None)
     ap.add_argument("--exposure", type=float, default=40000)

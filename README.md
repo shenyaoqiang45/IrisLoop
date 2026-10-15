@@ -64,7 +64,8 @@ Protocol, BLE bring-up, packing, and capture live in `docs/` and `tools/` — st
 - [Hub submissions](hub/README.md)
 
 ```bash
-python tools/min_play_test.py --ble --group 1 --seconds 5
+python -m irisloop.session find
+python -m irisloop.session frames path/to/frames --seconds 30 --frame-ms 300
 python tools/project_and_capture.py --group 1 --seconds 6
 ```
 

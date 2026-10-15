@@ -15,8 +15,6 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from irisloop import protocol as P
-from irisloop.ble_client import IrisBleClient
 from irisloop.calibrate import (
     DEFAULT_OUT,
     Calibration,
@@ -26,7 +24,6 @@ from irisloop.calibrate import (
     _open_camera,
     _project,
 )
-from irisloop.loop import DEFAULT_ADDR
 from irisloop.physical_reward import assess_physical
 from irisloop.preferences import generate_pairs
 from irisloop.reward_run import finalize_run, save_trial, start_run, write_json
@@ -88,18 +85,15 @@ def _trial_order(widths: list[int], repeats: int, seed: int):
 
 async def run(args) -> int:
     calibration = Calibration.load(args.calibration)
-    cli = IrisBleClient(args.address)
-    print(f"=== CONNECT {args.address} ===")
-    await cli.connect()
+    from irisloop.session import open_slot
+
+    opened = await open_slot(args.address)
+    cli = opened.client
+    print(f"=== CONNECT {opened.address} ===")
     cam = _open_camera(args.camera, args.cam_width, args.cam_height)
     print(f"  camera: {cam.info()}")
     await asyncio.sleep(1.0)
     try:
-        response = await cli.send_command(P.cmd_delete_group(1))
-        if not response.ok:
-            raise RuntimeError(f"cannot clear group 1: {response.error}")
-        await asyncio.sleep(0.5)
-
         target = await _load_or_draw_target(args, cli, cam, calibration)
         if target is None:
             print("  cancelled")
@@ -224,12 +218,13 @@ async def run(args) -> int:
         except Exception:
             pass
         cam.release()
-        await cli.disconnect()
+        await opened.close()
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="reward_ab")
-    parser.add_argument("--address", default=DEFAULT_ADDR)
+    parser.add_argument("--address", default=None,
+                        help="projector MAC; omit when only one IrisGreen is advertising")
     parser.add_argument("--camera", type=int, default=0)
     parser.add_argument("--cam-width", type=int, default=1280)
     parser.add_argument("--cam-height", type=int, default=720)

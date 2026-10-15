@@ -24,10 +24,9 @@ import cv2
 import numpy as np
 
 from irisloop import protocol as P
-from irisloop.ble_client import IrisBleClient
 from irisloop.camera import UsbCamera
+from irisloop.session import connect, resolve_address
 
-DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
 OUT_DIR = "captures"
 
 
@@ -55,34 +54,33 @@ async def run_group(
     jpeg_quality: int = 92,
     out_dir: str | None = None,
 ) -> dict:
-    cli = IrisBleClient(addr)
+    projector = None
     last_err: BaseException | None = None
     for attempt in range(1, 4):
         try:
-            await cli.connect()
-            await cli.stop()  # stop any previous playback first
+            projector = await connect(addr)
+            await projector.stop()
             last_err = None
             break
-        except OSError as e:
+        except (OSError, RuntimeError) as e:
             last_err = e
             print(f"  BLE start abort (attempt {attempt}/3): {e}", flush=True)
-            try:
-                await cli.disconnect()
-            except Exception:
-                pass
+            if projector is not None:
+                try:
+                    await projector.close()
+                except Exception:
+                    pass
+            projector = None
             await asyncio.sleep(2.0 * attempt)
-            cli = IrisBleClient(addr)
-    if last_err is not None:
-        raise last_err
+    if last_err is not None or projector is None:
+        raise last_err or RuntimeError("could not connect")
     await asyncio.sleep(0.3)
 
     gname = P.group_name(group)
-    # Leave headroom on total play time (units of 100ms); default interval 2 -> 200ms/frame (5fps)
-    total = int(seconds * 10) + 60
-    interval = interval_100ms if interval_100ms is not None else 2
-    print(f"\n=== play group {group} ({gname}) total={total/10:.0f}s interval={interval*100}ms ===")
-    r = await cli.play(group_id=group, loop=False, total_100ms=total, interval_100ms=interval)
-    print(f"  {'ok' if r.ok else 'fail'} raw={r.raw.hex()} {r.error}")
+    frame_ms = (interval_100ms if interval_100ms is not None else 2) * 100
+    play_for = seconds + 6
+    print(f"\n=== play group {group} ({gname}) {play_for:.0f}s frame={frame_ms}ms ===")
+    await projector.play(group, seconds=play_for, frame_ms=frame_ms, loop=False)
 
     # Projector response + MEMS spin-up need time
     await asyncio.sleep(1.2)
@@ -174,15 +172,16 @@ async def run_group(
         result = {"group": group, "frames": 0}
 
     if not keepalive:
-        await cli.stop()
+        await projector.stop()
         print("  playback stopped")
-    await cli.disconnect()
+    await projector.close()
     return result
 
 
 async def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--group", type=lambda x: int(x, 0), nargs="+", required=True)
     ap.add_argument("--seconds", type=float, default=6.0)
     ap.add_argument("--camera", type=int, default=0)
@@ -196,6 +195,7 @@ async def main() -> int:
     ap.add_argument("--keepalive", action="store_true", help="Do not stop playback after capture")
     args = ap.parse_args()
 
+    args.address = await resolve_address(args.address)
     print(f"=== IrisLoop project+capture ===")
     print(f"  projector {args.address}")
     print(f"  camera index={args.camera}")

@@ -37,11 +37,9 @@ from dataclasses import dataclass
 import cv2
 import numpy as np
 
-from irisloop import protocol as P
 from irisloop.ble_client import IrisBleClient
 from irisloop.hik_camera import HikCamera
-from irisloop.image_pack import WIDTH, HEIGHT, build_stream
-from irisloop.loop import DEFAULT_ADDR, push_image
+from irisloop.image_pack import WIDTH, HEIGHT
 
 DEFAULT_LAYOUT = "cbinfo/CB-0300-W-001.layout.json"
 DEFAULT_DIR = os.path.join("captures", "procalib", time.strftime("run_%Y%m%d_%H%M%S"))
@@ -50,8 +48,6 @@ PROCALIB_NPZ = "procalib.npz"
 REPORT_JSON = "report.json"
 
 # keep the group on continuously while capturing (same as irisloop.calibrate)
-PLAY_TOTAL_100MS = 36000
-PLAY_INTERVAL_100MS = 50
 
 
 # ---------------- board model ----------------
@@ -582,15 +578,10 @@ def triangulate(
 
 
 async def _project(cli: IrisBleClient, bw: np.ndarray, settle: float = 0.8) -> None:
-    """Push a 1bpp image as 1_1.bmp and keep group 1 playing (see calibrate.py)."""
-    await push_image(cli, build_stream(bw), "1_1.bmp")
-    await cli.stop()
-    await asyncio.sleep(0.3)
-    r = await cli.play(group_id=1, loop=True,
-                       total_100ms=PLAY_TOTAL_100MS, interval_100ms=PLAY_INTERVAL_100MS)
-    if not r.ok:
-        raise RuntimeError(f"play failed: {r.error}")
-    await asyncio.sleep(settle)
+    """Overwrite 1_1.bmp and keep group 1 playing. Does not delete the group."""
+    from irisloop.session import deliver_mask
+
+    await deliver_mask(cli, bw, settle=settle)
 
 
 def _black_image() -> np.ndarray:
@@ -872,11 +863,11 @@ async def run_collect(args) -> int:
     intr = np.load(os.path.join(args.dir, CAM_INT_NPZ))
     K, dist = intr["K"], intr["dist"]
 
-    cli = IrisBleClient(args.address)
-    print(f"=== CONNECT {args.address} ===")
-    await cli.connect()
-    r = await cli.send_command(P.cmd_delete_group(1))
-    print(f"  clear group 1: {'ok' if r.ok else r.error}")
+    from irisloop.session import open_slot
+
+    opened = await open_slot(args.address)
+    cli = opened.client
+    print(f"=== CONNECT {opened.address} ===")
     cam = _open_hik(args)
     # one exposure for the whole session: board dots + saturating laser dots
     _cam_params(cam, args.exp_board, args.gain_board)
@@ -1453,9 +1444,11 @@ async def run_verify(args) -> int:
         print("  verify 使用针孔模型")
     board = BoardModel.load(args.layout)
 
-    cli = IrisBleClient(args.address)
-    await cli.connect()
-    await cli.send_command(P.cmd_delete_group(1))
+    from irisloop.session import open_slot
+
+    opened = await open_slot(args.address)
+    cli = opened.client
+    print(f"=== CONNECT {opened.address} ===")
     cam = _open_hik(args)
     _cam_params(cam, args.exp_board, args.gain_board)  # one exposure throughout
     grid_img, grid_pts = make_grid_image(args.grid_cols, args.grid_rows, args.grid_margin, args.grid_radius)
@@ -1581,7 +1574,8 @@ def _add_common(ap: argparse.ArgumentParser) -> None:
     ap.add_argument("--layout", default=DEFAULT_LAYOUT)
     ap.add_argument("--mvs-dir", default=None)
     ap.add_argument("--serial", default=None)
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--exp-board", type=float, default=40000,
                     help="全程唯一曝光 us（≥激光扫描整帧周期，条纹积分消隐）")
     ap.add_argument("--gain-board", type=float, default=8.0, help="全程增益 dB")

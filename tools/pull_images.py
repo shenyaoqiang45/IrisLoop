@@ -35,7 +35,6 @@ from irisloop.ble_client import IrisBleClient
 from irisloop.image_pack import HEAD_BYTES, STREAM_BYTES
 from irisloop.projector import CHAR_MAIN_CMD2, NAME_PREFIX, SVC_MAIN
 
-DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
 DEFAULT_HOST = "192.168.4.1"
 OUT_DIR = "data"
 
@@ -63,20 +62,32 @@ def http_get_retry(url: str, timeout: float = 10.0, tries: int = 5) -> tuple[int
 
 
 async def find_device(timeout: float = 12.0, address: str | None = None):
-    """Return (address, BLEDevice|None). Prefer the scanned device object so WinRT can connect immediately."""
+    """Return (address, BLEDevice|None). Prefer the scanned device object so WinRT can connect immediately.
+
+    With no address, the only advertising IrisGreen is used. Several devices
+    require ``--address``.
+    """
     found = await BleakScanner.discover(timeout=timeout, return_adv=True)
-    if address:
-        for addr, (dev, adv) in found.items():
-            if addr.upper() == address.upper():
-                return addr, dev
+    iris: list[tuple[str, object, str]] = []
     for addr, (dev, adv) in found.items():
         name = (dev.name or getattr(adv, "local_name", None) or "")
         uuids = [u.lower() for u in (getattr(adv, "service_uuids", None) or [])]
         if NAME_PREFIX.lower() in name.lower() or SVC_MAIN in uuids:
-            return addr, dev
-    if address:
-        return address, None
-    raise RuntimeError("IrisGreen not found in scan")
+            iris.append((addr, dev, name or "(unnamed)"))
+    given = (address or "").strip()
+    if given:
+        for addr, dev, _name in iris:
+            if addr.upper() == given.upper():
+                return addr, dev
+        return given, None
+    if len(iris) == 1:
+        addr, dev, name = iris[0]
+        print(f"using {name} {addr}", flush=True)
+        return addr, dev
+    if not iris:
+        raise RuntimeError("no IrisGreen is advertising")
+    lines = "\n".join(f"  {name}  {addr}" for addr, _dev, name in iris)
+    raise RuntimeError("more than one IrisGreen is nearby; pass --address\n" + lines)
 
 
 def build_wifi_cred(ssid: str, password: str) -> bytes:
@@ -414,7 +425,8 @@ def pull_all(host: str, out_dir: str, expected: int, switch_ble: bool = False) -
 
 async def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--host", default=DEFAULT_HOST)
     ap.add_argument("--out", default=OUT_DIR)
     ap.add_argument("--ssid", default="")

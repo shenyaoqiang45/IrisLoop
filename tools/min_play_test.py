@@ -26,9 +26,6 @@ import cv2
 
 from irisloop.camera import UsbCamera, probe_cameras, quiet_opencv
 
-DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
-
-
 def _ps(cmd: str) -> str:
     try:
         r = subprocess.run(
@@ -181,7 +178,8 @@ async def ble_loop(addr: str, group: int, seconds: float, camera: int, out_dir: 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Probe whether a laptop built-in camera can replace a USB cam")
     ap.add_argument("--ble", action="store_true", help="Also BLE-play one group and capture")
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--group", type=int, default=1)
     ap.add_argument("--seconds", type=float, default=5.0)
     ap.add_argument("--camera", type=int, default=None, help="Camera index for BLE capture; default first usable")
@@ -236,10 +234,17 @@ def main() -> int:
 
     import asyncio
 
+    from irisloop.session import resolve_address
+
     cam_index = args.camera if args.camera is not None else indexes[0]
     ble_dir = str(out_root / "ble")
     os.makedirs(ble_dir, exist_ok=True)
-    return asyncio.run(ble_loop(args.address, args.group, args.seconds, cam_index, ble_dir))
+
+    async def ble_entry() -> int:
+        addr = await resolve_address(args.address)
+        return await ble_loop(addr, args.group, args.seconds, cam_index, ble_dir)
+
+    return asyncio.run(ble_entry())
 
 
 if __name__ == "__main__":

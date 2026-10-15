@@ -52,8 +52,7 @@ For group-1 projection (max 10 BMPs):
 
 ```bash
 python tools/wan_siliconflow_smoke.py "…" --frames 10 -o captures/wan/run1
-python tools/push_group.py --dir captures/wan/run1/frames --group 1 --count 10
-python tools/play_group.py --group 1 --loop --interval 3 --total 300
+python -m irisloop.session frames captures/wan/run1/frames --seconds 30 --frame-ms 300
 ```
 
 ## Cost posture

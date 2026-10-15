@@ -33,8 +33,6 @@ if sys.platform == "win32":
 import cv2
 import numpy as np
 
-from irisloop import protocol as P
-from irisloop.ble_client import IrisBleClient
 from irisloop.calibrate import (
     CAL_DIR,
     DEFAULT_OUT,
@@ -47,8 +45,6 @@ from irisloop.calibrate import (
     detect_dot,
 )
 from irisloop.image_pack import HEIGHT, WIDTH
-from irisloop.loop import DEFAULT_ADDR
-
 MARK_RADIUS = 24          # projector-px radius of the dot marker
 CHECKER_CELLS = (8, 6)    # checkerboard cells for the drag-rectangle fill
 
@@ -173,12 +169,11 @@ class AimUI:
 
 async def run_interactive(args) -> int:
     calib = Calibration.load(args.calibration)
-    cli = IrisBleClient(args.address)
-    print(f"=== CONNECT {args.address} ===")
-    await cli.connect()
-    r = await cli.send_command(P.cmd_delete_group(1))
-    print(f"  clear group 1: {'ok' if r.ok else r.error}")
-    await asyncio.sleep(0.5)
+    from irisloop.session import open_slot
+
+    opened = await open_slot(args.address)
+    cli = opened.client
+    print(f"=== CONNECT {opened.address} ===")
     cam = _open_camera(args.camera, args.cam_width, args.cam_height)
     print(f"  camera: {cam.info()}")
     await asyncio.sleep(1.0)
@@ -220,18 +215,17 @@ async def run_interactive(args) -> int:
         try:
             await _project(cli, _black_image(), settle=0.3)  # leave the device dark
         finally:
-            await cli.disconnect()
+            await opened.close()
     return 0
 
 
 async def run_single(args) -> int:
     calib = Calibration.load(args.calibration)
-    cli = IrisBleClient(args.address)
-    print(f"=== CONNECT {args.address} ===")
-    await cli.connect()
-    r = await cli.send_command(P.cmd_delete_group(1))
-    print(f"  clear group 1: {'ok' if r.ok else r.error}")
-    await asyncio.sleep(0.5)
+    from irisloop.session import open_slot
+
+    opened = await open_slot(args.address)
+    cli = opened.client
+    print(f"=== CONNECT {opened.address} ===")
     cam = _open_camera(args.camera, args.cam_width, args.cam_height)
     print(f"  camera: {cam.info()}")
     await asyncio.sleep(1.0)
@@ -254,12 +248,13 @@ async def run_single(args) -> int:
         try:
             await _project(cli, _black_image(), settle=0.3)
         finally:
-            await cli.disconnect()
+            await opened.close()
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="aim_at")
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--camera", type=int, default=0)
     ap.add_argument("--cam-width", type=int, default=1280)
     ap.add_argument("--cam-height", type=int, default=720)

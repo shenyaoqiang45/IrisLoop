@@ -31,22 +31,11 @@ sys.path.insert(0, ".")
 sys.path.insert(0, "..")
 
 from irisloop import kimi_client as K
-from irisloop import protocol as P
 from irisloop import wan_bailian as W
-from irisloop.ble_client import IrisBleClient
 from irisloop.calibrate import DEFAULT_OUT as DEFAULT_CALIBRATION
 from irisloop.calibrate import Calibration, place_in_camera_rect
-from irisloop.image_pack import build_stream, describe, to_1bpp
-from irisloop.projector import CHAR_FILE_DATA, CHAR_FILE_END, CHAR_FILE_START
+from irisloop.image_pack import describe, to_1bpp
 from irisloop.video_frames import extract_frames
-
-DEFAULT_ADDR = "F4:12:FA:B6:B7:CA"
-ATT_HEADER_BYTES = 3
-DEFAULT_ATT_MTU = 23
-FILE_NAME_FIELD_MIN_BYTES = 16
-START_DELAY_S = 0.1
-PACKET_DELAY_S = 0.03
-INTER_FILE_DELAY_S = 1.0
 
 # Visual idioms the director may choose from, and the 1bpp conversion each needs.
 # Silhouette was the original (and only) idiom; it is now one of six.
@@ -209,19 +198,13 @@ def writer_wan(brief: dict, out_dir: Path, *, frames: int, size: str) -> tuple[P
         size=size,
         negative_prompt=neg,
     )
-    # ensure numbered frames for push_group sort
+    # numbered frames so the session upload order is stable
     frame_dir = writer_dir / "frames"
     if not paths:
         paths = extract_frames(mp4, frame_dir, count=frames)
     print(f"  video   : {mp4}", flush=True)
     print(f"  frames  : {len(paths)} under {frame_dir}", flush=True)
     return mp4, paths
-
-
-def build_name_packet(file_size: int, file_name: str) -> bytes:
-    nb = file_name.encode("utf-8")
-    field = max(FILE_NAME_FIELD_MIN_BYTES, len(nb))
-    return file_size.to_bytes(4, "big") + nb.ljust(field, b"\x00")
 
 
 def load_bw(path: Path, mode: str = "threshold", *, resize: bool = True):
@@ -235,21 +218,6 @@ def load_bw(path: Path, mode: str = "threshold", *, resize: bool = True):
     if resize and img.shape != (480, 640):
         img = cv2.resize(img, (640, 480), interpolation=cv2.INTER_AREA)
     return to_1bpp(img, mode)
-
-
-async def push_one(client, file_name: str, stream: bytes) -> None:
-    packet = build_name_packet(len(stream), file_name)
-    mtu = getattr(client, "mtu_size", DEFAULT_ATT_MTU) or DEFAULT_ATT_MTU
-    chunk = max(1, mtu - ATT_HEADER_BYTES)
-    n = (len(stream) + chunk - 1) // chunk
-    await client.write_gatt_char(CHAR_FILE_START, packet, response=True)
-    await asyncio.sleep(START_DELAY_S)
-    for i in range(n):
-        await client.write_gatt_char(
-            CHAR_FILE_DATA, stream[i * chunk : (i + 1) * chunk], response=False
-        )
-        await asyncio.sleep(PACKET_DELAY_S)
-    await client.write_gatt_char(CHAR_FILE_END, packet, response=True)
 
 
 async def project_and_capture(
@@ -288,38 +256,42 @@ async def project_and_capture(
             flush=True,
         )
 
-    cli = IrisBleClient(address)
-    await cli.connect()
-    print(f"  connected mtu={cli.info.mtu}", flush=True)
+    from irisloop.session import SLOT_GROUP, connect
+
+    if group != SLOT_GROUP:
+        raise RuntimeError("session projection writes group 1 (boot); pass --group 1")
+    frames_bw = []
+    for i, path in enumerate(frame_paths, 1):
+        bw = load_bw(path, pack_mode, resize=calibration is None)
+        if calibration is not None:
+            bw, projector_quad = place_in_camera_rect(
+                bw, calibration, target_rect, padding=spatial_padding
+            )
+            cv2.imwrite(
+                str(preview_dir / f"frame_{i:02d}.png"),
+                bw * 255,
+            )
+            if i == 1:
+                print(
+                    f"  proj quad: {projector_quad.round(1).tolist()}",
+                    flush=True,
+                )
+        print(f"  [{i}/{len(frame_paths)}] {path.name}  {describe(bw)}", flush=True)
+        frames_bw.append(bw)
+    opened = await connect(address)
     try:
-        print(f"  delete group {group}…", flush=True)
-        r = await cli.send_command(P.cmd_delete_group(group))
-        print(f"  delete: {'ok' if r.ok else r.error}", flush=True)
-        await asyncio.sleep(0.5)
-        client = cli.client
-        assert client is not None
-        for i, path in enumerate(frame_paths, 1):
-            bw = load_bw(path, pack_mode, resize=calibration is None)
-            if calibration is not None:
-                bw, projector_quad = place_in_camera_rect(
-                    bw, calibration, target_rect, padding=spatial_padding
-                )
-                cv2.imwrite(
-                    str(preview_dir / f"frame_{i:02d}.png"),
-                    bw * 255,
-                )
-                if i == 1:
-                    print(
-                        f"  proj quad: {projector_quad.round(1).tolist()}",
-                        flush=True,
-                    )
-            stream = build_stream(bw)
-            name = f"{group}_{i}.bmp"
-            print(f"  [{i}/{len(frame_paths)}] {path.name} -> {name}  {describe(bw)}", flush=True)
-            await push_one(client, name, stream)
-            await asyncio.sleep(INTER_FILE_DELAY_S)
+        shown = await opened.show_animation(
+            frames_bw,
+            frame_ms=max(100, interval_100ms * 100),
+            seconds=max(seconds, 1.0),
+        )
+        print(
+            f"  projected {shown.frames} frames, play {shown.play_seconds}s, "
+            f"replaced {shown.replaced}",
+            flush=True,
+        )
     finally:
-        await cli.disconnect()
+        await opened.close()
 
     print("\n=== [4/5] CAPTURE real projection ===", flush=True)
     capture_dir.mkdir(parents=True, exist_ok=True)
@@ -464,18 +436,19 @@ async def run_one_round(
 
     # keep playing after capture so user can watch the loop
     if not args.skip_project:
-        cli = IrisBleClient(args.address)
-        await cli.connect()
+        from irisloop.session import connect as open_session
+
+        playing = await open_session(args.address)
         try:
-            await cli.stop()
-            await asyncio.sleep(0.3)
-            r = await cli.play(
-                group_id=args.group, loop=True,
-                total_100ms=600, interval_100ms=args.interval,
+            await playing.play(
+                args.group,
+                seconds=60,
+                frame_ms=max(100, args.interval * 100),
+                loop=True,
             )
-            print(f"\n=== KEEP PLAYING: {'ok' if r.ok else r.error} (loop 60s) ===", flush=True)
+            print("\n=== KEEP PLAYING: loop 60s ===", flush=True)
         finally:
-            await cli.disconnect()
+            await playing.close()
 
     stills = pick_review_stills(capture_dir, limit=args.review_stills)
     review = director_review(
@@ -500,6 +473,10 @@ async def run_one_round(
 
 
 async def async_main(args: argparse.Namespace) -> int:
+    if not args.skip_project:
+        from irisloop.session import resolve_address
+
+        args.address = await resolve_address(args.address)
     wish = args.wish.strip()
     tag = datetime.now().strftime("%Y%m%d_%H%M%S")
     rounds = max(1, args.rounds)
@@ -582,7 +559,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--frames", type=int, default=10, help="frames to extract / push (max 10 for group 1)")
     ap.add_argument("--size", default="832*480", help="Wan Bailian size (480P default)")
     ap.add_argument("--group", type=int, default=1)
-    ap.add_argument("--address", default=DEFAULT_ADDR)
+    ap.add_argument("--address", default=None,
+                    help="projector MAC; omit when only one IrisGreen is advertising")
     ap.add_argument("--camera", type=int, default=0)
     ap.add_argument("--exposure", type=float, default=-7.0)
     ap.add_argument("--seconds", type=float, default=8.0)
