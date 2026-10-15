@@ -1,11 +1,13 @@
 """Draw a freehand region on the camera view and fill it with projector light.
 
 Same gesture as the old 2D lasso (tools/play_video_at.py): hold, trace any
-closed shape, release. The mask is warped with a homography fitted from the
-ray-field calibration at the reference depth.
+closed shape, release. Textured selections follow in-plane object motion.
+The mask is warped with a homography fitted at the reference depth; depth
+changes and tilt are not supported. BLE uploads lag behind camera tracking.
 
     python tools/aim3d.py
     python tools/aim3d.py --at 640 512
+    python tools/aim3d.py --static
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ import asyncio
 import math
 import os
 import sys
+import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -32,6 +35,7 @@ from irisloop import protocol as P
 from irisloop.ble_client import IrisBleClient
 from irisloop.hik_camera import HikCamera
 from irisloop.image_pack import HEIGHT, WIDTH
+from irisloop.region_tracker import RegionTracker, TrackingLost
 from irisloop.procalib import (
     _black_image,
     _dirs_toward_scene,
@@ -132,6 +136,7 @@ class ClickUI:
             self.drawing = True
             self.points = [(px, py)]
             self.polygon = None
+            self.pending_poly = None
         elif event == cv2.EVENT_MOUSEMOVE and self.drawing:
             if not self.points or math.hypot(px - self.points[-1][0], py - self.points[-1][1]) >= 3:
                 self.points.append((px, py))
@@ -144,8 +149,10 @@ class ClickUI:
                 epsilon = max(1.0, 0.003 * cv2.arcLength(contour, True))
                 self.polygon = cv2.approxPolyDP(contour, epsilon, True).reshape(-1, 2)
                 self.pending_poly = self.polygon.astype(np.float64)
+                self.points = []
             else:
                 self.points = []
+                self.message = "selection too small; draw again"
 
     def render(self, frame: np.ndarray) -> np.ndarray:
         vis = frame.copy()
@@ -156,6 +163,43 @@ class ClickUI:
         cv2.putText(vis, self.message, (16, 36),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
         return cv2.resize(vis, (int(vis.shape[1] * SCALE), int(vis.shape[0] * SCALE)))
+
+
+class LatestProjection:
+    """Serialize BLE uploads, replacing pending images instead of queuing them."""
+
+    def __init__(self, cli: IrisBleClient) -> None:
+        self.cli = cli
+        self.pending: np.ndarray | None = None
+        self.last = _black_image()
+        self.task: asyncio.Task[None] | None = None
+
+    def submit(self, mask: np.ndarray) -> None:
+        self.pending = mask.copy()
+
+    async def _send(self, mask: np.ndarray) -> None:
+        started = time.perf_counter()
+        await _project(self.cli, mask, settle=0.0)
+        self.last = mask
+        print(f"  projection upload={time.perf_counter() - started:.2f}s "
+              "(not camera-to-light latency)", flush=True)
+
+    def pump(self) -> None:
+        if self.task is not None:
+            if not self.task.done():
+                return
+            self.task.result()
+            self.task = None
+        if self.pending is not None:
+            mask, self.pending = self.pending, None
+            if not np.array_equal(mask, self.last):
+                self.task = asyncio.create_task(self._send(mask))
+
+    async def finish(self) -> None:
+        self.pending = None
+        # Do not interrupt a file transfer and then interleave a black upload.
+        if self.task is not None:
+            await self.task
 
 
 async def _grab(cam: HikCamera):
@@ -213,6 +257,8 @@ async def run(args) -> int:
     cam.flush(3)
     print(f"  camera: {cam.info()}", flush=True)
     ui = ClickUI()
+    tracker = RegionTracker()
+    output = LatestProjection(cli)
     cv2.namedWindow("aim3d")
     cv2.setMouseCallback("aim3d", ui.on_mouse)
     try:
@@ -231,36 +277,89 @@ async def run(args) -> int:
                   f"measured=({meas[0]:.1f},{meas[1]:.1f}) err={err:.1f}px")
             return 0
 
-        print("window 'aim3d': draw a shape to fill with light, q/Esc = quit", flush=True)
+        print("window 'aim3d': draw a textured region, r = clear, q/Esc = quit", flush=True)
+        if not args.static:
+            print("  planar tracking only; BLE projection lags. "
+                  "Loss requests black after any in-flight upload, NOT an emergency stop.",
+                  flush=True)
+        frame = None
         while True:
-            ok, frame = cam.read(1000)
-            if not ok or frame is None:
+            output.pump()
+            ok, captured = await asyncio.to_thread(cam.read, 100)
+            if not ok or captured is None:
+                if tracker.active or ui.polygon is not None:
+                    print("[warning] camera frame unavailable; requesting black", flush=True)
+                tracker.reset()
+                ui.polygon = None
+                ui.pending_poly = None
+                ui.points = []
+                ui.drawing = False
+                ui.message = "camera frame unavailable; projection blank requested"
+                output.submit(_black_image())
+                if frame is not None:
+                    cv2.imshow("aim3d", ui.render(frame))
+                if cv2.waitKey(1) & 0xFF in (27, ord("q")):
+                    break
                 continue
+            frame = captured
+            if tracker.active:
+                try:
+                    ui.polygon = tracker.update(frame)
+                except TrackingLost as exc:
+                    ui.polygon = None
+                    ui.message = f"LOST: {exc}; blank requested"
+                    print(f"[warning] {ui.message}", flush=True)
+                    output.submit(_black_image())
             cv2.imshow("aim3d", ui.render(frame))
             key = cv2.waitKey(1) & 0xFF
             if key in (27, ord("q")):
                 break
-            if ui.pending_poly is None:
+            if key == ord("r") or ui.drawing:
+                tracker.reset()
+                ui.polygon = None
+                ui.pending_poly = None
+                output.submit(_black_image())
+                ui.message = "draw on a stationary textured object; release to track"
+                if key == ord("r"):
+                    ui.points = []
+                    ui.drawing = False
                 continue
-            poly = ui.pending_poly
-            ui.pending_poly = None
-            ui.message = "filling shape..."
-            cv2.imshow("aim3d", ui.render(frame))
-            cv2.waitKey(1)
-            bw = shape_light_mask(poly, (frame.shape[1], frame.shape[0]), H)
+            selected = ui.pending_poly is not None
+            if selected:
+                poly = ui.pending_poly
+                ui.pending_poly = None
+                if not args.static:
+                    try:
+                        ui.polygon = tracker.start(frame, poly)
+                    except TrackingLost as exc:
+                        ui.polygon = None
+                        ui.message = str(exc)
+                        print(f"[warning] {exc}", flush=True)
+                        output.submit(_black_image())
+                        continue
+            if ui.polygon is None or (args.static and not selected):
+                continue
+            bw = shape_light_mask(ui.polygon, (frame.shape[1], frame.shape[0]), H)
             lit = int(bw.sum())
-            print(f"  shape light pixels={lit}", flush=True)
             if lit < 10:
-                ui.message = "shape is outside the projection field, draw again"
+                tracker.reset()
+                ui.polygon = None
+                ui.message = "outside projection field; blank requested, draw again"
+                print(f"[warning] {ui.message}", flush=True)
+                output.submit(_black_image())
                 continue
-            await _project(cli, bw, settle=0.5)
-            ui.message = "light on. draw another shape, q = quit"
+            output.submit(bw)
+            ui.message = ("static selection" if args.static else "tracking; BLE light lags")
+            ui.message += "    r = clear, draw again, q = quit"
         return 0
     finally:
         cv2.destroyAllWindows()
         cam.close()
         try:
-            await _project(cli, _black_image(), settle=0.2)
+            try:
+                await output.finish()
+            finally:
+                await _project(cli, _black_image(), settle=0.2)
         finally:
             await cli.disconnect()
 
@@ -275,6 +374,8 @@ def main(argv=None) -> int:
     ap.add_argument("--gain", type=float, default=8.0)
     ap.add_argument("--at", type=float, nargs=2, metavar=("X", "Y"),
                     help="camera pixel, non-interactive single dot")
+    ap.add_argument("--static", action="store_true",
+                    help="disable object tracking; keep the original fixed selection")
     args = ap.parse_args(argv)
     if not os.path.isfile(args.calib):
         print(f"[error] missing {args.calib}")
