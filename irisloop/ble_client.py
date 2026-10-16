@@ -42,7 +42,7 @@ class IrisBleClient:
     # ---------- connection ----------
 
     async def connect(self) -> None:
-        self.client = BleakClient(self.address, timeout=20.0)
+        self.client = BleakClient(self.address, timeout=60.0)
         await self.client.connect()
         try:
             self.info.mtu = self.client.mtu_size

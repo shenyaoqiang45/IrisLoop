@@ -14,10 +14,12 @@ Interactive:
 
 Scriptable single shot (also used for automated tests):
     python tools/aim_at.py --at 600 300
+    python tools/aim_at.py --at 600 300 --at 100 100   # sequence, one connection
 """
 
 import argparse
 import asyncio
+import atexit
 import os
 import sys
 
@@ -81,6 +83,57 @@ def build_checker_quad(proj_quad) -> np.ndarray:
 
 
 # ---------------- aim + verify ----------------
+
+
+async def _open(args):
+    """Open the projector and either camera. Returns (session, camera).
+
+    The projector stays connected for the lifetime of this process; do not
+    reconnect between shots or the IrisGreen firmware wedges.
+    """
+    from irisloop.session import connect
+
+    await asyncio.sleep(1.0)  # let the Bluetooth stack settle after scan
+    opened = await connect(args.address)
+    print(f"=== CONNECT {opened.address} ===")
+
+    def _kill_close():
+        """Last-ditch BLE close if the process dies without cleanup."""
+        try:
+            asyncio.run(opened.close())
+        except Exception:
+            pass
+
+    atexit.register(_kill_close)
+    if args.hik:
+        from irisloop.hik_camera import HikCamera
+
+        cam = HikCamera(args.mvs_dir)
+        cam.enumerate()
+        cam.open(serial=args.serial)
+        cam.set_gain(args.gain)
+        cam.set_exposure_us(args.exposure)
+        cam.flush(3)
+        print(f"  camera: {cam.info()}")
+        return opened, cam
+    cam = _open_camera(args.camera, args.cam_width, args.cam_height)
+    print(f"  camera: {cam.info()}")
+    await asyncio.sleep(1.0)
+    return opened, cam
+
+
+async def _close(cam, cli, opened) -> None:
+    """Release either camera, turn the laser dark, and close the session."""
+    try:
+        if hasattr(cam, "release"):
+            cam.release()
+        elif hasattr(cam, "close"):
+            cam.close()
+    finally:
+        try:
+            await _project(cli, _black_image(), settle=0.3)  # leave the device dark
+        finally:
+            await opened.close()
 
 
 async def aim_at(cli, cam, bg, calib: Calibration, target_cam,
@@ -169,14 +222,8 @@ class AimUI:
 
 async def run_interactive(args) -> int:
     calib = Calibration.load(args.calibration)
-    from irisloop.session import open_slot
-
-    opened = await open_slot(args.address)
+    opened, cam = await _open(args)
     cli = opened.client
-    print(f"=== CONNECT {opened.address} ===")
-    cam = _open_camera(args.camera, args.cam_width, args.cam_height)
-    print(f"  camera: {cam.info()}")
-    await asyncio.sleep(1.0)
     try:
         bg = await _capture_background(cli, cam, CAL_DIR)  # device dark, clean wall frame
         ui = AimUI(bg)
@@ -211,44 +258,36 @@ async def run_interactive(args) -> int:
             await asyncio.sleep(0.01)
     finally:
         cv2.destroyAllWindows()
-        cam.release()
-        try:
-            await _project(cli, _black_image(), settle=0.3)  # leave the device dark
-        finally:
-            await opened.close()
+        await _close(cam, cli, opened)
     return 0
 
 
 async def run_single(args) -> int:
     calib = Calibration.load(args.calibration)
-    from irisloop.session import open_slot
-
-    opened = await open_slot(args.address)
+    opened, cam = await _open(args)
     cli = opened.client
-    print(f"=== CONNECT {opened.address} ===")
-    cam = _open_camera(args.camera, args.cam_width, args.cam_height)
-    print(f"  camera: {cam.info()}")
-    await asyncio.sleep(1.0)
+    exit_code = 0
     try:
         bg = await _capture_background(cli, cam, CAL_DIR)
-        bw, meas, err = await aim_at(cli, cam, bg, calib, (args.at[0], args.at[1]))
-        cv2.imwrite(os.path.join(CAL_DIR, "aim_last.png"),
-                    (bw * 255).astype(np.uint8))
-        frame = _grab_frame(cam)
-        if frame is not None:
-            cv2.imwrite(os.path.join(CAL_DIR, "aim_last_capture.png"), frame)
-        if meas is None:
-            print("  landing blob not detected")
-            return 2
-        print(f"  target cam=({args.at[0]},{args.at[1]})  "
-              f"measured=({meas[0]:.1f},{meas[1]:.1f})  err={err:.1f}px")
-        return 0
+        for i, (x, y) in enumerate(args.at, 1):
+            print(f"[{i}/{len(args.at)}] aiming at ({x},{y})")
+            bw, meas, err = await aim_at(cli, cam, bg, calib, (x, y))
+            cv2.imwrite(os.path.join(CAL_DIR, "aim_last.png"),
+                        (bw * 255).astype(np.uint8))
+            frame = _grab_frame(cam)
+            if frame is not None:
+                cv2.imwrite(os.path.join(CAL_DIR, "aim_last_capture.png"), frame)
+            if meas is None:
+                print("  landing blob not detected")
+                exit_code = 2
+            else:
+                print(f"  target cam=({x},{y})  "
+                      f"measured=({meas[0]:.1f},{meas[1]:.1f})  err={err:.1f}px")
+            if i < len(args.at):
+                await asyncio.sleep(0.5)
+        return exit_code
     finally:
-        cam.release()
-        try:
-            await _project(cli, _black_image(), settle=0.3)
-        finally:
-            await opened.close()
+        await _close(cam, cli, opened)
 
 
 def main(argv=None) -> int:
@@ -259,8 +298,15 @@ def main(argv=None) -> int:
     ap.add_argument("--cam-width", type=int, default=1280)
     ap.add_argument("--cam-height", type=int, default=720)
     ap.add_argument("--calibration", default=DEFAULT_OUT)
+    ap.add_argument("--hik", action="store_true",
+                    help="use the Hik industrial camera instead of a USB webcam")
+    ap.add_argument("--serial", default="K65564865", help="Hik serial number")
+    ap.add_argument("--mvs-dir", default=None)
+    ap.add_argument("--exposure", type=float, default=40000, help="Hik exposure us")
+    ap.add_argument("--gain", type=float, default=8.0, help="Hik gain dB")
     ap.add_argument("--at", type=float, nargs=2, metavar=("X", "Y"),
-                    help="camera pixel to aim at (non-interactive single shot)")
+                    action="append",
+                    help="camera pixel to aim at; repeat for a sequence, then quit")
     args = ap.parse_args(argv)
     if not os.path.exists(args.calibration):
         print(f"[error] no calibration at {args.calibration} — run tools/run_calibration.py first")

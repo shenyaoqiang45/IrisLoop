@@ -219,7 +219,10 @@ class ProjectorSession:
 
     async def close(self) -> None:
         """Drop the BLE link. Playback already started keeps running."""
-        await self.client.disconnect()
+        try:
+            await self.client.disconnect()
+        except Exception as exc:
+            print(f"[warn] BLE disconnect failed: {exc}", file=sys.stderr)
 
     async def _project(self, frames: list[np.ndarray], frame_ms: int, seconds: float) -> Projection:
         if len(frames) > SLOT_MAX_FRAMES:
@@ -354,18 +357,25 @@ async def open_slot(address: str | None, scan_seconds: float = 8.0) -> Projector
 
 
 async def connect(address: str) -> ProjectorSession:
-    """Connect to one projector. Pass an address from find(); there is no default."""
+    """Connect to one projector. Pass an address from find(); there is no default.
+
+    Fails fast: the IrisGreen firmware wedges if a handshake is interrupted,
+    so retrying only makes recovery slower.
+    """
     if not address or not str(address).strip():
         raise ValueError("address is required; call find() and pass one of the results")
     client = IrisBleClient(address)
-    await client.connect()
     try:
+        await client.connect()
         await client.load_info()
         name = await client.read_gatt_string(CHAR_DEVICE_NAME)
+        return ProjectorSession(client, name=name or client.info.model or address)
     except Exception:
-        await client.disconnect()
+        try:
+            await client.disconnect()
+        except Exception:
+            pass
         raise
-    return ProjectorSession(client, name=name or client.info.model or address)
 
 
 def _emit(payload: dict) -> None:
