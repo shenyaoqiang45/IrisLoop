@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "address": "20:6E:F1:81:71:62",
+  "samples": [],
+  "error": "device.connect: {'code': -32014, 'message': 'connect to 20:6E:F1:81:71:62 failed: Device with address 20:6E:F1:81:71:62 was not found.', 'data': {'token': 'connect_failed'}}"
+}

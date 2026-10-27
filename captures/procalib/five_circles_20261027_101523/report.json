@@ -1,0 +1,229 @@
+{
+  "status": "passed",
+  "address": "F4:12:FA:B6:B7:CA",
+  "samples": [],
+  "targets": [
+    [
+      712.3300160836349,
+      329.8546441495778
+    ],
+    [
+      946.3486368703759,
+      452.60981047937565
+    ],
+    [
+      510.25404180825865,
+      497.796828338997
+    ],
+    [
+      814.8571277830537,
+      611.6007175266434
+    ],
+    [
+      742.3347098686996,
+      618.881829733164
+    ]
+  ],
+  "target_order": "camera top-to-bottom",
+  "radii_px": [
+    22.9729795910919,
+    22.879261522812396,
+    22.697677211302157,
+    22.422543683250957,
+    22.38347070615472
+  ],
+  "seed_from": "F:\\2026\\IrisLoop\\captures\\procalib\\five_circles_20261027_100519",
+  "projector_points": [
+    [
+      361.0,
+      67.0
+    ],
+    [
+      201.0,
+      184.0
+    ],
+    [
+      490.0,
+      237.0
+    ],
+    [
+      285.0,
+      343.0
+    ],
+    [
+      332.67689803438856,
+      351.98117243791853
+    ]
+  ],
+  "verification": [
+    [
+      {
+        "target": 1,
+        "observed": [
+          712.0734356894554,
+          329.0750289687138
+        ],
+        "error_px": 0.8207516852927137,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 246
+      },
+      {
+        "target": 2,
+        "observed": [
+          945.5882951653944,
+          453.17404580152674
+        ],
+        "error_px": 0.9468268094520803,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 195
+      },
+      {
+        "target": 3,
+        "observed": [
+          512.1916733708769,
+          497.2998793242156
+        ],
+        "error_px": 2.0003435694266236,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 216
+      },
+      {
+        "target": 4,
+        "observed": [
+          811.7652027027027,
+          609.884009009009
+        ],
+        "error_px": 3.536536276785777,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 200
+      },
+      {
+        "target": 5,
+        "observed": [
+          740.4672340425532,
+          617.9985815602837
+        ],
+        "error_px": 2.0658154070820847,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 216
+      }
+    ],
+    [
+      {
+        "target": 1,
+        "observed": [
+          712.0733691904564,
+          329.12260377878914
+        ],
+        "error_px": 0.7757259388743546,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 254
+      },
+      {
+        "target": 2,
+        "observed": [
+          945.5201816347125,
+          453.151614530777
+        ],
+        "error_px": 0.9898937860261144,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 197
+      },
+      {
+        "target": 3,
+        "observed": [
+          511.95160302225855,
+          497.34020829079026
+        ],
+        "error_px": 1.7579010050913406,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 216
+      },
+      {
+        "target": 4,
+        "observed": [
+          811.8170696184095,
+          609.6993882901253
+        ],
+        "error_px": 3.5856668152601943,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 200
+      },
+      {
+        "target": 5,
+        "observed": [
+          740.5740578439965,
+          617.9497516798131
+        ],
+        "error_px": 1.9921508601583828,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 210
+      }
+    ],
+    [
+      {
+        "target": 1,
+        "observed": [
+          712.0767626199416,
+          329.0422750660548
+        ],
+        "error_px": 0.8509294005595203,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 255
+      },
+      {
+        "target": 2,
+        "observed": [
+          945.6007594936709,
+          453.2443037974684
+        ],
+        "error_px": 0.980766201136363,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 196
+      },
+      {
+        "target": 3,
+        "observed": [
+          512.218093385214,
+          497.25914396887157
+        ],
+        "error_px": 2.036320966551726,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 216
+      },
+      {
+        "target": 4,
+        "observed": [
+          811.7551982256723,
+          609.9312448017744
+        ],
+        "error_px": 3.5226561225924073,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 204
+      },
+      {
+        "target": 5,
+        "observed": [
+          740.5116918844567,
+          617.7645116918844
+        ],
+        "error_px": 2.1381754315869204,
+        "light_inside_circle_fraction": 1.0,
+        "lit_pixels_inside": 217
+      }
+    ]
+  ],
+  "board_movement_px": 0.0,
+  "final_state": "five spots playing",
+  "after_disconnect_verification": {
+    "status": "passed",
+    "errors_px": [
+      0.7779755764382043,
+      1.219364829134725,
+      1.7761755174594154,
+      3.4443957083598877,
+      1.965423513804405
+    ],
+    "raw_image": "after_disconnect_raw.png"
+  }
+}

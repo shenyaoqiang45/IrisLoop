@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "address": "F4:12:FA:B6:B7:CA",
+  "samples": [],
+  "error": "device.connect: {'code': -32014, 'message': 'connect to F4:12:FA:B6:B7:CA failed: ', 'data': {'token': 'connect_failed'}}"
+}

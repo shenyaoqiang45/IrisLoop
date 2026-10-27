@@ -1,0 +1,14 @@
+{
+  "status": "failed",
+  "address": "F4:12:FA:B6:B7:CA",
+  "target": "green sunglasses on toy eyes",
+  "initial_pose_check": {
+    "correlation": 0.9768780469894409,
+    "displacement": [
+      0,
+      0
+    ]
+  },
+  "error": "Expected 12 surface probes, got 9",
+  "final_state": "black requested"
+}

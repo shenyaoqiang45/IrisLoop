@@ -42,3 +42,15 @@ tools/ble_protocol_dump.txt
 
 # Reverse-engineering scratch (Flutter copies / SDK extracts / decompilers)
 tmp/
+
+# Projection experiments: publish numeric evidence and masks, never office camera frames.
+captures/procalib/*_initial.png
+captures/procalib/chick_reference_local.png
+captures/procalib/five_circles_*/*
+!captures/procalib/five_circles_*/report.json
+!captures/procalib/five_circles_*/*.npz
+!captures/procalib/five_circles_*/projector_mask.png
+captures/procalib/chick_sunglasses_*/*
+!captures/procalib/chick_sunglasses_*/report.json
+!captures/procalib/chick_sunglasses_*/*.npz
+!captures/procalib/chick_sunglasses_*/*mask.png

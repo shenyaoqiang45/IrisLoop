@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "address": "F4:12:FA:B6:B7:CA",
+  "samples": [],
+  "error": "device.connect: {'code': -32014, 'message': 'connect to F4:12:FA:B6:B7:CA failed: [WinError -2147418113] \u707e\u96be\u6027\u6545\u969c', 'data': {'token': 'connect_failed'}}"
+}

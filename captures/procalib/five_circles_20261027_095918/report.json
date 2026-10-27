@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "address": "F4:12:FA:B6:B7:CA",
+  "samples": [],
+  "error": "'utf-8' codec can't decode byte 0xd2 in position 126: invalid continuation byte"
+}

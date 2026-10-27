@@ -1,0 +1,7 @@
+{
+  "status": "failed",
+  "address": "F4:12:FA:B6:B7:CA",
+  "samples": [],
+  "error": "Cannot identify full board and all five large circles",
+  "final_state": "black requested"
+}
