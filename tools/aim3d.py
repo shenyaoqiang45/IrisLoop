@@ -34,6 +34,7 @@ import numpy as np
 from irisloop.ble_client import IrisBleClient
 from irisloop.hik_camera import HikCamera
 from irisloop.image_pack import HEIGHT, WIDTH
+from irisloop.live_projection import LatestMask
 from irisloop.region_tracker import RegionTracker, TrackingLost
 from irisloop.procalib import (
     _black_image,
@@ -170,41 +171,18 @@ class ClickUI:
         return cv2.resize(vis, (int(vis.shape[1] * SCALE), int(vis.shape[0] * SCALE)))
 
 
-class LatestProjection:
+class LatestProjection(LatestMask):
     """Serialize BLE uploads, replacing pending images instead of queuing them."""
 
     def __init__(self, cli: IrisBleClient) -> None:
         self.cli = cli
-        self.pending: np.ndarray | None = None
-        self.last = _black_image()
-        self.task: asyncio.Task[None] | None = None
+        super().__init__(self._send_mask)
 
-    def submit(self, mask: np.ndarray) -> None:
-        self.pending = mask.copy()
-
-    async def _send(self, mask: np.ndarray) -> None:
+    async def _send_mask(self, mask: np.ndarray) -> None:
         started = time.perf_counter()
         await _project(self.cli, mask, settle=0.0)
-        self.last = mask
         print(f"  projection upload={time.perf_counter() - started:.2f}s "
               "(not camera-to-light latency)", flush=True)
-
-    def pump(self) -> None:
-        if self.task is not None:
-            if not self.task.done():
-                return
-            self.task.result()
-            self.task = None
-        if self.pending is not None:
-            mask, self.pending = self.pending, None
-            if not np.array_equal(mask, self.last):
-                self.task = asyncio.create_task(self._send(mask))
-
-    async def finish(self) -> None:
-        self.pending = None
-        # Do not interrupt a file transfer and then interleave a black upload.
-        if self.task is not None:
-            await self.task
 
 
 async def _grab(cam: HikCamera):

@@ -43,6 +43,9 @@ tools/ble_protocol_dump.txt
 # Reverse-engineering scratch (Flutter copies / SDK extracts / decompilers)
 tmp/
 
+# UETrack-S checkout and weights. Not part of the IrisLoop source.
+third_party/
+
 # Projection experiments: publish numeric evidence and masks, never office camera frames.
 captures/procalib/*_initial.png
 captures/procalib/chick_reference_local.png
